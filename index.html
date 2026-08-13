@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sahibinden.com Klon - Profesyonel İlan Platformu</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Header -->
+    <header class="bg-yellow-400 shadow sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-1 cursor-pointer" onclick="resetFilters()">
+                <span class="text-2xl font-black text-blue-900 tracking-tighter">sahibinden</span>
+                <span class="text-2xl font-black text-red-600 tracking-tighter">.com</span>
+                <span class="text-xs bg-blue-900 text-yellow-400 px-1.5 py-0.5 rounded font-bold ml-1">Pro Klon</span>
+            </div>
+            <div class="flex-1 max-w-2xl flex">
+                <input type="text" id="searchInput" placeholder="Kelime, ilan no. veya mağaza ara..." class="w-full bg-white border-y border-l border-gray-300 rounded-l-lg px-4 py-2.5 text-sm outline-none focus:border-blue-600">
+                <button onclick="applyFilters()" class="bg-blue-900 hover:bg-blue-800 text-yellow-400 px-6 rounded-r-lg font-bold text-sm transition">
+                    <i class="fa-solid fa-search"></i>
+                </button>
+            </div>
+            <div>
+                <button onclick="openAddModal()" class="bg-red-600 hover:bg-red-700 text-white text-sm font-bold px-4 py-2.5 rounded-lg transition shadow flex items-center gap-2">
+                    <i class="fa-solid fa-plus-circle"></i>
+                    <span>Ücretsiz İlan Ver</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- Sidebar Filters -->
+        <aside class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 h-fit space-y-5">
+            <div class="flex items-center justify-between border-b pb-3">
+                <h3 class="font-bold text-gray-900 text-base"><i class="fa-solid fa-filter text-blue-900 mr-2"></i>Filtreler</h3>
+                <button onclick="resetFilters()" class="text-xs text-red-600 hover:underline font-semibold">Sıfırla</button>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-2">Kategori</label>
+                <select id="filterCategory" onchange="onCategoryChange()" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-blue-600">
+                    <option value="Tümü">Tüm Kategoriler</option>
+                    <option value="Emlak">Emlak</option>
+                    <option value="Vasıta">Vasıta</option>
+                    <option value="Alışveriş">İkinci El ve Sıfır</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-2">Fiyat Aralığı (TL)</label>
+                <div class="flex items-center gap-2">
+                    <input type="number" id="minPrice" placeholder="Min" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-xs outline-none">
+                    <span class="text-gray-400">-</span>
+                    <input type="number" id="maxPrice" placeholder="Max" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-xs outline-none">
+                </div>
+            </div>
+            <div id="dynamicFilterArea" class="space-y-4"></div>
+            <button onclick="applyFilters()" class="w-full bg-blue-900 hover:bg-blue-800 text-yellow-400 font-bold py-2.5 rounded-lg transition text-sm shadow">Filtreleri Uygula</button>
+        </aside>
+
+        <!-- Listings Section -->
+        <div class="lg:col-span-3 space-y-4">
+            <div class="bg-white px-4 py-3 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between text-sm">
+                <span id="resultCount" class="text-gray-600 font-medium">İlanlar yükleniyor...</span>
+                <select id="sortOrder" onchange="applyFilters()" class="bg-gray-50 border border-gray-300 rounded-lg p-1.5 text-xs outline-none">
+                    <option value="newest">En Yeni İlan</option>
+                    <option value="price-asc">Fiyata Göre (Artan)</option>
+                    <option value="price-desc">Fiyata Göre (Azalan)</option>
+                </select>
+            </div>
+            <div id="listingContainer" class="space-y-3"></div>
+        </div>
+    </main>
+
+    <!-- Modal -->
+    <div id="addModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeAddModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Yeni İlan Ekle</h3>
+            <form id="addListingForm" onsubmit="handleListingSubmit(event)" class="space-y-4 text-sm">
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">İlan Başlığı</label>
+                    <input type="text" id="newTitle" required placeholder="Örn: Sahibinden Temiz Aile Aracı" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-blue-600">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">Kategori</label>
+                        <select id="newCategory" onchange="onModalCategoryChange()" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-blue-600">
+                            <option value="Emlak">Emlak</option>
+                            <option value="Vasıta">Vasıta</option>
+                            <option value="Alışveriş">İkinci El ve Sıfır</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">Fiyat (TL)</label>
+                        <input type="number" id="newPrice" required class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-blue-600">
+                    </div>
+                </div>
+                <div id="modalDynamicFields" class="space-y-3 bg-gray-50 p-3 rounded-lg border"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">Şehir / İlçe</label>
+                        <input type="text" id="newLocation" required placeholder="İstanbul / Sultanbeyli" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-blue-600">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">Fotoğraf URL</label>
+                        <input type="url" id="newImage" required placeholder="https://..." class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-blue-600">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition shadow">İlanı Yayınla</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+
