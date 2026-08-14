@@ -3,179 +3,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>kendinsat.com - Satılık, Kiralık, İkinci El, Emlak, Araç ve Her Şey</title>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <title>kendinsat.com - Orijinal Sahibinden Yapılı Tam Dinamik Sistem</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
         body { background-color: #f5f5f5; color: #333; }
-        .main-header { background-color: #ffe800; padding: 12px 20px; border-bottom: 2px solid #e0cb00; }
+        header { background-color: #ffe800; padding: 12px 20px; border-bottom: 2px solid #e0cb00; }
         .header-container { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
         .logo { font-size: 28px; font-weight: 800; color: #000; }
         .logo span { color: #d10000; }
-        .search-bar-header { display: flex; width: 45%; background: #fff; border-radius: 4px; border: 1px solid #ccc; }
-        .search-bar-header input { flex: 1; padding: 10px; border: none; outline: none; border-radius: 4px 0 0 4px; }
-        .search-bar-header button { background-color: #0055ff; color: white; border: none; padding: 0 20px; border-radius: 0 4px 4px 0; font-weight: bold; cursor: pointer; }
-        .user-actions { display: flex; align-items: center; gap: 10px; }
-        .login-btn { background: white; border: 1px solid #ccc; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; }
-        .free-ad-btn { background-color: #d10000; color: white; border: none; padding: 9px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; }
-        .sub-nav { background-color: #333; color: white; padding: 10px 20px; }
-        .sub-nav ul { max-width: 1200px; margin: 0 auto; list-style: none; display: flex; gap: 20px; overflow-x: auto; }
-        .sub-nav ul li a { color: white; text-decoration: none; font-size: 13px; white-space: nowrap; }
-        .main-content { max-width: 1200px; margin: 20px auto; display: flex; gap: 20px; padding: 0 15px; }
-        .filter-sidebar { width: 260px; background: white; padding: 15px; border-radius: 6px; border: 1px solid #ddd; height: fit-content; }
-        .filter-sidebar h3 { font-size: 16px; margin-bottom: 15px; border-bottom: 2px solid #ffe800; padding-bottom: 5px; }
+        .search-box { display: flex; width: 45%; background: #fff; border-radius: 4px; border: 1px solid #ccc; }
+        .search-box input { flex: 1; padding: 10px; border: none; outline: none; }
+        .search-box button { background-color: #0055ff; color: white; border: none; padding: 0 20px; font-weight: bold; cursor: pointer; }
+        nav.sub-nav { background-color: #333; color: white; padding: 10px 20px; }
+        nav.sub-nav ul { max-width: 1200px; margin: 0 auto; list-style: none; display: flex; gap: 20px; overflow-x: auto; }
+        nav.sub-nav ul li a { color: white; text-decoration: none; font-size: 13px; cursor: pointer; white-space: nowrap; }
+        nav.sub-nav ul li a:hover { color: #ffe800; }
+        .main-container { max-width: 1200px; margin: 20px auto; display: flex; gap: 20px; padding: 0 15px; }
+        .sidebar { width: 280px; background: white; padding: 15px; border-radius: 6px; border: 1px solid #ddd; height: fit-content; }
+        .sidebar h3 { font-size: 16px; margin-bottom: 15px; border-bottom: 2px solid #ffe800; padding-bottom: 5px; }
         .filter-group { margin-bottom: 15px; }
         .filter-group label { display: block; font-size: 12px; font-weight: bold; color: #666; margin-bottom: 5px; }
-        .filter-group select, .price-inputs input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; }
-        .price-inputs { display: flex; gap: 5px; }
-        .filter-apply-btn { width: 100%; background-color: #0055ff; color: white; border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; }
-        .listings-section { flex: 1; }
-        .listings-header { background: white; padding: 10px 15px; border: 1px solid #ddd; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 14px; font-weight: bold; }
-        .listings-list { display: flex; flex-direction: column; gap: 10px; }
-        .listing-item { background: white; border: 1px solid #ddd; border-radius: 6px; display: flex; padding: 10px; gap: 15px; align-items: center; }
-        .listing-item img { width: 160px; height: 120px; object-fit: cover; border-radius: 4px; }
-        .listing-details { flex: 1; }
-        .listing-details h4 { font-size: 15px; color: #0055ff; margin-bottom: 5px; }
-        .listing-specs { font-size: 13px; color: #555; margin-bottom: 5px; }
-        .listing-price { font-size: 18px; font-weight: bold; color: #000; text-align: right; padding-right: 10px; }
+        .filter-group select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; }
+        .content-area { flex: 1; background: white; padding: 20px; border-radius: 6px; border: 1px solid #ddd; }
+        .dynamic-listings { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
+        .listing-card { display: flex; border: 1px solid #eee; padding: 10px; border-radius: 4px; gap: 15px; align-items: center; background: #fafafa; }
+        .listing-card img { width: 150px; height: 110px; object-fit: cover; border-radius: 4px; }
+        .listing-info h4 { color: #0055ff; font-size: 16px; margin-bottom: 5px; }
+        .listing-info p { font-size: 13px; color: #555; margin-bottom: 3px; }
+        .listing-price { font-size: 18px; font-weight: bold; color: #000; margin-left: auto; padding-right: 15px; }
     </style>
 </head>
 <body>
-    <header class="main-header">
+
+    <header>
         <div class="header-container">
             <div class="logo">kendin<span>sat.com</span></div>
-            <div class="search-bar-header">
-                <input type="text" id="searchInput" placeholder="Kelime, ilan no. veya mağaza adı ile ara">
-                <button id="searchBtn">Ara</button>
+            <div class="search-box">
+                <input type="text" id="mainSearchInput" placeholder="Kelime, ilan no. veya mağaza adı ile ara">
+                <button onclick="globalSearch()">Ara</button>
             </div>
-            <div class="user-actions">
-                <div id="authArea">
-                    <button id="googleLoginBtn" class="login-btn">Google ile Giriş Yap</button>
-                </div>
-                <div id="userProfile" style="display: none;" class="profile-area">
-                    <span id="userName" style="font-weight: bold; font-size: 13px;">Kullanıcı</span>
-                    <button id="logoutBtn" style="background:#d10000; color:white; border:none; padding:5px 8px; border-radius:3px; cursor:pointer;">Çıkış</button>
-                </div>
-                <button class="free-ad-btn">+ Ücretsiz İlan Ver</button>
+            <div>
+                <button style="background:white; border:1px solid #ccc; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer;">Giriş Yap</button>
+                <button style="background:#d10000; color:white; border:none; padding:9px 15px; border-radius:4px; font-weight:bold; cursor:pointer;">+ Ücretsiz İlan Ver</button>
             </div>
         </div>
     </header>
 
     <nav class="sub-nav">
         <ul>
-            <li><a href="#">Emlak</a></li>
-            <li><a href="#">Vasıta</a></li>
-            <li><a href="#">Yedek Parça, Aksesuar</a></li>
-            <li><a href="#">İkinci El ve Sıfır Alışveriş</a></li>
-            <li><a href="#">İş Makinaları & Sanayi</a></li>
-            <li><a href="#">Usta ve Hizmetler</a></li>
+            <li><a onclick="filterByCategory('emlak')">Emlak</a></li>
+            <li><a onclick="filterByCategory('vasita')">Vasıta</a></li>
+            <li><a onclick="filterByCategory('yedek-parca')">Yedek Parça, Aksesuar</a></li>
+            <li><a onclick="filterByCategory('alisveris')">İkinci El ve Sıfır Alışveriş</a></li>
+            <li><a onclick="filterByCategory('is-makineleri')">İş Makinaları & Sanayi</a></li>
+            <li><a onclick="filterByCategory('hizmetler')">Usta ve Hizmetler</a></li>
         </ul>
     </nav>
 
-    <div class="main-content">
-        <aside class="filter-sidebar">
-            <h3>Filtreler</h3>
+    <div class="main-container">
+        <!-- Dinamik Filtre Paneli -->
+        <aside class="sidebar">
+            <h3>Kategori Seçimi</h3>
             <div class="filter-group">
-                <label>KATEGORİ</label>
-                <select id="categoryFilter">
+                <label>Ana Kategori</label>
+                <select id="catSelect" onchange="updateSubCategories()">
                     <option value="all">Tüm Kategoriler</option>
                     <option value="emlak">Emlak</option>
                     <option value="vasita">Vasıta</option>
+                    <option value="alisveris">İkinci El ve Sıfır Alışveriş</option>
                 </select>
             </div>
-            <div class="filter-group">
-                <label>FİYAT ARALIĞI (TL)</label>
-                <div class="price-inputs">
-                    <input type="number" id="minPrice" placeholder="Min">
-                    <input type="number" id="maxPrice" placeholder="Max">
-                </div>
+            
+            <div class="filter-group" id="subCatContainer" style="display:none;">
+                <label>Alt Kategori / Marka</label>
+                <select id="subCatSelect" onchange="filterBySubCategory()">
+                    <option value="all">Tümü</option>
+                </select>
             </div>
-            <button id="applyFilterBtn" class="filter-apply-btn">Filtreleri Uygula</button>
+
+            <div class="filter-group">
+                <label>Şehir / Konum</label>
+                <select id="citySelect" onchange="applyFilters()">
+                    <option value="all">Tüm İller</option>
+                    <option value="istanbul">İstanbul (Sultanbeyli vb.)</option>
+                    <option value="ankara">Ankara</option>
+                    <option value="izmir">İzmir</option>
+                </select>
+            </div>
         </aside>
 
-        <section class="listings-section">
-            <div class="listings-header">
-                <span id="listingCount">2 İlan Listeleniyor</span>
-                <select id="sortSelect">
-                    <option value="newest">En Yeni İlan</option>
-                    <option value="price-asc">Fiyata Göre (Önce En Düşük)</option>
-                    <option value="price-desc">Fiyata Göre (Önce En Yüksek)</option>
-                </select>
-            </div>
-
-            <div id="listingsContainer" class="listings-list">
-                <div class="listing-item" data-category="vasita" data-price="980000">
-                    <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=300&q=80" alt="Araç">
-                    <div class="listing-details">
-                        <h4>Hatasız Boyasız Aile Aracı - Otomatik Vites</h4>
-                        <p class="listing-specs">2021 • 45.000 km • Benzin/LPG</p>
-                        <p style="font-size: 12px; color: #888;">Ankara / Çankaya</p>
+        <!-- Dinamik İlan Listeleme Alanı -->
+        <main class="content-area">
+            <h2 id="categoryTitle">Tüm İlanlar</h2>
+            <p id="resultCount" style="font-size: 13px; color: #666; margin-top: 5px;">3 ilan listeleniyor</p>
+            
+            <div class="dynamic-listings" id="listingsBox">
+                <!-- İlan 1: Vasıta -->
+                <div class="listing-card" data-cat="vasita" data-sub="bmw" data-city="ankara">
+                    <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf" alt="Araç">
+                    <div class="listing-info">
+                        <h4>BMW 3.20i Ed Luxury Line - Hatasız</h4>
+                        <p>2021 Model • 45.000 km • Benzin • Otomatik</p>
+                        <p style="font-size:11px; color:#888;">Ankara / Çankaya</p>
                     </div>
-                    <div class="listing-price">980.000 TL</div>
+                    <div class="listing-price">1.850.000 TL</div>
                 </div>
 
-                <div class="listing-item" data-category="emlak" data-price="3450000">
-                    <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=300&q=80" alt="Konut">
-                    <div class="listing-details">
-                        <h4>Merkezi Konumda Ara Kat 3+1 Satılık Daire</h4>
-                        <p class="listing-specs">3+1 • 135 m² • 5. Kat</p>
-                        <p style="font-size: 12px; color: #888;">İstanbul / Sultanbeyli</p>
+                <!-- İlan 2: Emlak -->
+                <div class="listing-card" data-cat="emlak" data-sub="konut" data-city="istanbul">
+                    <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2" alt="Konut">
+                    <div class="listing-info">
+                        <h4>Sultanbeyli Merkezde Satılık Lüks 3+1 Daire</h4>
+                        <p>3+1 • 135 m² • 5. Kat • Kombili • Asansörlü</p>
+                        <p style="font-size:11px; color:#888;">İstanbul / Sultanbeyli</p>
                     </div>
                     <div class="listing-price">3.450.000 TL</div>
                 </div>
+
+                <!-- İlan 3: Alışveriş -->
+                <div class="listing-card" data-cat="alisveris" data-sub="elektronik" data-city="istanbul">
+                    <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e" alt="Kulaklık">
+                    <div class="listing-info">
+                        <h4>Kutulu Faturalı Kablosuz Oyuncu Kulaklığı</h4>
+                        <p>Sıfır / Ayarında • Garantili</p>
+                        <p style="font-size:11px; color:#888;">İstanbul / Ümraniye</p>
+                    </div>
+                    <div class="listing-price">2.450 TL</div>
+                </div>
             </div>
-        </section>
+        </main>
     </div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "ornek-api-key",
-            authDomain: "kendinsat.firebaseapp.com",
-            projectId: "kendinsat"
-        };
-        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-        const auth = firebase.auth();
+        // Kategori seçildiğinde alt kategorileri / markaları otomatik dolduran dinamik motor
+        function updateSubCategories() {
+            const cat = document.getElementById('catSelect').value;
+            const subContainer = document.getElementById('subCatContainer');
+            const subSelect = document.getElementById('subCatSelect');
+            
+            subSelect.innerHTML = '<option value="all">Tümü</option>';
 
-        document.getElementById('googleLoginBtn').addEventListener('click', () => {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).catch(error => {
-                alert("Google girişi için Firebase yapılandırma anahtarını eklemelisiniz.");
-            });
-        });
-
-        document.getElementById('logoutBtn').addEventListener('click', () => { auth.signOut(); });
-
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                document.getElementById('authArea').style.display = 'none';
-                document.getElementById('userProfile').style.display = 'flex';
-                document.getElementById('userName').textContent = user.displayName;
+            if (cat === 'vasita') {
+                subContainer.style.display = 'block';
+                ['BMW', 'Mercedes', 'Audi', 'Volkswagen', 'Renault'].forEach(brand => {
+                    let opt = document.createElement('option');
+                    opt.value = brand.toLowerCase();
+                    opt.textContent = brand;
+                    subSelect.appendChild(opt);
+                });
+            } else if (cat === 'emlak') {
+                subContainer.style.display = 'block';
+                ['Konut', 'Arsa', 'İşyeri', 'Bina'].forEach(item => {
+                    let opt = document.createElement('option');
+                    opt.value = item.toLowerCase();
+                    opt.textContent = item;
+                    subSelect.appendChild(opt);
+                });
+            } else if (cat === 'alisveris') {
+                subContainer.style.display = 'block';
+                ['Elektronik', 'Giyim', 'Ev Eşyası', 'Hobi'].forEach(item => {
+                    let opt = document.createElement('option');
+                    opt.value = item.toLowerCase();
+                    opt.textContent = item;
+                    subSelect.appendChild(opt);
+                });
             } else {
-                document.getElementById('authArea').style.display = 'flex';
-                document.getElementById('userProfile').style.display = 'none';
+                subContainer.style.display = 'none';
             }
-        });
+            applyFilters();
+        }
 
-        document.getElementById('applyFilterBtn').addEventListener('click', () => {
-            const cat = document.getElementById('categoryFilter').value;
-            const min = parseFloat(document.getElementById('minPrice').value) || 0;
-            const max = parseFloat(document.getElementById('maxPrice').value) || Infinity;
-            let count = 0;
+        function filterByCategory(categoryKey) {
+            document.getElementById('catSelect').value = categoryKey;
+            updateSubCategories();
+        }
 
-            document.querySelectorAll('.listing-item').forEach(item => {
-                const itemCat = item.getAttribute('data-category');
-                const price = parseFloat(item.getAttribute('data-price'));
-                if ((cat === 'all' || itemCat === cat) && (price >= min && price <= max)) {
-                    item.style.display = 'flex';
-                    count++;
+        function applyFilters() {
+            const selectedCat = document.getElementById('catSelect').value;
+            const selectedSub = document.getElementById('subCatSelect').value;
+            const selectedCity = document.getElementById('citySelect').value;
+            
+            const cards = document.querySelectorAll('.listing-card');
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const cardCat = card.getAttribute('data-cat');
+                const cardSub = card.getAttribute('data-sub');
+                const cardCity = card.getAttribute('data-city');
+
+                let matchCat = (selectedCat === 'all' || cardCat === selectedCat);
+                let matchSub = (selectedSub === 'all' || cardSub === selectedSub);
+                let matchCity = (selectedCity === 'all' || cardCity === selectedCity);
+
+                if (matchCat && matchSub && matchCity) {
+                    card.style.display = 'flex';
+                    visibleCount++;
                 } else {
-                    item.style.display = 'none';
+                    card.style.display = 'none';
                 }
             });
-            document.getElementById('listingCount').textContent = `${count} İlan Listeleniyor`;
-        });
+
+            document.getElementById('resultCount').textContent = `${visibleCount} ilan listeleniyor`;
+        }
+
+        function filterBySubCategory() {
+            applyFilters();
+        }
+
+        function globalSearch() {
+            const query = document.getElementById('mainSearchInput').value.toLowerCase();
+            const cards = document.querySelectorAll('.listing-card');
+            let count = 0;
+
+            cards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                if (text.includes(query)) {
+                    card.style.display = 'flex';
+                    count++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            document.getElementById('resultCount').textContent = `${count} ilan bulundu`;
+        }
     </script>
 </body>
 </html>
