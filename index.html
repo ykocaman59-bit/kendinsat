@@ -63,14 +63,40 @@
         .poll-box { background: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px; }
         .poll-btns { display: flex; gap: 10px; margin-top: 8px; }
 
-        /* EMOJI TEPKİ ALANI */
+        /* GENİŞLETİLMİŞ EMOJI PANELİ */
         .post-footer-actions { display: flex; align-items: center; gap: 10px; border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top: 10px; position: relative; }
-        .emoji-trigger-btn { background: #e2e8f0; color: #334155; border-radius: 20px; padding: 4px 10px; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
-        .emoji-picker-popup { display: none; position: absolute; bottom: 40px; left: 0; background: white; border: 1px solid var(--border-color); border-radius: 20px; padding: 5px 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); gap: 8px; z-index: 10; }
-        .emoji-picker-popup span { cursor: pointer; font-size: 1.2rem; transition: transform 0.1s; }
-        .emoji-picker-popup span:hover { transform: scale(1.3); }
-        .reaction-badges { display: flex; gap: 5px; flex-wrap: wrap; }
-        .reaction-badge { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 12px; padding: 2px 8px; font-size: 0.8rem; display: flex; align-items: center; gap: 4px; }
+        .emoji-trigger-btn { background: #e2e8f0; color: #334155; border-radius: 20px; padding: 6px 12px; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; }
+        
+        .emoji-picker-popup { 
+            display: none; 
+            position: absolute; 
+            bottom: 45px; 
+            left: 0; 
+            background: white; 
+            border: 1px solid var(--border-color); 
+            border-radius: 12px; 
+            padding: 10px; 
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15); 
+            width: 280px;
+            max-height: 200px;
+            overflow-y: auto;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 6px;
+            z-index: 100; 
+        }
+        .emoji-picker-popup span { 
+            cursor: pointer; 
+            font-size: 1.4rem; 
+            text-align: center;
+            padding: 4px;
+            border-radius: 6px;
+            transition: background 0.1s; 
+        }
+        .emoji-picker-popup span:hover { background: #f1f5f9; }
+
+        .reaction-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+        .reaction-badge { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 12px; padding: 3px 9px; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; cursor: pointer; }
+        .reaction-badge.active { background: #dbeafe; border-color: #3b82f6; color: #1d4ed8; font-weight: bold; }
 
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: white; padding: 2rem; border-radius: 10px; width: 100%; max-width: 400px; position: relative; text-align: center; }
@@ -108,7 +134,7 @@
         </header>
 
         <main class="container">
-            <!-- YÖNETİCİ HABER PAYLAŞIM KUTUSU (Sadece Admin Görür) -->
+            <!-- YÖNETİCİ HABER PAYLAŞIM KUTUSU -->
             <div class="card" id="adminShareCard" style="display: none;">
                 <h3><i class="fa-solid fa-bullhorn"></i> Yönetici Haber / Duyuru Paneli</h3>
                 <textarea id="postInput" placeholder="Sultanbeyli için resmi haber veya duyuru paylaşın..."></textarea>
@@ -161,6 +187,9 @@
         let siteLogo = localStorage.getItem('sb_logo') || "https://via.placeholder.com/40";
         let currentUser = JSON.parse(localStorage.getItem('sb_current_user')) || null;
         let isRegisterMode = false;
+
+        // Tüm Emojiler Listesi
+        const ALL_EMOJIS = ['👍', '❤️', '🔥', '👏', '😮', '😂', '😢', '😡', '🎉', '✨', '🙏', '💯', '🇹🇷', '⭐', '🚀', '👀', '💡', '⚠️'];
 
         const authSection = document.getElementById('authSection');
         const appSection = document.getElementById('appSection');
@@ -251,7 +280,6 @@
             init();
         });
 
-        // SADECE YÖNETİCİ HABER PAYLAŞABİLİR
         shareBtn.addEventListener('click', () => {
             if (!currentUser.isAdmin) return alert("Sadece yöneticiler haber paylaşabilir!");
             let text = postInput.value.trim();
@@ -317,15 +345,20 @@
                 let canDelete = currentUser.isAdmin || currentUser.email === post.email;
                 let deleteBtnHtml = canDelete ? `<button class="delete-post-btn" onclick="deletePost(${post.id})" title="Sil"><i class="fa-solid fa-trash"></i></button>` : "";
 
-                // Tepkileri HTML'e dök
+                // Tepkileri ve kullanıcının kendi bastığı emojiyi (active class ile) listeleme
                 let reactionsHtml = "";
                 if (post.reactions) {
                     for (let [emoji, usersList] of Object.entries(post.reactions)) {
                         if (usersList.length > 0) {
-                            reactionsHtml += `<div class="reaction-badge">${emoji} ${usersList.length}</div>`;
+                            let hasReacted = usersList.includes(currentUser.email);
+                            let activeClass = hasReacted ? 'active' : '';
+                            reactionsHtml += `<div class="reaction-badge ${activeClass}" onclick="addReaction(${post.id}, '${emoji}')">${emoji} ${usersList.length}</div>`;
                         }
                     }
                 }
+
+                // Genişletilmiş emoji panelindeki emojileri oluştur
+                let emojiListHtml = ALL_EMOJIS.map(emj => `<span onclick="addReaction(${post.id}, '${emj}')">${emj}</span>`).join('');
 
                 feedContainer.innerHTML += `
                     <div class="card post-card">
@@ -348,12 +381,8 @@
                                 <button class="emoji-trigger-btn" onclick="toggleEmojiPicker(${post.id})">
                                     <i class="fa-regular fa-face-smile"></i> Tepki Ver
                                 </button>
-                                <div id="picker-${post.id}" class="emoji-picker-popup">
-                                    <span onclick="addReaction(${post.id}, '👍')">👍</span>
-                                    <span onclick="addReaction(${post.id}, '❤️')">❤️</span>
-                                    <span onclick="addReaction(${post.id}, '😮')">😮</span>
-                                    <span onclick="addReaction(${post.id}, '🔥')">🔥</span>
-                                    <span onclick="addReaction(${post.id}, '👏')">👏</span>
+                                <div id="picker-${post.id}" class="emoji-picker-popup" style="display: none;">
+                                    ${emojiListHtml}
                                 </div>
                             </div>
                             <div class="reaction-badges">${reactionsHtml}</div>
@@ -365,23 +394,32 @@
 
         window.toggleEmojiPicker = function(postId) {
             let picker = document.getElementById(`picker-${postId}`);
-            picker.style.display = picker.style.display === 'flex' ? 'none' : 'flex';
+            // Diğer açık pencereleri kapat
+            document.querySelectorAll('.emoji-picker-popup').forEach(p => {
+                if(p.id !== `picker-${postId}`) p.style.display = 'none';
+            });
+            picker.style.display = picker.style.display === 'grid' ? 'none' : 'grid';
         }
 
+        // Emojiyi ekleme ve aynı emojiye tekrar basarak geri çekme (kaldırma)
         window.addReaction = function(postId, emoji) {
             let post = posts.find(p => p.id === postId);
             if (!post) return;
             if (!post.reactions) post.reactions = {};
 
-            // Kullanıcının daha önceki emojisini kaldır
+            let userAlreadyHasThisEmoji = post.reactions[emoji] && post.reactions[emoji].includes(currentUser.email);
+
+            // Kullanıcının daha önce bıraktığı tüm emojileri temizle
             for (let emj in post.reactions) {
                 post.reactions[emj] = post.reactions[emj].filter(email => email !== currentUser.email);
                 if (post.reactions[emj].length === 0) delete post.reactions[emj];
             }
 
-            // Yeni emojiyi ekle
-            if (!post.reactions[emoji]) post.reactions[emoji] = [];
-            post.reactions[emoji].push(currentUser.email);
+            // Eğer kullanıcı zaten bu emojiyi seçmemişse yeni emojiyi ekle (Seçdiyse yukarıdaki temizleme adımıyla geri çekilmiş/kaldırılmış olur)
+            if (!userAlreadyHasThisEmoji) {
+                if (!post.reactions[emoji]) post.reactions[emoji] = [];
+                post.reactions[emoji].push(currentUser.email);
+            }
 
             localStorage.setItem('sb_posts', JSON.stringify(posts));
             renderFeed();
