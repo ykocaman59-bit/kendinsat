@@ -63,36 +63,17 @@
         .poll-box { background: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px; }
         .poll-btns { display: flex; gap: 10px; margin-top: 8px; }
 
-        /* GENİŞLETİLMİŞ EMOJI PANELİ */
         .post-footer-actions { display: flex; align-items: center; gap: 10px; border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top: 10px; position: relative; }
         .emoji-trigger-btn { background: #e2e8f0; color: #334155; border-radius: 20px; padding: 6px 12px; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; }
         
-        .emoji-picker-popup { 
-            display: none; 
-            position: absolute; 
-            bottom: 45px; 
-            left: 0; 
-            background: white; 
-            border: 1px solid var(--border-color); 
-            border-radius: 12px; 
-            padding: 10px; 
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15); 
-            width: 280px;
-            max-height: 200px;
-            overflow-y: auto;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 6px;
-            z-index: 100; 
+        /* Gizli emoji tetikleyici input */
+        .hidden-emoji-input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            width: 1px;
+            height: 1px;
         }
-        .emoji-picker-popup span { 
-            cursor: pointer; 
-            font-size: 1.4rem; 
-            text-align: center;
-            padding: 4px;
-            border-radius: 6px;
-            transition: background 0.1s; 
-        }
-        .emoji-picker-popup span:hover { background: #f1f5f9; }
 
         .reaction-badges { display: flex; gap: 6px; flex-wrap: wrap; }
         .reaction-badge { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 12px; padding: 3px 9px; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; cursor: pointer; }
@@ -187,9 +168,6 @@
         let siteLogo = localStorage.getItem('sb_logo') || "https://via.placeholder.com/40";
         let currentUser = JSON.parse(localStorage.getItem('sb_current_user')) || null;
         let isRegisterMode = false;
-
-        // Tüm Emojiler Listesi
-        const ALL_EMOJIS = ['👍', '❤️', '🔥', '👏', '😮', '😂', '😢', '😡', '🎉', '✨', '🙏', '💯', '🇹🇷', '⭐', '🚀', '👀', '💡', '⚠️'];
 
         const authSection = document.getElementById('authSection');
         const appSection = document.getElementById('appSection');
@@ -345,20 +323,16 @@
                 let canDelete = currentUser.isAdmin || currentUser.email === post.email;
                 let deleteBtnHtml = canDelete ? `<button class="delete-post-btn" onclick="deletePost(${post.id})" title="Sil"><i class="fa-solid fa-trash"></i></button>` : "";
 
-                // Tepkileri ve kullanıcının kendi bastığı emojiyi (active class ile) listeleme
                 let reactionsHtml = "";
                 if (post.reactions) {
                     for (let [emoji, usersList] of Object.entries(post.reactions)) {
                         if (usersList.length > 0) {
                             let hasReacted = usersList.includes(currentUser.email);
                             let activeClass = hasReacted ? 'active' : '';
-                            reactionsHtml += `<div class="reaction-badge ${activeClass}" onclick="addReaction(${post.id}, '${emoji}')">${emoji} ${usersList.length}</div>`;
+                            reactionsHtml += `<div class="reaction-badge ${activeClass}" onclick="removeReaction(${post.id}, '${emoji}')">${emoji} ${usersList.length}</div>`;
                         }
                     }
                 }
-
-                // Genişletilmiş emoji panelindeki emojileri oluştur
-                let emojiListHtml = ALL_EMOJIS.map(emj => `<span onclick="addReaction(${post.id}, '${emj}')">${emj}</span>`).join('');
 
                 feedContainer.innerHTML += `
                     <div class="card post-card">
@@ -377,14 +351,12 @@
                         ${pollHtml}
                         
                         <div class="post-footer-actions">
-                            <div style="position:relative;">
-                                <button class="emoji-trigger-btn" onclick="toggleEmojiPicker(${post.id})">
-                                    <i class="fa-regular fa-face-smile"></i> Tepki Ver
-                                </button>
-                                <div id="picker-${post.id}" class="emoji-picker-popup" style="display: none;">
-                                    ${emojiListHtml}
-                                </div>
-                            </div>
+                            <!-- Telefonun kendi emoji klavyesini açan tetikleyici -->
+                            <button class="emoji-trigger-btn" onclick="triggerNativeEmojiPicker(${post.id})">
+                                <i class="fa-regular fa-face-smile"></i> Tepki Ver
+                            </button>
+                            <input type="text" id="emojiInput-${post.id}" class="hidden-emoji-input" oninput="handleEmojiInput(event, ${post.id})">
+
                             <div class="reaction-badges">${reactionsHtml}</div>
                         </div>
                     </div>
@@ -392,33 +364,46 @@
             });
         }
 
-        window.toggleEmojiPicker = function(postId) {
-            let picker = document.getElementById(`picker-${postId}`);
-            // Diğer açık pencereleri kapat
-            document.querySelectorAll('.emoji-picker-popup').forEach(p => {
-                if(p.id !== `picker-${postId}`) p.style.display = 'none';
-            });
-            picker.style.display = picker.style.display === 'grid' ? 'none' : 'grid';
+        // "Tepki Ver" butonuna basıldığında telefonun kendi klavyesini açar
+        window.triggerNativeEmojiPicker = function(postId) {
+            let input = document.getElementById(`emojiInput-${postId}`);
+            input.focus();
         }
 
-        // Emojiyi ekleme ve aynı emojiye tekrar basarak geri çekme (kaldırma)
-        window.addReaction = function(postId, emoji) {
+        // Klavyeden seçilen emojiyi algılayıp tepki olarak kaydeder
+        window.handleEmojiInput = function(event, postId) {
+            let val = event.target.value;
+            if (!val) return;
+            // Girilen son karakteri/emojiyi al
+            let emoji = val.slice(-1);
+            event.target.value = ""; // Kutuyu temizle
+
             let post = posts.find(p => p.id === postId);
             if (!post) return;
             if (!post.reactions) post.reactions = {};
 
-            let userAlreadyHasThisEmoji = post.reactions[emoji] && post.reactions[emoji].includes(currentUser.email);
-
-            // Kullanıcının daha önce bıraktığı tüm emojileri temizle
+            // Kullanıcının daha önceki emojisini kaldır (Değiştirme veya çekme mantığı)
             for (let emj in post.reactions) {
                 post.reactions[emj] = post.reactions[emj].filter(email => email !== currentUser.email);
                 if (post.reactions[emj].length === 0) delete post.reactions[emj];
             }
 
-            // Eğer kullanıcı zaten bu emojiyi seçmemişse yeni emojiyi ekle (Seçdiyse yukarıdaki temizleme adımıyla geri çekilmiş/kaldırılmış olur)
-            if (!userAlreadyHasThisEmoji) {
-                if (!post.reactions[emoji]) post.reactions[emoji] = [];
-                post.reactions[emoji].push(currentUser.email);
+            // Yeni seçilen emojiyi ekle
+            if (!post.reactions[emoji]) post.reactions[emoji] = [];
+            post.reactions[emoji].push(currentUser.email);
+
+            localStorage.setItem('sb_posts', JSON.stringify(posts));
+            renderFeed();
+        }
+
+        // Eklenmiş olan emoji rozetine tıklayarak tepkiyi geri çekme (kaldırma)
+        window.removeReaction = function(postId, emoji) {
+            let post = posts.find(p => p.id === postId);
+            if (!post || !post.reactions) return;
+
+            if (post.reactions[emoji]) {
+                post.reactions[emoji] = post.reactions[emoji].filter(email => email !== currentUser.email);
+                if (post.reactions[emoji].length === 0) delete post.reactions[emoji];
             }
 
             localStorage.setItem('sb_posts', JSON.stringify(posts));
