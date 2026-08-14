@@ -19,7 +19,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-color); padding-bottom: 50px; }
 
-        /* ÜST MENÜ */
         .navbar {
             background-color: var(--card-bg);
             padding: 1rem 2rem;
@@ -34,7 +33,6 @@
 
         .container { max-width: 650px; margin: 2rem auto; padding: 0 1rem; }
 
-        /* KARTLAR VE FORM STİLLERİ */
         .card { background: var(--card-bg); padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 1.5rem; border: 1px solid var(--border-color); }
         button { cursor: pointer; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; transition: 0.2s; }
         button:hover { opacity: 0.85; }
@@ -42,7 +40,6 @@
         .btn-danger { background-color: var(--danger-color); color: white; }
         .btn-success { background-color: var(--success-color); color: white; }
 
-        /* GİRİŞ / KAYIT EKRANI */
         .auth-container { max-width: 400px; margin: 4rem auto; background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .auth-container h2 { margin-bottom: 1rem; text-align: center; }
         .form-group { margin-bottom: 1rem; }
@@ -50,11 +47,9 @@
         .form-control { width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; }
         .switch-auth { text-align: center; margin-top: 1rem; font-size: 0.9rem; color: #2563eb; cursor: pointer; }
 
-        /* PAYLAŞIM ALANI */
         textarea { width: 100%; height: 90px; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; resize: none; font-size: 1rem; margin-top: 10px; }
-        .share-options { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+        .share-options { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
 
-        /* AKIŞ GÖNDERİLERİ */
         .post-card { position: relative; }
         .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .user-meta { display: flex; align-items: center; gap: 10px; }
@@ -63,12 +58,20 @@
         .delete-post-btn { background: none; color: var(--danger-color); font-size: 1rem; cursor: pointer; padding: 5px; }
 
         .post-body { font-size: 1.05rem; margin-bottom: 15px; white-space: pre-wrap; line-height: 1.5; }
-        
-        /* ANKET */
+        .post-image { width: 100%; max-height: 350px; object-fit: cover; border-radius: 8px; margin-bottom: 15px; }
+
         .poll-box { background: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px; }
         .poll-btns { display: flex; gap: 10px; margin-top: 8px; }
 
-        /* MODAL */
+        /* EMOJI TEPKİ ALANI */
+        .post-footer-actions { display: flex; align-items: center; gap: 10px; border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top: 10px; position: relative; }
+        .emoji-trigger-btn { background: #e2e8f0; color: #334155; border-radius: 20px; padding: 4px 10px; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
+        .emoji-picker-popup { display: none; position: absolute; bottom: 40px; left: 0; background: white; border: 1px solid var(--border-color); border-radius: 20px; padding: 5px 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); gap: 8px; z-index: 10; }
+        .emoji-picker-popup span { cursor: pointer; font-size: 1.2rem; transition: transform 0.1s; }
+        .emoji-picker-popup span:hover { transform: scale(1.3); }
+        .reaction-badges { display: flex; gap: 5px; flex-wrap: wrap; }
+        .reaction-badge { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 12px; padding: 2px 8px; font-size: 0.8rem; display: flex; align-items: center; gap: 4px; }
+
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: white; padding: 2rem; border-radius: 10px; width: 100%; max-width: 400px; position: relative; text-align: center; }
         .close-modal { position: absolute; top: 10px; right: 15px; font-size: 1.5rem; cursor: pointer; }
@@ -76,22 +79,22 @@
 </head>
 <body>
 
-    <!-- GİRİŞ / KAYIT BÖLÜMÜ (Giriş yapılmamışsa görünür) -->
+    <!-- GİRİŞ / KAYIT EKRANI -->
     <div id="authSection" class="auth-container" style="display: none;">
-        <h2 id="authTitle">Demo Gmail Girişi</h2>
+        <h2 id="authTitle">Demo Giriş</h2>
         <div class="form-group">
-            <label>Gmail / E-posta veya Yönetici Adı:</label>
+            <label>E-posta veya Yönetici Adı:</label>
             <input type="text" id="authEmail" class="form-control" placeholder="ornek@gmail.com veya admin">
         </div>
         <div class="form-group">
             <label>Şifre:</label>
-            <input type="password" id="authPassword" class="form-control" placeholder="Şifreniz (Admin için 14531453)">
+            <input type="password" id="authPassword" class="form-control" placeholder="Şifreniz (Admin: 14531453)">
         </div>
         <button id="authActionBtn" class="btn-primary" style="width: 100%;">Giriş Yap</button>
         <div class="switch-auth" id="switchAuthMode">Hesabın yok mu? Kayıt ol</div>
     </div>
 
-    <!-- ANA UYGULAMA (Giriş yapılmışsa görünür) -->
+    <!-- ANA UYGULAMA -->
     <div id="appSection" style="display: none;">
         <header class="navbar">
             <div class="logo-area">
@@ -105,13 +108,17 @@
         </header>
 
         <main class="container">
-            <!-- HABER / ANKET PAYLAŞIM KUTUSU -->
-            <div class="card">
-                <h3><i class="fa-solid fa-bullhorn"></i> Sultanbeyli'de Ne Oluyor?</h3>
-                <textarea id="postInput" placeholder="Deprem, yol durumu, önemli bir olay... Herkes paylaşabilir!"></textarea>
+            <!-- YÖNETİCİ HABER PAYLAŞIM KUTUSU (Sadece Admin Görür) -->
+            <div class="card" id="adminShareCard" style="display: none;">
+                <h3><i class="fa-solid fa-bullhorn"></i> Yönetici Haber / Duyuru Paneli</h3>
+                <textarea id="postInput" placeholder="Sultanbeyli için resmi haber veya duyuru paylaşın..."></textarea>
                 <div class="share-options">
-                    <label><input type="checkbox" id="isPollCheck"> Anket Ekle (Örn: Hissedenler?)</label>
-                    <button id="shareBtn" class="btn-success">Haber Paylaş</button>
+                    <div>
+                        <label style="font-size:0.9rem; font-weight:600; display:block; margin-bottom:4px;">Görsel Ekle:</label>
+                        <input type="file" id="postImageInput" accept="image/*" class="form-control" style="font-size:0.85rem; padding:4px;">
+                    </div>
+                    <label><input type="checkbox" id="isPollCheck"> Anket Ekle (Örn: Depremi hissettiniz mi?)</label>
+                    <button id="shareBtn" class="btn-success" style="width:100%;">Haberi Yayınla</button>
                 </div>
             </div>
 
@@ -120,7 +127,7 @@
         </main>
     </div>
 
-    <!-- PROFİL / YÖNETİCİ AYARLARI MODALI -->
+    <!-- PROFİL / AYARLAR MODALI -->
     <div id="profileModal" class="modal" style="display: none;">
         <div class="modal-content">
             <span class="close-modal" id="closeModal">&times;</span>
@@ -137,16 +144,24 @@
     </div>
 
     <script>
-        // Veri Saklama (localStorage tabanlı demo)
         let users = JSON.parse(localStorage.getItem('sb_users')) || [];
         let posts = JSON.parse(localStorage.getItem('sb_posts')) || [
-            { id: 1, email: "admin", name: "Sultanbeyli Takip (Yönetici)", isAdmin: true, text: "İstanbul Valiliği: Yarın kent genelinde kuvvetli rüzgar ve fırtına bekleniyor, dikkatli olun.", poll: null, time: "Dün 08:41" }
+            { 
+                id: 1, 
+                email: "admin", 
+                name: "Sultanbeyli Takip (Yönetici)", 
+                isAdmin: true, 
+                text: "İstanbul Valiliği: Yarın kent genelinde kuvvetli rüzgar ve fırtına bekleniyor, dikkatli olun.", 
+                image: "",
+                poll: null, 
+                reactions: {},
+                time: "Dün 08:41" 
+            }
         ];
         let siteLogo = localStorage.getItem('sb_logo') || "https://via.placeholder.com/40";
         let currentUser = JSON.parse(localStorage.getItem('sb_current_user')) || null;
         let isRegisterMode = false;
 
-        // DOM Elementleri
         const authSection = document.getElementById('authSection');
         const appSection = document.getElementById('appSection');
         const authTitle = document.getElementById('authTitle');
@@ -155,7 +170,9 @@
         const authActionBtn = document.getElementById('authActionBtn');
         const switchAuthMode = document.getElementById('switchAuthMode');
 
+        const adminShareCard = document.getElementById('adminShareCard');
         const postInput = document.getElementById('postInput');
+        const postImageInput = document.getElementById('postImageInput');
         const isPollCheck = document.getElementById('isPollCheck');
         const shareBtn = document.getElementById('shareBtn');
         const feedContainer = document.getElementById('feedContainer');
@@ -170,12 +187,16 @@
         const logoFileInput = document.getElementById('logoFileInput');
         const siteLogoImg = document.getElementById('siteLogoImg');
 
-        // Sayfa Yüklenme Kontrolü
         function init() {
             siteLogoImg.src = siteLogo;
             if (currentUser) {
                 authSection.style.display = 'none';
                 appSection.style.display = 'block';
+                if (currentUser.isAdmin) {
+                    adminShareCard.style.display = 'block';
+                } else {
+                    adminShareCard.style.display = 'none';
+                }
                 renderFeed();
             } else {
                 authSection.style.display = 'block';
@@ -183,22 +204,19 @@
             }
         }
 
-        // Giriş / Kayıt Modu Değiştirme
         switchAuthMode.addEventListener('click', () => {
             isRegisterMode = !isRegisterMode;
-            authTitle.innerText = isRegisterMode ? "Demo Gmail Kayıt Ol" : "Demo Gmail Girişi";
+            authTitle.innerText = isRegisterMode ? "Demo Kayıt Ol" : "Demo Giriş";
             authActionBtn.innerText = isRegisterMode ? "Kayıt Ol ve Giriş Yap" : "Giriş Yap";
             switchAuthMode.innerText = isRegisterMode ? "Zaten hesabın var mı? Giriş yap" : "Hesabın yok mu? Kayıt ol";
         });
 
-        // Giriş / Kayıt İşlemi
         authActionBtn.addEventListener('click', () => {
             let email = authEmail.value.trim();
             let pass = authPassword.value.trim();
 
             if (!email || !pass) return alert("Lütfen tüm alanları doldurun!");
 
-            // Admin Kontrolü (İstediğiniz gibi: admin / 14531453)
             if (email === "admin" && pass === "14531453") {
                 currentUser = { email: "admin", name: "Sultanbeyli Takip (Yönetici)", isAdmin: true };
                 localStorage.setItem('sb_current_user', JSON.stringify(currentUser));
@@ -213,7 +231,7 @@
                 localStorage.setItem('sb_users', JSON.stringify(users));
                 currentUser = newUser;
                 localStorage.setItem('sb_current_user', JSON.stringify(currentUser));
-                alert("Kayıt başarılı, giriş yapıldı!");
+                alert("Kayıt başarılı!");
                 init();
             } else {
                 let found = users.find(u => u.email === email && u.pass === pass);
@@ -222,23 +240,36 @@
                     localStorage.setItem('sb_current_user', JSON.stringify(currentUser));
                     init();
                 } else {
-                    alert("Hatalı e-posta veya şifre! (Admin için: admin / 14531453)");
+                    alert("Hatalı bilgi! (Admin için: admin / 14531453)");
                 }
             }
         });
 
-        // Çıkış Yap
         logoutBtn.addEventListener('click', () => {
             localStorage.removeItem('sb_current_user');
             currentUser = null;
             init();
         });
 
-        // Haber Paylaşma (Herkes atabilir)
+        // SADECE YÖNETİCİ HABER PAYLAŞABİLİR
         shareBtn.addEventListener('click', () => {
+            if (!currentUser.isAdmin) return alert("Sadece yöneticiler haber paylaşabilir!");
             let text = postInput.value.trim();
             if (!text) return alert("Boş haber paylaşılamaz!");
 
+            let file = postImageInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    saveNewPost(text, event.target.result);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                saveNewPost(text, "");
+            }
+        });
+
+        function saveNewPost(text, imageBase64) {
             let pollData = null;
             if (isPollCheck.checked) {
                 pollData = { question: text, yes: [], no: [] };
@@ -248,20 +279,22 @@
                 id: Date.now(),
                 email: currentUser.email,
                 name: currentUser.name,
-                isAdmin: currentUser.isAdmin || false,
+                isAdmin: true,
                 text: text,
+                image: imageBase64,
                 poll: pollData,
+                reactions: {},
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             };
 
             posts.unshift(newPost);
             localStorage.setItem('sb_posts', JSON.stringify(posts));
             postInput.value = "";
+            postImageInput.value = "";
             isPollCheck.checked = false;
             renderFeed();
-        });
+        }
 
-        // Akışı Listeleme
         function renderFeed() {
             feedContainer.innerHTML = "";
             posts.forEach(post => {
@@ -280,30 +313,80 @@
                     `;
                 }
 
-                // Silme yetkisi: Yönetici ise veya gönderiyi atan kişi kendisiyse silebilir
+                let imageHtml = post.image ? `<img src="${post.image}" class="post-image">` : "";
                 let canDelete = currentUser.isAdmin || currentUser.email === post.email;
-                let deleteBtnHtml = canDelete ? `<button class="delete-post-btn" onclick="deletePost(${post.id})" title="Haberi Sil"><i class="fa-solid fa-trash"></i></button>` : "";
+                let deleteBtnHtml = canDelete ? `<button class="delete-post-btn" onclick="deletePost(${post.id})" title="Sil"><i class="fa-solid fa-trash"></i></button>` : "";
+
+                // Tepkileri HTML'e dök
+                let reactionsHtml = "";
+                if (post.reactions) {
+                    for (let [emoji, usersList] of Object.entries(post.reactions)) {
+                        if (usersList.length > 0) {
+                            reactionsHtml += `<div class="reaction-badge">${emoji} ${usersList.length}</div>`;
+                        }
+                    }
+                }
 
                 feedContainer.innerHTML += `
                     <div class="card post-card">
                         <div class="post-header">
                             <div class="user-meta">
-                                <img src="${post.isAdmin ? siteLogo : 'https://via.placeholder.com/35'}" class="post-avatar">
+                                <img src="${siteLogo}" class="post-avatar">
                                 <div>
-                                    <strong>${post.name}</strong> ${post.isAdmin ? '<span class="admin-badge">YÖNETİCİ</span>' : ''}
+                                    <strong>${post.name}</strong> <span class="admin-badge">YÖNETİCİ</span>
                                     <div style="font-size: 0.75rem; color: #64748b;">${post.time}</div>
                                 </div>
                             </div>
                             ${deleteBtnHtml}
                         </div>
                         <div class="post-body">${post.text}</div>
+                        ${imageHtml}
                         ${pollHtml}
+                        
+                        <div class="post-footer-actions">
+                            <div style="position:relative;">
+                                <button class="emoji-trigger-btn" onclick="toggleEmojiPicker(${post.id})">
+                                    <i class="fa-regular fa-face-smile"></i> Tepki Ver
+                                </button>
+                                <div id="picker-${post.id}" class="emoji-picker-popup">
+                                    <span onclick="addReaction(${post.id}, '👍')">👍</span>
+                                    <span onclick="addReaction(${post.id}, '❤️')">❤️</span>
+                                    <span onclick="addReaction(${post.id}, '😮')">😮</span>
+                                    <span onclick="addReaction(${post.id}, '🔥')">🔥</span>
+                                    <span onclick="addReaction(${post.id}, '👏')">👏</span>
+                                </div>
+                            </div>
+                            <div class="reaction-badges">${reactionsHtml}</div>
+                        </div>
                     </div>
                 `;
             });
         }
 
-        // Haberi Silme Fonksiyonu
+        window.toggleEmojiPicker = function(postId) {
+            let picker = document.getElementById(`picker-${postId}`);
+            picker.style.display = picker.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        window.addReaction = function(postId, emoji) {
+            let post = posts.find(p => p.id === postId);
+            if (!post) return;
+            if (!post.reactions) post.reactions = {};
+
+            // Kullanıcının daha önceki emojisini kaldır
+            for (let emj in post.reactions) {
+                post.reactions[emj] = post.reactions[emj].filter(email => email !== currentUser.email);
+                if (post.reactions[emj].length === 0) delete post.reactions[emj];
+            }
+
+            // Yeni emojiyi ekle
+            if (!post.reactions[emoji]) post.reactions[emoji] = [];
+            post.reactions[emoji].push(currentUser.email);
+
+            localStorage.setItem('sb_posts', JSON.stringify(posts));
+            renderFeed();
+        }
+
         window.deletePost = function(id) {
             if (!confirm("Bu haberi silmek istediğinize emin misiniz?")) return;
             posts = posts.filter(p => p.id !== id);
@@ -311,11 +394,9 @@
             renderFeed();
         };
 
-        // Anket Oy Verme
         window.vote = function(postId, choice) {
             let post = posts.find(p => p.id === postId);
-            if (!post) return;
-            // Daha önce oy verdiyse temizle
+            if (!post || !post.poll) return;
             post.poll.yes = post.poll.yes.filter(e => e !== currentUser.email);
             post.poll.no = post.poll.no.filter(e => e !== currentUser.email);
 
@@ -326,21 +407,15 @@
             renderFeed();
         };
 
-        // Profil ve Logo Ayarları Modalı
         profileBtn.addEventListener('click', () => {
-            profileUserEmail.innerText = `Kullanıcı Adı: ${currentUser.name} (${currentUser.email})`;
-            if (currentUser.isAdmin) {
-                adminLogoConfig.style.display = 'block';
-            } else {
-                adminLogoConfig.style.display = 'none';
-            }
+            profileUserEmail.innerText = `Kullanıcı: ${currentUser.name} (${currentUser.email})`;
+            adminLogoConfig.style.display = currentUser.isAdmin ? 'block' : 'none';
             profileModal.style.display = 'flex';
         });
 
         closeModal.addEventListener('click', () => { profileModal.style.display = 'none'; });
         closeModalBtn.addEventListener('click', () => { profileModal.style.display = 'none'; });
 
-        // Yönetici Logosu Değiştirme (Galeriden Resim Seçme)
         logoFileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -349,7 +424,7 @@
                     siteLogo = event.target.result;
                     localStorage.setItem('sb_logo', siteLogo);
                     siteLogoImg.src = siteLogo;
-                    alert("Site logosu başarıyla güncellendi!");
+                    alert("Site logosu güncellendi!");
                     renderFeed();
                 };
                 reader.readAsDataURL(file);
