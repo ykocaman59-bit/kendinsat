@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>sahibinden.com - Satılık, Kiralık, Emlak, Araç ve Her Şey</title>
+    <title>sahibinden.com Pro Max - Satılık, Kiralık, Emlak, Araç ve Her Şey</title>
     <link rel="stylesheet" href="style.css">
     <!-- Firebase SDK'ları -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 </head>
 <body>
-    <!-- Üst Banner / Header -->
+    <!-- Üst Header Alanı -->
     <header class="main-header">
         <div class="header-container">
             <div class="logo-area">
@@ -37,7 +37,21 @@
         </div>
     </header>
 
-    <!-- Ana İçerik ve Filtreleme Alanı -->
+    <!-- Alt Kategori Menü Çubuğu -->
+    <nav class="sub-nav">
+        <ul>
+            <li><a href="#">Emlak</a></li>
+            <li><a href="#">Vasıta</a></li>
+            <li><a href="#">Yedek Parça, Aksesuar</a></li>
+            <li><a href="#">İkinci El ve Sıfır Alışveriş</a></li>
+            <li><a href="#">İş Makinaları & Sanayi</a></li>
+            <li><a href="#">Usta ve Hizmetler</a></li>
+            <li><a href="#">Özel Ders Verenler</a></li>
+            <li><a href="#">İş İlanları</a></li>
+        </ul>
+    </nav>
+
+    <!-- Ana İçerik ve Detaylı Filtreleme Alanı -->
     <div class="main-content">
         <aside class="filter-sidebar">
             <h3>Filtreler</h3>
@@ -47,6 +61,7 @@
                     <option value="all">Tüm Kategoriler</option>
                     <option value="emlak">Emlak</option>
                     <option value="vasita">Vasıta</option>
+                    <option value="alisveris">Alışveriş</option>
                 </select>
             </div>
             <div class="filter-group">
@@ -56,26 +71,37 @@
                     <input type="number" id="maxPrice" placeholder="Max">
                 </div>
             </div>
+            <div class="filter-group">
+                <label>İL / İLÇE SEÇİMİ</label>
+                <select id="cityFilter">
+                    <option value="all">Tüm İller</option>
+                    <option value="istanbul">İstanbul (Sultanbeyli vb.)</option>
+                    <option value="ankara">Ankara</option>
+                </select>
+            </div>
             <button id="applyFilterBtn" class="filter-apply-btn">Filtreleri Uygula</button>
         </aside>
 
         <section class="listings-section">
             <div class="listings-header">
                 <span id="listingCount">2 İlan Listeleniyor</span>
-                <select id="sortSelect">
-                    <option value="newest">En Yeni İlan</option>
-                    <option value="price-asc">Fiyata Göre (Önce En Düşük)</option>
-                    <option value="price-desc">Fiyata Göre (Önce En Yüksek)</option>
-                </select>
+                <div class="sort-area">
+                    <label for="sortSelect">Sıralama:</label>
+                    <select id="sortSelect">
+                        <option value="newest">En Yeni İlan</option>
+                        <option value="price-asc">Fiyata Göre (Önce En Düşük)</option>
+                        <option value="price-desc">Fiyata Göre (Önce En Yüksek)</option>
+                    </select>
+                </div>
             </div>
 
             <div id="listingsContainer" class="listings-list">
-                <!-- Örnek İlan 1 -->
+                <!-- İlan 1 -->
                 <div class="listing-item" data-category="vasita" data-price="980000">
                     <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=300&q=80" alt="Araç">
                     <div class="listing-details">
                         <h4>Hatasız Boyasız Aile Aracı - Otomatik Vites</h4>
-                        <p class="listing-specs">2021 • 45.000 km • Benzin/LPG</p>
+                        <p class="listing-specs">2021 • 45.000 km • Benzin/LPG • Otomatik</p>
                         <p class="listing-location">Ankara / Çankaya</p>
                     </div>
                     <div class="listing-price">
@@ -83,12 +109,12 @@
                     </div>
                 </div>
 
-                <!-- Örnek İlan 2 -->
+                <!-- İlan 2 -->
                 <div class="listing-item" data-category="emlak" data-price="3450000">
                     <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=300&q=80" alt="Konut">
                     <div class="listing-details">
                         <h4>Merkezi Konumda Ara Kat 3+1 Satılık Daire</h4>
-                        <p class="listing-specs">3+1 • 135 m² • 5. Kat</p>
+                        <p class="listing-specs">3+1 • 135 m² • 5. Kat • Kombili</p>
                         <p class="listing-location">İstanbul / Sultanbeyli</p>
                     </div>
                     <div class="listing-price">
