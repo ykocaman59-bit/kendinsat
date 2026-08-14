@@ -1,287 +1,232 @@
+:root {
+    --primary-color: #2563eb;
+    --success-color: #16a34a;
+    --danger-color: #dc2626;
+    --warning-color: #ca8a04;
+    --bg-color: #f8fafc;
+    --card-bg: #ffffff;
+    --text-color: #1e293b;
+    --border-color: #e2e8f0;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
-    background-color: #f5f5f5;
-    color: #333;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
 }
 
-.main-header {
-    background-color: #ffe800;
-    padding: 12px 20px;
-    border-bottom: 1px solid #e0cb00;
-}
-
-.header-container {
-    max-width: 1200px;
-    margin: 0 auto;
+.navbar {
+    background-color: var(--card-bg);
+    padding: 1rem 2rem;
     display: flex;
-    align-items: center;
     justify-content: space-between;
-}
-
-.logo-area {
-    display: flex;
-    align-items: baseline;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .logo {
-    font-size: 26px;
+    font-size: 1.25rem;
     font-weight: bold;
-    color: #000;
-}
-
-.logo .com {
-    color: #d10000;
-}
-
-.pro-slogan {
-    font-size: 11px;
-    background: #000;
-    color: #ffe800;
-    padding: 2px 5px;
-    border-radius: 3px;
-    margin-left: 5px;
-    font-weight: bold;
-}
-
-.search-bar-header {
-    display: flex;
-    width: 40%;
-}
-
-.search-bar-header input {
-    width: 100%;
-    padding: 10px;
-    border: none;
-    border-radius: 4px 0 0 4px;
-    outline: none;
-    font-size: 14px;
-}
-
-.search-bar-header button {
-    background-color: #0055ff;
-    color: white;
-    border: none;
-    padding: 0 20px;
-    border-radius: 0 4px 4px 0;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.user-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.login-btn {
-    background: white;
-    border: 1px solid #ccc;
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
+    color: var(--primary-color);
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 13px;
-    font-weight: bold;
 }
 
-.profile-area {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: bold;
+.container {
+    max-width: 700px;
+    margin: 2rem auto;
+    padding: 0 1rem;
 }
 
-.logout-btn {
-    background: #d10000;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 3px;
+/* Butonlar */
+button {
     cursor: pointer;
-}
-
-.free-ad-btn {
-    background-color: #d10000;
-    color: white;
     border: none;
-    padding: 9px 15px;
-    border-radius: 4px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.sub-nav {
-    background-color: #333;
-    color: white;
-    padding: 10px 20px;
-}
-
-.sub-nav ul {
-    max-width: 1200px;
-    margin: 0 auto;
-    list-style: none;
-    display: flex;
-    gap: 20px;
-    overflow-x: auto;
-}
-
-.sub-nav ul li a {
-    color: white;
-    text-decoration: none;
-    font-size: 13px;
-    white-space: nowrap;
-}
-
-.sub-nav ul li a:hover {
-    color: #ffe800;
-}
-
-.main-content {
-    max-width: 1200px;
-    margin: 20px auto;
-    display: flex;
-    gap: 20px;
-    padding: 0 15px;
-}
-
-.filter-sidebar {
-    width: 260px;
-    background: white;
-    padding: 15px;
+    padding: 0.5rem 1rem;
     border-radius: 6px;
-    border: 1px solid #ddd;
-    height: fit-content;
+    font-weight: 600;
+    transition: opacity 0.2s;
 }
 
-.filter-sidebar h3 {
-    font-size: 16px;
-    margin-bottom: 15px;
-    border-bottom: 2px solid #ffe800;
-    padding-bottom: 5px;
+button:hover { opacity: 0.9; }
+
+.btn-primary { background-color: var(--primary-color); color: white; }
+.btn-success { background-color: var(--success-color); color: white; }
+.btn-danger { background-color: var(--danger-color); color: white; }
+.btn-warning { background-color: var(--warning-color); color: white; }
+
+/* Paylaşım Kutusu */
+.share-box {
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
 }
 
-.filter-group {
-    margin-bottom: 15px;
-}
-
-.filter-group label {
-    display: block;
-    font-size: 12px;
-    font-weight: bold;
-    color: #666;
-    margin-bottom: 5px;
-}
-
-.filter-group select, .price-inputs input {
+.share-box textarea {
     width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 13px;
-}
-
-.price-inputs {
-    display: flex;
-    gap: 5px;
-}
-
-.filter-apply-btn {
-    width: 100%;
-    background-color: #0055ff;
-    color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 4px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.listings-section {
-    flex: 1;
-}
-
-.listings-header {
-    background: white;
-    padding: 10px 15px;
-    border: 1px solid #ddd;
+    height: 90px;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
     border-radius: 6px;
+    resize: none;
+    margin-top: 10px;
+    font-size: 1rem;
+}
+
+.share-options {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
-    font-size: 14px;
-    font-weight: bold;
+    margin-top: 10px;
 }
 
-.sort-area {
+/* Akış Kartları */
+.post-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.post-header {
     display: flex;
     align-items: center;
-    gap: 5px;
-    font-size: 13px;
+    gap: 12px;
+    margin-bottom: 10px;
 }
 
-.listings-header select {
-    padding: 5px;
+.post-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.post-user-info h4 { font-size: 0.95rem; }
+.post-user-info span { font-size: 0.75rem; color: #64748b; }
+
+.admin-badge {
+    background-color: var(--danger-color);
+    color: white;
+    font-size: 0.65rem;
+    padding: 2px 6px;
     border-radius: 4px;
-    border: 1px solid #ccc;
+    margin-left: 6px;
 }
 
-.listings-list {
+.post-body {
+    font-size: 1.05rem;
+    margin-bottom: 15px;
+    white-space: pre-wrap;
+}
+
+/* Anket Alanı */
+.poll-area {
+    background: #f1f5f9;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.poll-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+/* Yorumlar */
+.comments-section {
+    border-top: 1px solid var(--border-color);
+    padding-top: 10px;
+    margin-top: 10px;
+}
+
+.comment-item {
+    font-size: 0.9rem;
+    background: #f8fafc;
+    padding: 6px 10px;
+    border-radius: 6px;
+    margin-top: 6px;
+}
+
+.comment-input-group {
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.comment-input-group input {
+    flex: 1;
+    padding: 5px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+/* Profil Modal */
+.modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+    text-align: center;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px; right: 15px;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.profile-avatar {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+.form-group {
+    margin: 15px 0;
+    text-align: left;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-top: 5px;
+}
+
+.modal-actions {
     display: flex;
     flex-direction: column;
     gap: 10px;
-}
-
-.listing-item {
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    display: flex;
-    padding: 10px;
-    gap: 15px;
-    align-items: center;
-}
-
-.listing-item img {
-    width: 160px;
-    height: 120px;
-    object-fit: cover;
-    border-radius: 4px;
-}
-
-.listing-details {
-    flex: 1;
-}
-
-.listing-details h4 {
-    font-size: 15px;
-    color: #0055ff;
-    margin-bottom: 5px;
-}
-
-.listing-specs {
-    font-size: 13px;
-    color: #555;
-    margin-bottom: 5px;
-}
-
-.listing-location {
-    font-size: 12px;
-    color: #888;
-}
-
-.listing-price {
-    font-size: 18px;
-    font-weight: bold;
-    color: #000;
-    text-align: right;
-    padding-right: 10px;
+    margin-top: 20px;
 }
