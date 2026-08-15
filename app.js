@@ -45,6 +45,7 @@ auth.onAuthStateChanged((user) => {
         currentUser = user;
         shareBox.style.display = 'block';
         
+        // Admin kontrolü (Örn: Belirli e-posta veya admin şifre doğrulama akışı)
         let isAdmin = user.email === "admin@sultanbeyli.com" || localStorage.getItem("isAdmin") === "true";
 
         userMenuSection.innerHTML = `
@@ -67,6 +68,7 @@ auth.onAuthStateChanged((user) => {
         userMenuSection.innerHTML = `
             <button id="loginBtn" class="btn-primary"><i class="fa-brands fa-google"></i> Gmail ile Giriş Yap</button>
         `;
+        // Yeniden bağla
         document.getElementById('loginBtn').addEventListener('click', () => {
             const provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithPopup(provider);
@@ -94,11 +96,12 @@ saveProfileBtn.addEventListener('click', () => {
     });
 });
 
-// GMAIL / HESABI SİLME
+// GMAIL / HESABI SİLME (İstediğiniz Kriter: Mesajlar silinmez, kullanıcı 'Kullanıcı Yok' görünür)
 deleteAccountBtn.addEventListener('click', async () => {
     if (!confirm("Gmail hesabınızı ve site kaydınızı silmek istediğinize emin misiniz? Paylaştığınız mesajlar kalacak ancak isminiz 'Kullanıcı Yok' olarak güncellenecektir.")) return;
 
     try {
+        // Firestore'daki gönderi ve yorumlarda kullanıcı adını anonimleştir
         const batch = db.batch();
         const postsSnap = await db.collection('posts').where('uid', '==', currentUser.uid).get();
         postsSnap.forEach(doc => {
@@ -106,6 +109,7 @@ deleteAccountBtn.addEventListener('click', async () => {
         });
         await batch.commit();
 
+        // Firebase Auth hesabını sil
         await currentUser.delete();
         alert("Hesabınız başarıyla silindi.");
         profileModal.style.display = 'none';
@@ -131,6 +135,7 @@ submitPostBtn.addEventListener('click', async () => {
         };
     }
 
+    // Admin şifre kontrolü için hızlı bir prompt (İstediğiniz admin 14531453 kuralı)
     if(content.includes("#admin14531453")) {
         localStorage.setItem("isAdmin", "true");
         alert("Yönetici yetkisi aktifleşti!");
@@ -208,9 +213,11 @@ window.votePoll = async function(postId, choice) {
 
     let poll = doc.data().poll;
     
+    // Önceki oyları temizle
     poll.yes = poll.yes.filter(id => id !== currentUser.uid);
     poll.no = poll.no.filter(id => id !== currentUser.uid);
 
+    // Yeni oyu ekle
     if (choice === 'yes') poll.yes.push(currentUser.uid);
     if (choice === 'no') poll.no.push(currentUser.uid);
 
