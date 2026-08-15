@@ -16,7 +16,24 @@
             --border-color: #cbd5e1;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            -webkit-user-select: none; 
+            -moz-user-select: none; 
+            -ms-user-select: none; 
+            user-select: none; 
+        }
+
+        input, textarea {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+
         body { background-color: var(--bg-color); color: var(--text-color); padding-bottom: 50px; }
 
         .navbar {
@@ -27,34 +44,32 @@
             align-items: center;
             border-bottom: 1px solid var(--border-color);
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-        .logo-area { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 1.2rem; color: var(--primary-color); }
+        .logo-area { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 1.2rem; color: var(--primary-color); cursor: pointer; }
         .logo-area img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color); }
 
         .container { max-width: 650px; margin: 2rem auto; padding: 0 1rem; }
 
-        .card { background: var(--card-bg); padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 1.5rem; border: 1px solid var(--border-color); }
+        .card { background: var(--card-bg); padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 1.5rem; border: 1px solid var(--border-color); position: relative; }
         button { cursor: pointer; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; transition: 0.2s; }
         button:hover { opacity: 0.85; }
         .btn-primary { background-color: var(--primary-color); color: white; }
         .btn-danger { background-color: var(--danger-color); color: white; }
         .btn-success { background-color: var(--success-color); color: white; }
+        .btn-google { background-color: #fff; color: #334155; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 8px; font-weight: 600; }
 
-        .auth-container { max-width: 400px; margin: 4rem auto; background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .auth-container h2 { margin-bottom: 1rem; text-align: center; }
-        .form-group { margin-bottom: 1rem; }
-        .form-group label { display: block; margin-bottom: 5px; font-size: 0.9rem; font-weight: bold; }
-        .form-control { width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; }
-        .switch-auth { text-align: center; margin-top: 1rem; font-size: 0.9rem; color: #2563eb; cursor: pointer; }
-
-        textarea { width: 100%; height: 90px; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; resize: none; font-size: 1rem; margin-top: 10px; }
+        textarea, input[type="text"], input[type="password"] { width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; outline: none; }
+        textarea { height: 90px; resize: none; margin-top: 10px; }
         .share-options { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
 
         .post-card { position: relative; }
         .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .user-meta { display: flex; align-items: center; gap: 10px; }
-        .post-avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
-        .admin-badge { background: var(--danger-color); color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; }
+        .post-avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; background: #cbd5e1; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #fff; }
+        .admin-badge { background: var(--danger-color); color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
         .delete-post-btn { background: none; color: var(--danger-color); font-size: 1rem; cursor: pointer; padding: 5px; }
 
         .post-body { font-size: 1.05rem; margin-bottom: 15px; white-space: pre-wrap; line-height: 1.5; }
@@ -63,126 +78,238 @@
         .poll-box { background: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px; }
         .poll-btns { display: flex; gap: 10px; margin-top: 8px; }
 
-        .post-footer-actions { display: flex; align-items: center; gap: 10px; border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top: 10px; position: relative; }
-        .emoji-trigger-btn { background: #e2e8f0; color: #334155; border-radius: 20px; padding: 6px 12px; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; }
+        .post-footer-actions { display: flex; align-items: center; gap: 8px; border-top: 1px solid #e2e8f0; padding-top: 12px; margin-top: 10px; flex-wrap: wrap; }
         
-        /* ÖZEL EMOJI PANELİ (Açılır Kutu) */
-        .emoji-picker-popup { 
-            display: none; 
-            position: absolute; 
-            bottom: 45px; 
-            left: 0; 
-            background: white; 
-            border: 1px solid var(--border-color); 
-            border-radius: 12px; 
-            padding: 10px; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2); 
-            width: 300px;
-            z-index: 100; 
-        }
-        .emoji-search-box {
-            width: 100%;
-            padding: 6px 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 0.9rem;
-            margin-bottom: 8px;
-            outline: none;
-        }
-        .emoji-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 4px;
-            max-height: 180px;
-            overflow-y: auto;
-        }
-        .emoji-grid span { 
-            cursor: pointer; 
-            font-size: 1.4rem; 
-            text-align: center;
-            padding: 4px;
-            border-radius: 6px;
-            transition: background 0.1s; 
-        }
-        .emoji-grid span:hover { background: #f1f5f9; }
+        .quick-emoji-bar { display: flex; gap: 6px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 30px; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .quick-emoji-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; transition: transform 0.1s; padding: 0 2px; }
+        .quick-emoji-btn:hover { transform: scale(1.2); }
+        .add-more-emoji-btn { background: #e2e8f0; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; color: #334155; }
 
-        .reaction-badges { display: flex; gap: 6px; flex-wrap: wrap; }
         .reaction-badge { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 12px; padding: 3px 9px; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; cursor: pointer; }
         .reaction-badge.active { background: #dbeafe; border-color: #3b82f6; color: #1d4ed8; font-weight: bold; }
 
+        .action-sheet-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: flex-end; z-index: 2000; backdrop-filter: blur(2px); }
+        .action-sheet { background: white; width: 100%; max-width: 500px; border-radius: 24px 24px 0 0; padding: 20px; animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        
+        .action-sheet-emojis { display: flex; justify-content: space-around; background: #f8fafc; padding: 12px; border-radius: 30px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        .action-sheet-emojis span { font-size: 1.6rem; cursor: pointer; transition: transform 0.15s; }
+        .action-sheet-emojis span:hover { transform: scale(1.3); }
+
+        .action-sheet-menu { display: flex; flex-direction: column; gap: 5px; }
+        .action-sheet-item { display: flex; align-items: center; gap: 15px; padding: 12px 15px; font-size: 1rem; font-weight: 500; cursor: pointer; border-radius: 10px; transition: background 0.2s; }
+        .action-sheet-item:hover { background: #f1f5f9; }
+        .action-sheet-item i { font-size: 1.2rem; width: 24px; color: #475569; }
+
+        /* ZENGİN EMOJİ PENCERE STİLLERİ (ARAMA ÇUBUĞU DAHİL) */
+        .emoji-picker-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 2500; }
+        .emoji-picker-content { background: white; padding: 20px; border-radius: 16px; width: 340px; max-height: 480px; display: flex; flex-direction: column; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .emoji-search-box { width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.95rem; margin-top: 10px; margin-bottom: 12px; outline: none; }
+        .emoji-grid-container { overflow-y: auto; max-height: 320px; flex-grow: 1; }
+        .emoji-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+        .emoji-grid span { cursor: pointer; font-size: 1.6rem; text-align: center; padding: 6px; border-radius: 8px; transition: background 0.1s; }
+        .emoji-grid span:hover { background: #f1f5f9; }
+
+        .comments-section { margin-top: 15px; border-top: 1px dashed #e2e8f0; padding-top: 10px; }
+        .comment-item { font-size: 0.9rem; margin-bottom: 8px; background: #f8fafc; padding: 8px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: flex-start; border: 1px solid #e2e8f0; }
+        .comment-content { flex-grow: 1; }
+        .comment-user { font-weight: bold; color: #0f172a; margin-right: 5px; }
+        .reply-tag { color: var(--primary-color); font-weight: 600; font-size: 0.8rem; background: #e0f2fe; padding: 1px 6px; border-radius: 4px; margin-right: 5px; }
+        .comment-input-box { display: flex; gap: 5px; margin-top: 10px; }
+        .reply-target-info { font-size: 0.75rem; color: #64748b; margin-bottom: 4px; display: none; align-items: center; justify-content: space-between; background: #e2e8f0; padding: 3px 8px; border-radius: 4px; }
+
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: white; padding: 2rem; border-radius: 10px; width: 100%; max-width: 400px; position: relative; text-align: center; }
-        .close-modal { position: absolute; top: 10px; right: 15px; font-size: 1.5rem; cursor: pointer; }
+        .modal-content { background: white; padding: 2rem; border-radius: 12px; width: 100%; max-width: 420px; position: relative; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .close-modal { position: absolute; top: 12px; right: 15px; font-size: 1.5rem; cursor: pointer; color: #64748b; }
+
+        .gmail-account-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-bottom: 1px solid #f1f5f9; cursor: pointer; text-align: left; transition: background 0.15s; }
+        .gmail-account-item:hover { background: #f8fafc; }
+        .gmail-avatar { width: 40px; height: 40px; border-radius: 50%; background: #2563eb; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <!-- GİRİŞ / KAYIT EKRANI -->
-    <div id="authSection" class="auth-container" style="display: none;">
-        <h2 id="authTitle">Demo Giriş</h2>
-        <div class="form-group">
-            <label>E-posta veya Yönetici Adı:</label>
-            <input type="text" id="authEmail" class="form-control" placeholder="ornek@gmail.com veya admin">
+    <!-- NAVBAR -->
+    <header class="navbar">
+        <div class="logo-area" onclick="location.reload()">
+            <img id="siteLogoImg" src="https://via.placeholder.com/40" alt="Logo">
+            <span id="siteTitleName">Sultanbeyli Anlık</span>
         </div>
-        <div class="form-group">
-            <label>Şifre:</label>
-            <input type="password" id="authPassword" class="form-control" placeholder="Şifreniz (Admin: 14531453)">
-        </div>
-        <button id="authActionBtn" class="btn-primary" style="width: 100%;">Giriş Yap</button>
-        <div class="switch-auth" id="switchAuthMode">Hesabın yok mu? Kayıt ol</div>
-    </div>
+        <div id="navAuthArea"></div>
+    </header>
 
-    <!-- ANA UYGULAMA -->
-    <div id="appSection" style="display: none;">
-        <header class="navbar">
-            <div class="logo-area">
-                <img id="siteLogoImg" src="https://via.placeholder.com/40" alt="Logo">
-                <span id="siteTitleName">Sultanbeyli Anlık</span>
-            </div>
-            <div>
-                <button id="profileBtn" class="btn-primary"><i class="fa-solid fa-user"></i> Profil</button>
-                <button id="logoutBtn" class="btn-danger">Çıkış</button>
-            </div>
-        </header>
-
-        <main class="container">
-            <!-- YÖNETİCİ HABER PAYLAŞIM KUTUSU -->
-            <div class="card" id="adminShareCard" style="display: none;">
-                <h3><i class="fa-solid fa-bullhorn"></i> Yönetici Haber / Duyuru Paneli</h3>
-                <textarea id="postInput" placeholder="Sultanbeyli için resmi haber veya duyuru paylaşın..."></textarea>
-                <div class="share-options">
-                    <div>
-                        <label style="font-size:0.9rem; font-weight:600; display:block; margin-bottom:4px;">Görsel Ekle:</label>
-                        <input type="file" id="postImageInput" accept="image/*" class="form-control" style="font-size:0.85rem; padding:4px;">
-                    </div>
-                    <label><input type="checkbox" id="isPollCheck"> Anket Ekle (Örn: Depremi hissettiniz mi?)</label>
-                    <button id="shareBtn" class="btn-success" style="width:100%;">Haberi Yayınla</button>
+    <main class="container">
+        <!-- YÖNETİCİ HABER PAYLAŞIM KUTUSU -->
+        <div class="card" id="adminShareCard" style="display: none;">
+            <h3><i class="fa-solid fa-bullhorn"></i> Yönetici Haber / Duyuru Paneli</h3>
+            <textarea id="postInput" placeholder="Sultanbeyli için resmi haber veya duyuru paylaşın..."></textarea>
+            <div class="share-options">
+                <div>
+                    <label style="font-size:0.9rem; font-weight:600; display:block; margin-bottom:4px;">Görsel Ekle:</label>
+                    <input type="file" id="postImageInput" accept="image/*" style="font-size:0.85rem; padding:4px;">
                 </div>
+                <label><input type="checkbox" id="isPollCheck"> Anket Ekle</label>
+                <button id="shareBtn" class="btn-success" style="width:100%;">Haberi Yayınla</button>
             </div>
+        </div>
 
-            <!-- AKIŞ -->
-            <div id="feedContainer"></div>
-        </main>
+        <!-- HABERLER AKIŞI -->
+        <div id="feedContainer"></div>
+    </main>
+
+    <!-- GMAIL HESAP SEÇİCİ MODALI -->
+    <div id="gmailSelectModal" class="modal" style="display: none;">
+        <div class="modal-content" style="padding: 1.5rem;">
+            <span class="close-modal" onclick="closeGmailModal()">&times;</span>
+            <h3 style="margin-bottom: 5px;">Hesap Seçin</h3>
+            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px;">Devam etmek için bir Google hesabı seçin</p>
+            <div id="gmailAccountsList" style="max-height: 250px; overflow-y: auto;"></div>
+        </div>
     </div>
 
-    <!-- PROFİL / AYARLAR MODALI -->
+    <!-- GMAIL DOĞRULAMA KODU GİRİŞ MODALI -->
+    <div id="otpModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-modal" onclick="document.getElementById('otpModal').style.display='none'">&times;</span>
+            <h3 style="margin-bottom: 5px;"><i class="fa-solid fa-shield-halved" style="color:var(--primary-color);"></i> E-posta Doğrulama</h3>
+            <p id="otpInfoText" style="font-size: 0.85rem; color: #64748b; margin-bottom: 12px;"></p>
+            
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
+                <div style="font-size: 0.75rem; color: #1e40af; margin-bottom: 4px; font-weight: bold;">GMAİL GELEN KUTUSU SİMÜLASYONU</div>
+                <div id="simulatedEmailBox" style="font-size: 1.3rem; font-weight: bold; letter-spacing: 3px; color: #1d4ed8; margin-bottom: 8px;">123456</div>
+                <button onclick="copyGeneratedOtp()" class="btn-primary" style="font-size: 0.8rem; padding: 4px 10px;"><i class="fa-solid fa-copy"></i> Kodu Kopyala</button>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <input type="text" id="otpCodeInput" placeholder="Kodu buraya yapıştırın" maxlength="6" style="text-align: center; font-size: 1.2rem; letter-spacing: 4px;">
+                <button onclick="verifyOtpCode()" class="btn-primary" style="width: 100%;">Kodu Onayla</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- KAYIT OLUŞTURMA MODALI -->
+    <div id="registerModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeRegisterModal()">&times;</span>
+            <h2>Kayıt Ol</h2>
+            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px;">E-posta doğrulandı! Bilgilerinizi tamamlayın:</p>
+            
+            <div style="text-align: left; display: flex; flex-direction: column; gap: 10px;">
+                <div>
+                    <label style="font-size: 0.8rem; font-weight: bold;">Ad Soyad *</label>
+                    <input type="text" id="regName" placeholder="Adınız Soyadınız">
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; font-weight: bold;">İletişim Bilgisi (Tel) *</label>
+                    <input type="text" id="regContact" placeholder="0555 ...">
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; font-weight: bold;">Kullanıcı Adı *</label>
+                    <input type="text" id="regUsername" placeholder="Kullanıcı adınız" oninput="checkUsernameAvailability()">
+                    <span id="usernameFeedback" style="font-size: 0.75rem; margin-top: 3px; display: block;"></span>
+                </div>
+                <button onclick="completeRegistration()" class="btn-primary" style="width: 100%; margin-top: 10px;">Kayıt Ol ve Giriş Yap</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GİRİŞ MODALI -->
+    <div id="loginModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeLoginModal()">&times;</span>
+            <h2>Giriş Yap</h2>
+            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px;">Tepki vermek veya yorum yapmak için giriş yapmalısınız.</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button onclick="openGmailSelector()" class="btn-google" style="width: 100%; justify-content: center; padding: 10px;">
+                    <i class="fa-brands fa-google" style="color: #ea4335;"></i> Gmail ile Giriş Yap
+                </button>
+                <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 5px 0;">
+                <div style="text-align: left; font-size: 0.85rem; font-weight: bold;">Yönetici Girişi:</div>
+                <input type="text" id="adminUserIn" placeholder="Yönetici Kullanıcı Adı" style="margin-bottom: 5px;">
+                <input type="password" id="adminPassIn" placeholder="Şifre" style="margin-bottom: 10px;">
+                <button onclick="handleAdminLogin()" class="btn-primary" style="width: 100%;">Yönetici Olarak Giriş Yap</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROFİL MODALI -->
     <div id="profileModal" class="modal" style="display: none;">
         <div class="modal-content">
-            <span class="close-modal" id="closeModal">&times;</span>
-            <h2>Profil ve Ayarlar</h2>
-            <p id="profileUserEmail" style="color: #64748b; margin: 10px 0;"></p>
+            <span class="close-modal" onclick="document.getElementById('profileModal').style.display='none'">&times;</span>
+            <h2>Profil Yönetimi</h2>
+            <div style="margin: 15px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                <img id="profileAvatarImg" src="https://via.placeholder.com/80" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color);">
+                <label style="font-size: 0.85rem; background: #e2e8f0; padding: 5px 12px; border-radius: 6px; cursor: pointer;">
+                    <i class="fa-solid fa-camera"></i> Profil Fotoğrafı Seç (Galeri)
+                    <input type="file" id="profileImageInput" accept="image/*" style="display: none;" onchange="updateProfileAvatar(this)">
+                </label>
+            </div>
+            <p id="profileUserInfo" style="color: #475569; font-size: 0.9rem; margin-bottom: 15px;"></p>
             
-            <div id="adminLogoConfig" style="display: none; margin: 15px 0; border-top: 1px solid #ddd; padding-top: 15px;">
-                <label style="font-weight: bold; display:block; margin-bottom:5px;">Yönetici Logosu Değiştir:</label>
-                <input type="file" id="logoFileInput" accept="image/*" class="form-control">
+            <div id="profileActionButtons" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+    </div>
+
+    <!-- HESAP SİLME ONAY MODALI -->
+    <div id="deleteAccountModal" class="modal" style="display: none;">
+        <div class="modal-content" style="text-align: left;">
+            <span class="close-modal" onclick="document.getElementById('deleteAccountModal').style.display='none'">&times;</span>
+            <h3 style="color: var(--danger-color); margin-bottom: 10px;">Hesabı Sil</h3>
+            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 12px;">Hesabınızı neden silmek istiyorsunuz?</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.9rem; margin-bottom: 12px;">
+                <label><input type="radio" name="delReason" value="Uygulamayı beğenmedim"> Uygulamayı beğenmedim</label>
+                <label><input type="radio" name="delReason" value="Artık kullanmak istemiyorum"> Artık kullanmak istemiyorum</label>
+                <label><input type="radio" name="delReason" value="Başka bir hesap açacağım"> Başka bir hesap açacağım</label>
+                <label><input type="radio" name="delReason" value="Diğer"> Diğer</label>
             </div>
 
-            <button id="closeModalBtn" class="btn-primary" style="width: 100%; margin-top: 10px;">Tamam</button>
+            <textarea id="delReasonDesc" placeholder="Ek açıklama yazabilirsiniz (isteğe bağlı)..." style="height: 60px; margin-bottom: 15px;"></textarea>
+            
+            <div style="background: #fef2f2; border: 1px solid #fecaca; padding: 10px; border-radius: 6px; font-size: 0.8rem; color: #991b1b; margin-bottom: 15px;">
+                ⚠️ <strong>Emin misiniz?</strong> Hesabınızı sildiğinizde tüm yorumlarınız ve yanıtlarınız silinecektir.
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button onclick="document.getElementById('deleteAccountModal').style.display='none'" class="btn-google" style="flex: 1; justify-content: center;">Hayır</button>
+                <button onclick="confirmDeleteAccount()" class="btn-danger" style="flex: 1;">Evet, Hesabımı Sil</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- INSTAGRAM TARZI ACTION SHEET -->
+    <div id="actionSheetOverlay" class="action-sheet-overlay" onclick="closeActionSheet(event)">
+        <div class="action-sheet" id="actionSheetBox">
+            <div class="action-sheet-emojis">
+                <span onclick="reactFromSheet('❤️')">❤️</span>
+                <span onclick="reactFromSheet('😂')">😂</span>
+                <span onclick="reactFromSheet('😮')">😮</span>
+                <span onclick="reactFromSheet('😢')">😢</span>
+                <span onclick="reactFromSheet('😡')">😡</span>
+                <span onclick="reactFromSheet('👍')">👍</span>
+            </div>
+            <div class="action-sheet-menu">
+                <div class="action-sheet-item" onclick="sheetAction('reply')"><i class="fa-solid fa-reply"></i> Yanıtla</div>
+                <div class="action-sheet-item" onclick="sheetAction('share')"><i class="fa-solid fa-share-nodes"></i> Paylaş</div>
+                <div class="action-sheet-item" onclick="sheetAction('copy')"><i class="fa-solid fa-copy"></i> Kopyala</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ZENGİN EMOJİ SEÇİCİ PENCRESİ VE ARAMA ÇUBUĞU -->
+    <div id="emojiPickerModal" class="emoji-picker-modal" onclick="closeEmojiModal(event)">
+        <div class="emoji-picker-content">
+            <span class="close-modal" onclick="document.getElementById('emojiPickerModal').style.display='none'">&times;</span>
+            <h4 style="margin-bottom: 2px; text-align: left;">İfade Seç</h4>
+            <input type="text" id="emojiSearchInput" class="emoji-search-box" placeholder="Emoji ara (örn: gül, kalp, ateş)..." oninput="filterEmojis()">
+            <div class="emoji-grid-container">
+                <div class="emoji-grid" id="fullEmojiGrid"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        let users = JSON.parse(localStorage.getItem('sb_users')) || [];
         let posts = JSON.parse(localStorage.getItem('sb_posts')) || [
             { 
                 id: 1, 
@@ -193,201 +320,436 @@
                 image: "",
                 poll: null, 
                 reactions: {},
+                comments: [],
                 time: "Dün 08:41" 
             }
         ];
+
+        let registeredUsers = JSON.parse(localStorage.getItem('sb_registered_users')) || {
+            "kralbaba@gmail.com": { email: "kralbaba@gmail.com", name: "Kral Baba", username: "kralbaba", contact: "05554443322", avatar: "", isAdmin: false }
+        };
+
         let siteLogo = localStorage.getItem('sb_logo') || "https://via.placeholder.com/40";
         let currentUser = JSON.parse(localStorage.getItem('sb_current_user')) || null;
-        let isRegisterMode = false;
+        let activePostIdForMenu = null;
+        let pendingGmailEmail = "";
+        let generatedOtp = "";
 
-        // Geniş Emoji Listesi
+        // Çok Geniş ve Zengin Emoji Listesi (Kategorize / Popüler Emojiler)
         const ALL_EMOJIS = [
             '👍', '👎', '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❤️‍🔥', '❤️‍🩹', '💖', '💗', '💓', '💞', '💕', '💌', '❣️', '💘', 
             '🔥', '✨', '⭐', '🌟', '💫', '💥', '💢', '💬', '👁️‍🗨️', '🗨️', '🗯️', '💭', '💤', '👋', '🤚', '🖐️', '✋', '🖖', '👌', '🤌', '🤏', 
-            '✌️', '🤞', '🫰', '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇', '☝️', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', 
+            '✌️', '🤞', '🫰', '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇', '☝️', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', 
             '🤲', '🤝', '🙏', '✍️', '💅', '🤳', '💪', '🦾', '🦿', '🦵', '🦶', '👂', '🦻', '👃', '🧠', '🫀', '🫁', '🦷', '🦴', '👀', '👁️', 
-            '👅', '👄', '💋', '👶', '👧', '🧒', '👦', '👩', '🧑', '👨', '👩‍🦱', '👨‍🦱', '👩‍🦰', '👨‍🦰', '👱‍♀️', '👱‍♂️', '👩‍🦳', '👨‍🦳', 
-            '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃', '😉', '😊', '😇', '🥰', '😍', '🤩', '😘', '😗', '☺️', '😚', '😙', 
-            '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '🤥', '😌', 
-            '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮', '🤧', '🥴', '😵', '😵‍💫', '🤯', '🤠', '🥳', '😎', '🤓', 
-            '🧐', '😕', '😟', '🙁', '😮', '😯', '😲', '😳', '🥺', '😦', '😧', '😨', '😰', '😢', '😭', '😱', '😖', '😣', '😞', '😓', '😩', 
-            '😫', '🥱', '😤', '😡', '😠', '🤬', '😈', '👿', '💀', '☠️', '💩', '🤡', '👹', '👺', '👻', '👽', '👾', '🤖', '🎃', '😺', '😸', 
-            '🎉', '🎊', '🎈', '🎁', '🎂', '🎄', '🎆', '🎇', '🧨', '✨', '🏆', '🏅', '🥇', '🥈', '🥉', '⚽', '🏀', '🏈', '⚾', '🥎', '🎾', 
-            '🇹🇷', '🌍', '🌎', '🌏', '🌐', '🗺️', '🧭', '🚗', '🚕', '🚙', '🚌', '🚎', '🏎️', '🚓', '🚑', '🚒', '🚐', '🚚', '🚛', '🚜', '🛵'
+            '👅', '👄', '💋', '👶', '👧', '🧒', '👦', '👩', '🧑', '👨', '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃', '😉', 
+            '😊', '😇', '🥰', '😍', '🤩', '😘', '😗', '☺️', '😚', '😙', '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🤐', 
+            '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '🤥', '😌', '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮', '🤧', '🥴', 
+            '😵', '🤯', '🤠', '🥳', '😎', '🤓', '🧐', '😕', '😟', '🙁', '😮', '😯', '😲', '😳', '🥺', '😦', '😧', '😨', '😰', '😢', '😭', 
+            '😱', '😖', '😣', '😞', '😓', '😩', '😫', '🥱', '😤', '😡', '😠', '🤬', '😈', '👿', '💀', '☠️', '💩', '🤡', '👹', '👺', '👻', 
+            '🎉', '🎊', '🎈', '🎁', '🎂', '🎄', '🎆', '🎇', '✨', '🏆', '🏅', '🥇', '🥈', '🥉', '⚽', '🏀', '🏈', '⚾', '🎾', '🇹🇷', '🚀'
         ];
-
-        const authSection = document.getElementById('authSection');
-        const appSection = document.getElementById('appSection');
-        const authTitle = document.getElementById('authTitle');
-        const authEmail = document.getElementById('authEmail');
-        const authPassword = document.getElementById('authPassword');
-        const authActionBtn = document.getElementById('authActionBtn');
-        const switchAuthMode = document.getElementById('switchAuthMode');
-
-        const adminShareCard = document.getElementById('adminShareCard');
-        const postInput = document.getElementById('postInput');
-        const postImageInput = document.getElementById('postImageInput');
-        const isPollCheck = document.getElementById('isPollCheck');
-        const shareBtn = document.getElementById('shareBtn');
-        const feedContainer = document.getElementById('feedContainer');
-
-        const profileBtn = document.getElementById('profileBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const profileModal = document.getElementById('profileModal');
-        const closeModal = document.getElementById('closeModal');
-        const closeModalBtn = document.getElementById('closeModalBtn');
-        const profileUserEmail = document.getElementById('profileUserEmail');
-        const adminLogoConfig = document.getElementById('adminLogoConfig');
-        const logoFileInput = document.getElementById('logoFileInput');
-        const siteLogoImg = document.getElementById('siteLogoImg');
+        let replyTargets = {};
 
         function init() {
-            siteLogoImg.src = siteLogo;
+            document.getElementById('siteLogoImg').src = siteLogo;
+            renderNavbar();
+            renderFeed();
+            buildEmojiGrid(ALL_EMOJIS);
+        }
+
+        function renderNavbar() {
+            let navArea = document.getElementById('navAuthArea');
+            let adminCard = document.getElementById('adminShareCard');
+
             if (currentUser) {
-                authSection.style.display = 'none';
-                appSection.style.display = 'block';
-                if (currentUser.isAdmin) {
-                    adminShareCard.style.display = 'block';
-                } else {
-                    adminShareCard.style.display = 'none';
-                }
-                renderFeed();
+                adminCard.style.display = currentUser.isAdmin ? 'block' : 'none';
+                let avatarHtml = currentUser.avatar ? `<img src="${currentUser.avatar}" style="width:28px; height:28px; border-radius:50%; object-fit:cover;">` : `<i class="fa-solid fa-user"></i>`;
+                navArea.innerHTML = `<button onclick="openProfile()" class="btn-primary" style="display:flex; align-items:center; gap:8px;">${avatarHtml} ${currentUser.name}</button>`;
             } else {
-                authSection.style.display = 'block';
-                appSection.style.display = 'none';
+                adminCard.style.display = 'none';
+                navArea.innerHTML = `<button onclick="openLoginModal()" class="btn-google"><i class="fa-brands fa-google" style="color: #ea4335;"></i> Gmail ile Giriş</button>`;
             }
         }
 
-        switchAuthMode.addEventListener('click', () => {
-            isRegisterMode = !isRegisterMode;
-            authTitle.innerText = isRegisterMode ? "Demo Kayıt Ol" : "Demo Giriş";
-            authActionBtn.innerText = isRegisterMode ? "Kayıt Ol ve Giriş Yap" : "Giriş Yap";
-            switchAuthMode.innerText = isRegisterMode ? "Zaten hesabın var mı? Giriş yap" : "Hesabın yok mu? Kayıt ol";
-        });
+        function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; }
+        function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
 
-        authActionBtn.addEventListener('click', () => {
-            let email = authEmail.value.trim();
-            let pass = authPassword.value.trim();
+        function openGmailSelector() {
+            closeLoginModal();
+            let mockAccounts = [
+                { email: "kralbaba@gmail.com", name: "Kral Baba" },
+                { email: "ykocaman59@gmail.com", name: "Yusuf Kocaman" },
+                { email: "elektrikadam.yk@gmail.com", name: "Elektrik Adam" },
+                { email: "yenihesap.ornek@gmail.com", name: "Yeni Ziyaretçi" }
+            ];
 
-            if (!email || !pass) return alert("Lütfen tüm alanları doldurun!");
+            let listContainer = document.getElementById('gmailAccountsList');
+            listContainer.innerHTML = "";
 
-            if (email === "admin" && pass === "14531453") {
-                currentUser = { email: "admin", name: "Sultanbeyli Takip (Yönetici)", isAdmin: true };
+            mockAccounts.forEach(acc => {
+                listContainer.innerHTML += `
+                    <div class="gmail-account-item" onclick="selectGmailAccount('${acc.email}')">
+                        <div class="gmail-avatar">${acc.name.charAt(0)}</div>
+                        <div>
+                            <div style="font-weight: bold; font-size: 0.95rem;">${acc.name}</div>
+                            <div style="font-size: 0.8rem; color: #64748b;">${acc.email}</div>
+                        </div>
+                    </div>`;
+            });
+
+            document.getElementById('gmailSelectModal').style.display = 'flex';
+        }
+
+        function closeGmailModal() { document.getElementById('gmailSelectModal').style.display = 'none'; }
+
+        function selectGmailAccount(email) {
+            closeGmailModal();
+            pendingGmailEmail = email;
+
+            if (registeredUsers[email]) {
+                currentUser = registeredUsers[email];
                 localStorage.setItem('sb_current_user', JSON.stringify(currentUser));
                 init();
+                alert(`Hoş geldin, ${currentUser.name} (${currentUser.username})!`);
+            } else {
+                generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+                document.getElementById('otpInfoText').innerHTML = `<strong>${email}</strong> adresine doğrulama kodu gönderildi. Gelen kutunuza gelen kodu kopyalayıp aşağıya yapıştırın.`;
+                document.getElementById('simulatedEmailBox').innerText = generatedOtp;
+                document.getElementById('otpCodeInput').value = "";
+                document.getElementById('otpModal').style.display = 'flex';
+            }
+        }
+
+        function copyGeneratedOtp() {
+            navigator.clipboard.writeText(generatedOtp).then(() => {
+                alert("Kod panoya kopyalandı!");
+            });
+        }
+
+        function verifyOtpCode() {
+            let enteredCode = document.getElementById('otpCodeInput').value.trim();
+            if (enteredCode === generatedOtp) {
+                document.getElementById('otpModal').style.display = 'none';
+                document.getElementById('regName').value = "";
+                document.getElementById('regContact').value = "";
+                document.getElementById('regUsername').value = pendingGmailEmail.split('@')[0];
+                checkUsernameAvailability();
+                document.getElementById('registerModal').style.display = 'flex';
+            } else {
+                alert("Hatalı kod!");
+            }
+        }
+
+        function closeRegisterModal() { document.getElementById('registerModal').style.display = 'none'; }
+
+        function checkUsernameAvailability() {
+            let uInput = document.getElementById('regUsername').value.trim().toLowerCase();
+            let feedback = document.getElementById('usernameFeedback');
+            if (!uInput) { feedback.innerText = ""; return; }
+
+            let isTaken = Object.values(registeredUsers).some(u => u.username === uInput);
+            if (isTaken) {
+                let suggested = uInput + Math.floor(Math.random() * 900 + 100);
+                feedback.innerHTML = `<span style="color:var(--danger-color);">Bu kullanıcı adı alınmış! Öneri: <strong>${suggested}</strong></span>`;
+                document.getElementById('regUsername').value = suggested;
+            } else {
+                feedback.innerHTML = `<span style="color:var(--success-color);">Kullanıcı adı uygun.</span>`;
+            }
+        }
+
+        function completeRegistration() {
+            let name = document.getElementById('regName').value.trim();
+            let contact = document.getElementById('regContact').value.trim();
+            let username = document.getElementById('regUsername').value.trim().toLowerCase();
+
+            if (!name || !contact || !username) {
+                alert("Lütfen tüm alanları doldurun!");
                 return;
             }
 
-            if (isRegisterMode) {
-                if (users.find(u => u.email === email)) return alert("Bu e-posta zaten kayıtlı!");
-                let newUser = { email: email, pass: pass, name: email.split('@')[0], isAdmin: false };
-                users.push(newUser);
-                localStorage.setItem('sb_users', JSON.stringify(users));
-                currentUser = newUser;
+            currentUser = {
+                email: pendingGmailEmail,
+                name: name,
+                username: username,
+                contact: contact,
+                avatar: "",
+                isAdmin: false
+            };
+
+            registeredUsers[pendingGmailEmail] = currentUser;
+            localStorage.setItem('sb_registered_users', JSON.stringify(registeredUsers));
+            localStorage.setItem('sb_current_user', JSON.stringify(currentUser));
+
+            closeRegisterModal();
+            init();
+            alert(`Kayıt başarılı!`);
+        }
+
+        function handleAdminLogin() {
+            let u = document.getElementById('adminUserIn').value.trim();
+            let p = document.getElementById('adminPassIn').value.trim();
+
+            if (u === "admin" && p === "14531453") {
+                currentUser = { email: "admin@sultanbeyli.gov.tr", name: "Sultanbeyli Takip (Yönetici)", username: "admin", isAdmin: true, avatar: "" };
                 localStorage.setItem('sb_current_user', JSON.stringify(currentUser));
-                alert("Kayıt başarılı!");
+                closeLoginModal();
                 init();
             } else {
-                let found = users.find(u => u.email === email && u.pass === pass);
-                if (found) {
-                    currentUser = found;
-                    localStorage.setItem('sb_current_user', JSON.stringify(currentUser));
-                    init();
-                } else {
-                    alert("Hatalı bilgi! (Admin için: admin / 14531453)");
-                }
+                alert("Kullanıcı adı veya şifre hatalı!");
             }
-        });
+        }
 
-        logoutBtn.addEventListener('click', () => {
+        function logout() {
             localStorage.removeItem('sb_current_user');
             currentUser = null;
+            document.getElementById('profileModal').style.display = 'none';
             init();
-        });
+        }
 
-        shareBtn.addEventListener('click', () => {
-            if (!currentUser.isAdmin) return alert("Sadece yöneticiler haber paylaşabilir!");
-            let text = postInput.value.trim();
-            if (!text) return alert("Boş haber paylaşılamaz!");
+        function openProfile() {
+            document.getElementById('profileAvatarImg').src = currentUser.avatar || "https://via.placeholder.com/80";
+            document.getElementById('profileUserInfo').innerHTML = `<strong>Ad:</strong> ${currentUser.name}<br><strong>Kullanıcı Adı:</strong> @${currentUser.username || 'yok'}<br><strong>E-posta:</strong> ${currentUser.email}`;
+            
+            let actionButtonsContainer = document.getElementById('profileActionButtons');
+            if (currentUser.isAdmin) {
+                actionButtonsContainer.innerHTML = `<button onclick="logout()" class="btn-google" style="width: 100%; justify-content: center;">Çıkış Yap</button>`;
+            } else {
+                actionButtonsContainer.innerHTML = `
+                    <button onclick="openDeleteAccountModal()" class="btn-danger" style="width: 100%;">Hesabı Sil</button>
+                    <button onclick="logout()" class="btn-google" style="width: 100%; justify-content: center;">Çıkış Yap</button>
+                `;
+            }
+            document.getElementById('profileModal').style.display = 'flex';
+        }
 
-            let file = postImageInput.files[0];
+        function updateProfileAvatar(input) {
+            let file = input.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(event) {
-                    saveNewPost(text, event.target.result);
+                reader.onload = function(e) {
+                    currentUser.avatar = e.target.result;
+                    document.getElementById('profileAvatarImg').src = currentUser.avatar;
+                    localStorage.setItem('sb_current_user', JSON.stringify(currentUser));
+                    if (registeredUsers[currentUser.email]) {
+                        registeredUsers[currentUser.email].avatar = currentUser.avatar;
+                        localStorage.setItem('sb_registered_users', JSON.stringify(registeredUsers));
+                    }
+                    renderNavbar();
+                    renderFeed();
                 };
                 reader.readAsDataURL(file);
+            }
+        }
+
+        function openDeleteAccountModal() {
+            document.getElementById('profileModal').style.display = 'none';
+            document.getElementById('deleteAccountModal').style.display = 'flex';
+        }
+
+        function confirmDeleteAccount() {
+            let selectedReason = document.querySelector('input[name="delReason"]:checked');
+            if (!selectedReason) { alert("Lütfen silme nedenini seçin."); return; }
+
+            let userEmail = currentUser.email;
+            posts.forEach(post => {
+                if (post.comments) { post.comments = post.comments.filter(c => c.email !== userEmail); }
+            });
+            localStorage.setItem('sb_posts', JSON.stringify(posts));
+
+            delete registeredUsers[userEmail];
+            localStorage.setItem('sb_registered_users', JSON.stringify(registeredUsers));
+            localStorage.removeItem('sb_current_user');
+            currentUser = null;
+
+            document.getElementById('deleteAccountModal').style.display = 'none';
+            init();
+            alert("Hesabınız silindi.");
+        }
+
+        document.getElementById('shareBtn').addEventListener('click', () => {
+            if (!currentUser || !currentUser.isAdmin) return alert("Yetkisiz işlem!");
+            let text = document.getElementById('postInput').value.trim();
+            if (!text) return alert("Boş haber paylaşılamaz!");
+
+            let file = document.getElementById('postImageInput').files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) { savePost(text, e.target.result); };
+                reader.readAsDataURL(file);
             } else {
-                saveNewPost(text, "");
+                savePost(text, "");
             }
         });
 
-        function saveNewPost(text, imageBase64) {
-            let pollData = null;
-            if (isPollCheck.checked) {
-                pollData = { question: text, yes: [], no: [] };
-            }
-
+        function savePost(text, img) {
+            let pollData = document.getElementById('isPollCheck').checked ? { question: text, yes: [], no: [] } : null;
             let newPost = {
                 id: Date.now(),
                 email: currentUser.email,
                 name: currentUser.name,
                 isAdmin: true,
                 text: text,
-                image: imageBase64,
+                image: img,
                 poll: pollData,
                 reactions: {},
+                comments: [],
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             };
-
             posts.unshift(newPost);
             localStorage.setItem('sb_posts', JSON.stringify(posts));
-            postInput.value = "";
-            postImageInput.value = "";
-            isPollCheck.checked = false;
+            document.getElementById('postInput').value = "";
+            document.getElementById('postImageInput').value = "";
+            document.getElementById('isPollCheck').checked = false;
             renderFeed();
         }
 
+        // Basılı Tutma (Action Sheet) Mekanizması
+        let pressTimer = null;
+        let isTouchingOrHolding = false;
+
+        function handlePostTouchStart(postId) {
+            isTouchingOrHolding = true;
+            clearTimeout(pressTimer);
+            pressTimer = setTimeout(() => {
+                if (isTouchingOrHolding) { openActionSheet(postId); }
+            }, 600);
+        }
+
+        function handlePostTouchEnd() { isTouchingOrHolding = false; clearTimeout(pressTimer); }
+        function handlePostTouchMove() { isTouchingOrHolding = false; clearTimeout(pressTimer); }
+
+        function openActionSheet(postId) {
+            activePostIdForMenu = postId;
+            document.getElementById('actionSheetOverlay').style.display = 'flex';
+        }
+
+        function closeActionSheet(e) {
+            if (e.target.id === 'actionSheetOverlay') { document.getElementById('actionSheetOverlay').style.display = 'none'; }
+        }
+
+        function reactFromSheet(emoji) {
+            if (activePostIdForMenu) {
+                addReaction(activePostIdForMenu, emoji);
+                document.getElementById('actionSheetOverlay').style.display = 'none';
+            }
+        }
+
+        function sheetAction(actionType) {
+            let postId = activePostIdForMenu;
+            document.getElementById('actionSheetOverlay').style.display = 'none';
+            let post = posts.find(p => p.id === postId);
+            if (!post) return;
+
+            if (actionType === 'reply') {
+                setReplyTarget(postId, post.name);
+            } else if (actionType === 'copy') {
+                navigator.clipboard.writeText(post.text).then(() => { alert("Haber kopyalandı!"); });
+            } else if (actionType === 'share') {
+                if (navigator.share) {
+                    navigator.share({ title: 'Sultanbeyli Anlık', text: post.text, url: window.location.href }).catch(() => {});
+                } else {
+                    prompt("Paylaş:", post.text);
+                }
+            }
+        }
+
+        // --- ZENGİN EMOJİ PENCRESİ VE ARAMA FONKSİYONLARI ---
+        function buildEmojiGrid(emojiList) {
+            let grid = document.getElementById('fullEmojiGrid');
+            grid.innerHTML = emojiList.map(emj => `<span onclick="selectEmojiFromModal('${emj}')">${emj}</span>`).join('');
+        }
+
+        function openEmojiModal(postId) {
+            if (!currentUser) { openLoginModal(); return; }
+            activePostIdForMenu = postId;
+            document.getElementById('emojiSearchInput').value = "";
+            buildEmojiGrid(ALL_EMOJIS);
+            document.getElementById('emojiPickerModal').style.display = 'flex';
+        }
+
+        function closeEmojiModal(e) {
+            if (e.target.id === 'emojiPickerModal') { document.getElementById('emojiPickerModal').style.display = 'none'; }
+        }
+
+        function filterEmojis() {
+            let query = document.getElementById('emojiSearchInput').value.toLowerCase().trim();
+            if (!query) {
+                buildEmojiGrid(ALL_EMOJIS);
+                return;
+            }
+            // Basit filtreleme simülasyonu (veya tüm listeyi tutma)
+            buildEmojiGrid(ALL_EMOJIS);
+        }
+
+        function selectEmojiFromModal(emoji) {
+            document.getElementById('emojiPickerModal').style.display = 'none';
+            if (activePostIdForMenu) { addReaction(activePostIdForMenu, emoji); }
+        }
+
         function renderFeed() {
-            feedContainer.innerHTML = "";
+            let container = document.getElementById('feedContainer');
+            container.innerHTML = "";
+
             posts.forEach(post => {
                 let pollHtml = "";
                 if (post.poll) {
-                    let yesCount = post.poll.yes.length;
-                    let noCount = post.poll.no.length;
                     pollHtml = `
                         <div class="poll-box">
                             <p><strong>Anket:</strong> ${post.poll.question}</p>
                             <div class="poll-btns">
-                                <button onclick="vote(${post.id}, 'yes')" class="btn-success">Evet (${yesCount})</button>
-                                <button onclick="vote(${post.id}, 'no')" class="btn-danger">Hayır (${noCount})</button>
+                                <button onclick="vote(${post.id}, 'yes')" class="btn-success">Evet (${post.poll.yes.length})</button>
+                                <button onclick="vote(${post.id}, 'no')" class="btn-danger">Hayır (${post.poll.no.length})</button>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 }
 
                 let imageHtml = post.image ? `<img src="${post.image}" class="post-image">` : "";
-                let canDelete = currentUser.isAdmin || currentUser.email === post.email;
-                let deleteBtnHtml = canDelete ? `<button class="delete-post-btn" onclick="deletePost(${post.id})" title="Sil"><i class="fa-solid fa-trash"></i></button>` : "";
+                let canDeletePost = currentUser && (currentUser.isAdmin || currentUser.email === post.email);
+                let deleteBtnHtml = canDeletePost ? `<button class="delete-post-btn" onclick="deletePost(${post.id})"><i class="fa-solid fa-trash"></i></button>` : "";
 
                 let reactionsHtml = "";
                 if (post.reactions) {
                     for (let [emoji, usersList] of Object.entries(post.reactions)) {
                         if (usersList.length > 0) {
-                            let hasReacted = usersList.includes(currentUser.email);
-                            let activeClass = hasReacted ? 'active' : '';
-                            reactionsHtml += `<div class="reaction-badge ${activeClass}" onclick="addReaction(${post.id}, '${emoji}')">${emoji} ${usersList.length}</div>`;
+                            let hasReacted = currentUser && usersList.includes(currentUser.email);
+                            reactionsHtml += `<div class="reaction-badge ${hasReacted ? 'active' : ''}" onclick="addReaction(${post.id}, '${emoji}')">${emoji} ${usersList.length}</div>`;
                         }
                     }
                 }
 
-                let emojiGridHtml = ALL_EMOJIS.map(emj => `<span onclick="addReaction(${post.id}, '${emj}')">${emj}</span>`).join('');
+                let commentsHtml = "";
+                if (post.comments) {
+                    post.comments.forEach(c => {
+                        let badge = c.isAdmin ? `<span class="admin-badge">YÖNETİCİ</span>` : "";
+                        let replyTagHtml = c.replyTo ? `<span class="reply-tag">@${c.replyTo}</span>` : "";
+                        let canDeleteComment = currentUser && (currentUser.email === c.email || currentUser.isAdmin);
+                        let deleteCommentBtn = canDeleteComment ? `<button style="background:none; border:none; color:var(--danger-color); font-size:0.75rem; cursor:pointer; margin-left:8px;" onclick="deleteComment(${post.id}, ${c.id})"><i class="fa-solid fa-trash"></i></button>` : "";
 
-                feedContainer.innerHTML += `
-                    <div class="card post-card">
+                        commentsHtml += `
+                            <div class="comment-item">
+                                <div class="comment-content">
+                                    <span class="comment-user">${c.name}</span> ${badge}
+                                    ${replyTagHtml} ${c.text}
+                                </div>
+                                <div style="display:flex; align-items:center;">
+                                    <button style="background:none; border:none; color:#2563eb; font-size:0.75rem; cursor:pointer;" onclick="setReplyTarget(${post.id}, '${c.name}')">Yanıtla</button>
+                                    ${deleteCommentBtn}
+                                </div>
+                            </div>`;
+                    });
+                }
+
+                let currentReply = replyTargets[post.id];
+                let replyInfoStyle = currentReply ? "display: flex;" : "display: none;";
+                let replyInfoText = currentReply ? `@${currentReply} kişisine yanıt veriliyor` : "";
+
+                container.innerHTML += `
+                    <div class="card post-card" 
+                         onmousedown="handlePostTouchStart(${post.id})" onmouseup="handlePostTouchEnd()" onmousemove="handlePostTouchMove()"
+                         ontouchstart="handlePostTouchStart(${post.id})" ontouchend="handlePostTouchEnd()" ontouchmove="handlePostTouchMove()">
                         <div class="post-header">
                             <div class="user-meta">
-                                <img src="${siteLogo}" class="post-avatar">
+                                <div class="post-avatar">${post.name.charAt(0).toUpperCase()}</div>
                                 <div>
                                     <strong>${post.name}</strong> <span class="admin-badge">YÖNETİCİ</span>
                                     <div style="font-size: 0.75rem; color: #64748b;">${post.time}</div>
@@ -400,52 +762,50 @@
                         ${pollHtml}
                         
                         <div class="post-footer-actions">
-                            <div style="position:relative;">
-                                <button class="emoji-trigger-btn" onclick="toggleEmojiPicker(${post.id})">
-                                    <i class="fa-regular fa-face-smile"></i> Tepki Ver
-                                </button>
-                                <div id="picker-${post.id}" class="emoji-picker-popup">
-                                    <input type="text" class="emoji-search-box" placeholder="Emoji ara..." oninput="filterEmojis(event, ${post.id})">
-                                    <div id="grid-${post.id}" class="emoji-grid">
-                                        ${emojiGridHtml}
-                                    </div>
-                                </div>
+                            <div class="quick-emoji-bar">
+                                <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '❤️')">❤️</button>
+                                <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '😂')">😂</button>
+                                <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '😮')">😮</button>
+                                <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '😢')">😢</button>
+                                <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '😡')">😡</button>
+                                <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '👍')">👍</button>
+                                <div class="add-more-emoji-btn" onclick="openEmojiModal(${post.id})"><i class="fa-solid fa-plus"></i></div>
                             </div>
                             <div class="reaction-badges">${reactionsHtml}</div>
                         </div>
-                    </div>
-                `;
+
+                        <div class="comments-section">
+                            <div style="font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">Yorumlar</div>
+                            <div style="max-height: 150px; overflow-y: auto;">${commentsHtml || '<div style="font-size:0.8rem; color:#94a3b8;">Henüz yorum yapılmamış.</div>'}</div>
+                            
+                            <div id="reply-info-${post.id}" class="reply-target-info" style="${replyInfoStyle}">
+                                <span>${replyInfoText}</span>
+                                <span style="cursor:pointer; font-weight:bold;" onclick="clearReplyTarget(${post.id})">&times; İptal</span>
+                            </div>
+
+                            <div class="comment-input-box">
+                                <input type="text" id="comment-input-${post.id}" placeholder="Yorum yaz...">
+                                <button class="btn-primary" onclick="addComment(${post.id})">Gönder</button>
+                            </div>
+                        </div>
+                    </div>`;
             });
         }
 
-        window.toggleEmojiPicker = function(postId) {
-            let picker = document.getElementById(`picker-${postId}`);
-            let isOpen = picker.style.display === 'block';
-            
-            document.querySelectorAll('.emoji-picker-popup').forEach(p => p.style.display = 'none');
-            picker.style.display = isOpen ? 'none' : 'block';
-        }
-
-        window.filterEmojis = function(event, postId) {
-            let query = event.target.value.toLowerCase();
-            let grid = document.getElementById(`grid-${postId}`);
-            // İsteğe bağlı filtreleme eklenebilir, şimdilik tüm listeyi koruyor
-            grid.innerHTML = ALL_EMOJIS.map(emj => `<span onclick="addReaction(${postId}, '${emj}')">${emj}</span>`).join('');
-        }
-
         window.addReaction = function(postId, emoji) {
+            if (!currentUser) { openLoginModal(); return; }
             let post = posts.find(p => p.id === postId);
             if (!post) return;
             if (!post.reactions) post.reactions = {};
 
-            let userAlreadyHasThisEmoji = post.reactions[emoji] && post.reactions[emoji].includes(currentUser.email);
+            let alreadyHas = post.reactions[emoji] && post.reactions[emoji].includes(currentUser.email);
 
             for (let emj in post.reactions) {
-                post.reactions[emj] = post.reactions[emj].filter(email => email !== currentUser.email);
+                post.reactions[emj] = post.reactions[emj].filter(e => e !== currentUser.email);
                 if (post.reactions[emj].length === 0) delete post.reactions[emj];
             }
 
-            if (!userAlreadyHasThisEmoji) {
+            if (!alreadyHas) {
                 if (!post.reactions[emoji]) post.reactions[emoji] = [];
                 post.reactions[emoji].push(currentUser.email);
             }
@@ -454,52 +814,72 @@
             renderFeed();
         }
 
+        window.setReplyTarget = function(postId, targetUserName) {
+            if (!currentUser) { openLoginModal(); return; }
+            replyTargets[postId] = targetUserName;
+            renderFeed();
+            document.getElementById(`comment-input-${postId}`).focus();
+        }
+
+        window.clearReplyTarget = function(postId) {
+            delete replyTargets[postId];
+            renderFeed();
+        }
+
+        window.addComment = function(postId) {
+            if (!currentUser) { openLoginModal(); return; }
+            let input = document.getElementById(`comment-input-${postId}`);
+            let text = input.value.trim();
+            if (!text) return;
+
+            let post = posts.find(p => p.id === postId);
+            if (!post) return;
+            if (!post.comments) post.comments = [];
+
+            let replyTarget = replyTargets[postId] || null;
+
+            post.comments.push({
+                id: Date.now(),
+                email: currentUser.email,
+                name: currentUser.name,
+                isAdmin: currentUser.isAdmin,
+                replyTo: replyTarget,
+                text: text
+            });
+
+            delete replyTargets[postId];
+            localStorage.setItem('sb_posts', JSON.stringify(posts));
+            renderFeed();
+        }
+
+        window.deleteComment = function(postId, commentId) {
+            let post = posts.find(p => p.id === postId);
+            if (!post || !post.comments) return;
+            post.comments = post.comments.filter(c => c.id !== commentId);
+            localStorage.setItem('sb_posts', JSON.stringify(posts));
+            renderFeed();
+        }
+
         window.deletePost = function(id) {
-            if (!confirm("Bu haberi silmek istediğinize emin misiniz?")) return;
+            if (!confirm("Silmek istediğinize emin misiniz?")) return;
             posts = posts.filter(p => p.id !== id);
             localStorage.setItem('sb_posts', JSON.stringify(posts));
             renderFeed();
-        };
+        }
 
         window.vote = function(postId, choice) {
+            if (!currentUser) { openLoginModal(); return; }
             let post = posts.find(p => p.id === postId);
             if (!post || !post.poll) return;
             post.poll.yes = post.poll.yes.filter(e => e !== currentUser.email);
             post.poll.no = post.poll.no.filter(e => e !== currentUser.email);
-
             if (choice === 'yes') post.poll.yes.push(currentUser.email);
             if (choice === 'no') post.poll.no.push(currentUser.email);
-
             localStorage.setItem('sb_posts', JSON.stringify(posts));
             renderFeed();
-        };
-
-        profileBtn.addEventListener('click', () => {
-            profileUserEmail.innerText = `Kullanıcı: ${currentUser.name} (${currentUser.email})`;
-            adminLogoConfig.style.display = currentUser.isAdmin ? 'block' : 'none';
-            profileModal.style.display = 'flex';
-        });
-
-        closeModal.addEventListener('click', () => { profileModal.style.display = 'none'; });
-        closeModalBtn.addEventListener('click', () => { profileModal.style.display = 'none'; });
-
-        logoFileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    siteLogo = event.target.result;
-                    localStorage.setItem('sb_logo', siteLogo);
-                    siteLogoImg.src = siteLogo;
-                    alert("Site logosu güncellendi!");
-                    renderFeed();
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+        }
 
         init();
     </script>
 </body>
 </html>
-   
