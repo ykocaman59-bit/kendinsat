@@ -259,7 +259,7 @@
             </div>
 
             <div style="font-size: 0.85rem; font-weight: bold; margin-bottom: 8px;">Yapılan Öneriler:</div>
-            <div id="suggestionsListContainer" style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
+            <div id="suggestionsListContainer" style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;"></div>
         </div>
     </div>
 
@@ -445,6 +445,7 @@
             '👍', '👎', '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '🔥', '✨', '⭐', '🌟', '💫', '💥', '💬', '💭', '👋', '✋', '👌', '✌️', '🤞', '🤟', '🤘', '👏', '🙌', '🙏', '💪', '👀', '🧠', '🦷', '🦴', '👶', '👧', '🧒', '👦', '👩', '🧑', '👨', '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃', '😉', '😊', '😇', '🥰', '😍', '🤩', '😘', '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '🤥', '😌', '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮', '🤧', '🥴', '😵', '🤯', '🤠', '🥳', '😎', '🤓', '🧐', '😕', '😟', '🙁', '😮', '😯', '😲', '😳', '🥺', '😦', '😧', '😨', '😰', '😢', '😭', '😱', '😖', '😣', '😞', '😓', '😩', '😫', '🥱', '😤', '😡', '😠', '🤬', '😈', '👿', '💀', '☠️', '💩', '🤡', '👹', '👺', '👻', '🎉', '🎊', '🎈', '🎁', '🎂', '🎄', '🎆', '🎇', '🏆', '🏅', '🥇', '🥈', '🥉', '⚽', '🏀', '🏈', '⚾', '🎾', '🇹🇷', '🚀'
         ];
         let replyTargets = {};
+        let suggestionReplyTargets = {};
 
         function init() {
             document.getElementById('siteLogoImg').src = siteLogo;
@@ -525,7 +526,7 @@
             if (currentUser && !currentUser.isAdmin) {
                 inputBox.style.display = 'block';
             } else {
-                inputBox.style.display = 'none'; // Yönetici veya giriş yapmamışsa sadece okur
+                inputBox.style.display = 'none'; // Yönetici veya giriş yapmamışsa sadece önerileri görür, ekleyemez
             }
             renderSuggestionsList();
             sModal.style.display = 'flex';
@@ -540,7 +541,9 @@
                 name: currentUser.name,
                 email: currentUser.email,
                 text: text,
-                time: new Date().toLocaleDateString()
+                time: new Date().toLocaleDateString(),
+                reactions: {},
+                comments: []
             });
             localStorage.setItem('sb_suggestions', JSON.stringify(suggestions));
             document.getElementById('suggestionText').value = "";
@@ -554,12 +557,125 @@
                 container.innerHTML = `<div style="font-size: 0.85rem; color: #94a3b8;">Henüz öneri yapılmamış.</div>`;
                 return;
             }
-            container.innerHTML = suggestions.map(s => `
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px;">
-                    <div style="font-size: 0.8rem; font-weight: bold; color: var(--primary-color); margin-bottom: 3px;">${s.name}</div>
-                    <div style="font-size: 0.9rem; color: #1e293b;">${s.text}</div>
-                </div>
-            `).join('');
+
+            container.innerHTML = suggestions.map(s => {
+                // Reaksiyonlar
+                let reactionsHtml = "";
+                if (s.reactions) {
+                    for (let [emoji, usersList] of Object.entries(s.reactions)) {
+                        if (usersList.length > 0) {
+                            let hasReacted = currentUser && usersList.includes(currentUser.email);
+                            reactionsHtml += `<div class="reaction-badge ${hasReacted ? 'active' : ''}" onclick="addSuggestionReaction(${s.id}, '${emoji}')">${emoji} ${usersList.length}</div>`;
+                        }
+                    }
+                }
+
+                // Yorumlar (Sadece yönetici yanıt yazabilir/emoji atabilir)
+                let commentsHtml = "";
+                if (s.comments) {
+                    s.comments.forEach(c => {
+                        let badge = c.isAdmin ? `<span class="admin-badge">YÖNETİCİ</span>` : "";
+                        let canDel = currentUser && (currentUser.email === c.email || currentUser.isAdmin);
+                        let delBtn = canDel ? `<button style="background:none; border:none; color:var(--danger-color); font-size:0.75rem; cursor:pointer; margin-left:8px;" onclick="deleteSuggestionComment(${s.id}, ${c.id})"><i class="fa-solid fa-trash"></i></button>` : "";
+
+                        commentsHtml += `
+                            <div class="comment-item" style="margin-top: 6px;">
+                                <div class="comment-avatar" onclick="openUserProfile('${c.email}')">${c.name.charAt(0).toUpperCase()}</div>
+                                <div class="comment-bubble">
+                                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                                        <div>
+                                            <span class="comment-user" onclick="openUserProfile('${c.email}')">${c.name}</span> ${badge}
+                                            <div>${c.text}</div>
+                                        </div>
+                                        ${delBtn}
+                                    </div>
+                                </div>
+                            </div>`;
+                    });
+                }
+
+                let isAdminViewer = currentUser && currentUser.isAdmin;
+                let emojiBarHtml = isAdminViewer ? `
+                    <div class="quick-emoji-bar">
+                        <button class="quick-emoji-btn" onclick="addSuggestionReaction(${s.id}, '❤️')">❤️</button>
+                        <button class="quick-emoji-btn" onclick="addSuggestionReaction(${s.id}, '👍')">👍</button>
+                        <button class="quick-emoji-btn" onclick="addSuggestionReaction(${s.id}, '🔥')">🔥</button>
+                    </div>` : '';
+
+                let commentInputBoxHtml = isAdminViewer ? `
+                    <div class="comment-input-box" style="margin-top:8px;">
+                        <input type="text" id="sug-comment-input-${s.id}" placeholder="Yönetici olarak cevap yaz...">
+                        <button class="btn-primary" onclick="addSuggestionComment(${s.id})">Gönder</button>
+                    </div>` : '';
+
+                return `
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px;">
+                        <div style="font-size: 0.8rem; font-weight: bold; color: var(--primary-color); margin-bottom: 3px;">Falanca Kullanıcı: ${s.name}</div>
+                        <div style="font-size: 0.9rem; color: #1e293b; margin-bottom: 8px;">${s.text}</div>
+                        
+                        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
+                            ${emojiBarHtml}
+                            <div style="display:flex; gap:5px; flex-wrap:wrap;">${reactionsHtml}</div>
+                        </div>
+
+                        <div style="border-top: 1px dashed #cbd5e1; padding-top: 6px;">
+                            ${commentsHtml}
+                            ${commentInputBoxHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.addSuggestionReaction = function(suggestionId, emoji) {
+            if (!currentUser || !currentUser.isAdmin) return; // Sadece yönetici emoji atabilir
+            let sug = suggestions.find(s => s.id === suggestionId);
+            if (!sug) return;
+            if (!sug.reactions) sug.reactions = {};
+
+            let alreadyHas = sug.reactions[emoji] && sug.reactions[emoji].includes(currentUser.email);
+            for (let emj in sug.reactions) {
+                sug.reactions[emj] = sug.reactions[emj].filter(e => e !== currentUser.email);
+                if (sug.reactions[emj].length === 0) delete sug.reactions[emj];
+            }
+
+            if (!alreadyHas) {
+                if (!sug.reactions[emoji]) sug.reactions[emoji] = [];
+                sug.reactions[emoji].push(currentUser.email);
+            }
+
+            localStorage.setItem('sb_suggestions', JSON.stringify(suggestions));
+            renderSuggestionsList();
+        }
+
+        window.addSuggestionComment = function(suggestionId) {
+            if (!currentUser || !currentUser.isAdmin) return; // Sadece yönetici cevap yazabilir
+            let input = document.getElementById(`sug-comment-input-${suggestionId}`);
+            let text = input.value.trim();
+            if (!text) return;
+
+            let sug = suggestions.find(s => s.id === suggestionId);
+            if (!sug) return;
+            if (!sug.comments) sug.comments = [];
+
+            sug.comments.push({
+                id: Date.now(),
+                email: currentUser.email,
+                name: currentUser.name,
+                isAdmin: currentUser.isAdmin,
+                text: text
+            });
+
+            localStorage.setItem('sb_suggestions', JSON.stringify(suggestions));
+            renderSuggestionsList();
+        }
+
+        window.deleteSuggestionComment = function(suggestionId, commentId) {
+            let sug = suggestions.find(s => s.id === suggestionId);
+            if (!sug || !sug.comments) return;
+            sug.comments = sug.comments.filter(c => c.id !== commentId);
+            localStorage.setItem('sb_suggestions', JSON.stringify(suggestions));
+            renderSuggestionsList();
         }
 
         function openUsersListModal() {
@@ -588,14 +704,14 @@
 
             container.innerHTML = usersArr.map(u => `
                 <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px;">
-                    <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="openUserProfile('${u.email}')">
+                    <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="document.getElementById('usersListModal').style.display='none'; openUserProfile('${u.email}')">
                         <div class="comment-avatar">${u.name.charAt(0)}</div>
                         <div>
                             <div style="font-weight: bold; font-size: 0.9rem;">${u.name}</div>
                             <div style="font-size: 0.75rem; color: #64748b;">@${u.username}</div>
                         </div>
                     </div>
-                    <button onclick="openUserProfile('${u.email}')" class="btn-primary" style="font-size: 0.8rem; padding: 4px 8px;">Profili Gör</button>
+                    <button onclick="document.getElementById('usersListModal').style.display='none'; openUserProfile('${u.email}')" class="btn-primary" style="font-size: 0.8rem; padding: 4px 8px;">Profili Gör</button>
                 </div>
             `).join('');
         }
@@ -675,7 +791,6 @@
         function selectGmailAccount(email) {
             closeGmailModal();
             
-            // Ban kontrolü
             if (bannedUsers[email]) {
                 let bInfo = bannedUsers[email];
                 if (bInfo.type === 'permanent') {
@@ -686,7 +801,7 @@
                     let expiry = new Date(bInfo.expiryDate);
                     if (now < expiry) {
                         document.getElementById('banMessageText').innerText = `Hesabınız ${bInfo.expiryDate} tarihine kadar geçici olarak banlanmıştır.`;
-                        selectedUserEmailForBan = email; // İtiraz için geçici tut
+                        selectedUserEmailForBan = email;
                         document.getElementById('bannedModal').style.display = 'flex';
                         return;
                     } else {
@@ -791,7 +906,7 @@
             init();
         }
 
-        // PROFİL GÖRÜNTÜLEME VE DÜZENLEME (YÖNETİCİ GÖRÜNÜMÜ VEYA KENDİ PROFİLİ)
+        // PROFİL GÖRÜNTÜLEME (Kendi profilindeyse düzenleme, başkasının profiliyse veya yönetici ise profil kartı + ban tuşu)
         window.openUserProfile = function(userEmail) {
             let targetUser = registeredUsers[userEmail];
             if (!targetUser && userEmail === "admin") {
@@ -808,7 +923,6 @@
             let avatarSrc = targetUser.avatar || "https://via.placeholder.com/80";
 
             if (isMe) {
-                // Kendi profili -> Düzenleme ekranı
                 let now = Date.now();
                 let lastUpdate = targetUser.lastProfileUpdate || 0;
                 let sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
@@ -846,7 +960,6 @@
                         <button onclick="requestEmailChange('${userEmail}')" class="btn-primary" style="width: 100%; margin-top: 12px; font-size:0.9rem;">Değişiklikleri Kaydet</button>` : ''}
                 `;
             } else {
-                // Başkasının profili (Yönetici bakıyorsa rapor düğmesi ekle)
                 let links = targetUser.links || {};
                 let reportBtnHtml = "";
                 if (isAdminViewer && !targetUser.isAdmin && targetUser.email) {
@@ -1240,9 +1353,8 @@
                 let replyInfoStyle = currentReply ? "display: flex;" : "display: none;";
                 let replyInfoText = currentReply ? `@${currentReply.targetName} kişisine yanıt veriliyor` : "";
 
-                // Yalnızca yönetici cevap yazabilir ve emoji atabilir kontrolü
-                let canInteract = currentUser && currentUser.isAdmin;
-                let emojiBarHtml = canInteract ? `
+                // Haberlerde herkes yorum yapabilir ve emoji atabilir
+                let emojiBarHtml = `
                     <div class="quick-emoji-bar">
                         <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '❤️')">❤️</button>
                         <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '😂')">😂</button>
@@ -1251,9 +1363,9 @@
                         <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '😡')">😡</button>
                         <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '👍')">👍</button>
                         <div class="add-more-emoji-btn" onclick="openEmojiModal(${post.id})"><i class="fa-solid fa-plus"></i></div>
-                    </div>` : '';
+                    </div>`;
 
-                let commentInputBoxHtml = canInteract ? `
+                let commentInputBoxHtml = currentUser ? `
                     <div id="reply-info-${post.id}" class="reply-target-info" style="${replyInfoStyle}">
                         <span>${replyInfoText}</span>
                         <span style="cursor:pointer; font-weight:bold;" onclick="clearReplyTarget(${post.id})">&times; İptal</span>
@@ -1262,7 +1374,7 @@
                     <div class="comment-input-box">
                         <input type="text" id="comment-input-${post.id}" placeholder="Yorum yaz...">
                         <button class="btn-primary" onclick="addComment(${post.id})">Gönder</button>
-                    </div>` : `<div style="font-size:0.8rem; color:#64748b; margin-top:8px; text-align:center;"><em>Yalnızca yönetici yorum yapabilir ve emoji atabilir.</em></div>`;
+                    </div>` : `<div style="font-size:0.8rem; color:#64748b; margin-top:8px; text-align:center;"><em>Yorum yapmak için <span style="color:var(--primary-color); cursor:pointer;" onclick="openLoginModal()">giriş yapın</span>.</em></div>`;
 
                 container.innerHTML += `
                     <div class="card post-card" 
@@ -1302,7 +1414,7 @@
         }
 
         window.addReaction = function(postId, emoji) {
-            if (!currentUser || !currentUser.isAdmin) return; // Sadece yönetici emoji atabilir
+            if (!currentUser) { openLoginModal(); return; }
             let post = posts.find(p => p.id === postId);
             if (!post) return;
             if (!post.reactions) post.reactions = {};
@@ -1324,7 +1436,7 @@
         }
 
         window.setReplyTarget = function(postId, targetUserName, parentCommentId) {
-            if (!currentUser || !currentUser.isAdmin) return;
+            if (!currentUser) { openLoginModal(); return; }
             replyTargets[postId] = { targetName: targetUserName, parentId: parentCommentId };
             renderFeed();
             let inp = document.getElementById(`comment-input-${postId}`);
@@ -1337,7 +1449,7 @@
         }
 
         window.addComment = function(postId) {
-            if (!currentUser || !currentUser.isAdmin) return;
+            if (!currentUser) { openLoginModal(); return; }
             let input = document.getElementById(`comment-input-${postId}`);
             let text = input.value.trim();
             if (!text) return;
@@ -1365,7 +1477,6 @@
             renderFeed();
         }
 
-        // Yorum silme: Yorumu tamamen siler, yanıtlar kalır. (Hesap silme ile karıştırılmasın)
         window.deleteComment = function(postId, commentId) {
             let post = posts.find(p => p.id === postId);
             if (!post || !post.comments) return;
