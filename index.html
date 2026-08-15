@@ -101,6 +101,43 @@
         .action-sheet-item:hover { background: #f1f5f9; }
         .action-sheet-item i { font-size: 1.2rem; width: 24px; color: #475569; }
 
+        /* NAVBAR AÇILIR PROFİL MENÜSÜ */
+        .nav-profile-dropdown {
+            position: absolute;
+            right: 2rem;
+            top: 70px;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            width: 220px;
+            display: none;
+            flex-direction: column;
+            z-index: 150;
+            overflow: hidden;
+            animation: fadeIn 0.2s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        .nav-dropdown-item {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-color);
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+            background: white;
+            transition: background 0.15s;
+            text-align: left;
+            width: 100%;
+        }
+        .nav-dropdown-item:hover { background: #f8fafc; }
+        .nav-dropdown-item i { width: 20px; color: #64748b; }
+        .nav-dropdown-item.text-danger { color: var(--danger-color); }
+        .nav-dropdown-item.text-danger i { color: var(--danger-color); }
+
         .emoji-picker-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 2500; }
         .emoji-picker-content { background: white; padding: 20px; border-radius: 16px; width: 340px; max-height: 480px; display: flex; flex-direction: column; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .emoji-search-box { width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.95rem; margin-top: 10px; margin-bottom: 12px; outline: none; }
@@ -136,7 +173,7 @@
         .social-links a:hover { color: var(--primary-color); }
     </style>
 </head>
-<body>
+<body onclick="closeNavDropdownOutside(event)">
 
     <!-- NAVBAR -->
     <header class="navbar">
@@ -144,7 +181,7 @@
             <img id="siteLogoImg" src="https://via.placeholder.com/40" alt="Logo">
             <span id="siteTitleName">Sultanbeyli Anlık</span>
         </div>
-        <div id="navAuthArea"></div>
+        <div id="navAuthArea" style="position: relative;"></div>
     </header>
 
     <main class="container">
@@ -218,7 +255,7 @@
         </div>
     </div>
 
-    <!-- PROFİL DETAY & DÜZENLEME MODALI (İNSTAGRAM TARZI 7 GÜN KURALI VE GMAİL KOD DOĞRULAMALI) -->
+    <!-- PROFİL DETAY & DÜZENLEME MODALI -->
     <div id="profileModal" class="modal" style="display: none;">
         <div class="modal-content" style="max-width: 450px;">
             <span class="close-modal" onclick="document.getElementById('profileModal').style.display='none'">&times;</span>
@@ -332,10 +369,42 @@
             if (currentUser) {
                 adminCard.style.display = currentUser.isAdmin ? 'block' : 'none';
                 let avatarHtml = currentUser.avatar ? `<img src="${currentUser.avatar}" style="width:28px; height:28px; border-radius:50%; object-fit:cover;">` : `<i class="fa-solid fa-user"></i>`;
-                navArea.innerHTML = `<button onclick="openUserProfile('${currentUser.email}')" class="btn-primary" style="display:flex; align-items:center; gap:8px;">${avatarHtml} ${currentUser.name}</button>`;
+                
+                let deleteAccountOption = !currentUser.isAdmin ? `
+                    <div class="nav-dropdown-item text-danger" onclick="openDeleteAccountModalFromNav()">
+                        <i class="fa-solid fa-user-slash"></i> Hesabı Sil
+                    </div>` : '';
+
+                navArea.innerHTML = `
+                    <button onclick="toggleNavDropdown(event)" class="btn-primary" style="display:flex; align-items:center; gap:8px;">${avatarHtml} ${currentUser.name}</button>
+                    <div id="navProfileDropdown" class="nav-profile-dropdown">
+                        <div class="nav-dropdown-item" onclick="openUserProfile('${currentUser.email}')">
+                            <i class="fa-solid fa-user-pen"></i> Profili Düzenle
+                        </div>
+                        <div class="nav-dropdown-item" onclick="logout()">
+                            <i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap
+                        </div>
+                        ${deleteAccountOption}
+                    </div>
+                `;
             } else {
                 adminCard.style.display = 'none';
                 navArea.innerHTML = `<button onclick="openLoginModal()" class="btn-google"><i class="fa-brands fa-google" style="color: #ea4335;"></i> Gmail ile Giriş</button>`;
+            }
+        }
+
+        function toggleNavDropdown(event) {
+            event.stopPropagation();
+            let dropdown = document.getElementById('navProfileDropdown');
+            if (dropdown) {
+                dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+            }
+        }
+
+        function closeNavDropdownOutside(event) {
+            let dropdown = document.getElementById('navProfileDropdown');
+            if (dropdown && dropdown.style.display === 'flex') {
+                dropdown.style.display = 'none';
             }
         }
 
@@ -448,11 +517,10 @@
         function logout() {
             localStorage.removeItem('sb_current_user');
             currentUser = null;
-            document.getElementById('profileModal').style.display = 'none';
             init();
         }
 
-        // PROFİL GÖRÜNTÜLEME VE İNSTAGRAM TARZI DÜZENLEME (7 GÜN KURALI & GMAİL KOD DOĞRULAMA)
+        // PROFİL GÖRÜNTÜLEME VE DÜZENLEME MODALI
         window.openUserProfile = function(userEmail) {
             let targetUser = registeredUsers[userEmail];
             if (!targetUser && userEmail === "admin") {
@@ -469,7 +537,6 @@
             let avatarSrc = targetUser.avatar || "https://via.placeholder.com/80";
 
             if (isMe || isAdminViewer) {
-                // Kendi profili veya yönetici profili düzenleme alanı (Instagram tarzı)
                 let now = Date.now();
                 let lastUpdate = targetUser.lastProfileUpdate || 0;
                 let sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
@@ -506,15 +573,8 @@
 
                     ${canChangeInfo && isMe ? `
                         <button onclick="requestEmailChange('${userEmail}')" class="btn-primary" style="width: 100%; margin-top: 12px; font-size:0.9rem;">Değişiklikleri Kaydet</button>` : ''}
-
-                    ${isMe && !targetUser.isAdmin ? `
-                        <div style="display: flex; gap: 8px; margin-top: 12px;">
-                            <button onclick="openDeleteAccountModal()" class="btn-danger" style="flex:1; font-size:0.85rem;">Hesabı Sil</button>
-                            <button onclick="logout()" class="btn-google" style="flex:1; justify-content: center; font-size:0.85rem;">Çıkış Yap</button>
-                        </div>` : ''}
                 `;
             } else {
-                // Diğer kullanıcıların profili (Sadece profil resmi, kullanıcı adı ve sosyal bağlantılar / Gmail)
                 let links = targetUser.links || {};
                 contentHtml = `
                     <div style="margin: 15px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
@@ -535,7 +595,6 @@
             document.getElementById('profileModal').style.display = 'flex';
         }
 
-        // GMAIL DEĞİŞİKLİĞİ İÇİN ONAY KODU GÖNDERME AKIŞI
         window.requestEmailChange = function(oldEmail) {
             let newName = document.getElementById('editProfileName').value.trim();
             let newUsername = document.getElementById('editProfileUsername').value.trim().toLowerCase();
@@ -549,7 +608,6 @@
             pendingNewEmail = newEmail;
             generatedGmailCode = Math.floor(100000 + Math.random() * 900000).toString();
             
-            // Simüle edilmiş Gmail kod gönderimi
             alert(`[Gmail Doğrulama Simülasyonu]\n Yeni adresiniz (${newEmail}) için doğrulama kodu gönderildi.\nKodunuz: ${generatedGmailCode}`);
 
             let modalBody = document.getElementById('profileModalContentBody');
@@ -568,7 +626,6 @@
                 return;
             }
 
-            // Bilgileri güncelle ve 7 gün kuralı damgasını vur
             currentUser.name = newName;
             currentUser.username = newUsername;
             currentUser.email = newEmail;
@@ -606,8 +663,9 @@
             }
         }
 
-        function openDeleteAccountModal() {
-            document.getElementById('profileModal').style.display = 'none';
+        function openDeleteAccountModalFromNav() {
+            let dropdown = document.getElementById('navProfileDropdown');
+            if (dropdown) dropdown.style.display = 'none';
             document.getElementById('deleteAccountModal').style.display = 'flex';
         }
 
@@ -1002,5 +1060,4 @@
     </script>
 </body>
 </html>
-          
-    
+  
