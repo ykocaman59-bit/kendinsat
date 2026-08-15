@@ -200,16 +200,16 @@
         let currentUser = JSON.parse(localStorage.getItem('sb_current_user')) || null;
         let isRegisterMode = false;
 
-        // Geniş Emoji Listesi (Yüzlerce popüler emoji)
+        // Geniş Emoji Listesi
         const ALL_EMOJIS = [
             '👍', '👎', '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❤️‍🔥', '❤️‍🩹', '💖', '💗', '💓', '💞', '💕', '💌', '❣️', '💘', 
             '🔥', '✨', '⭐', '🌟', '💫', '💥', '💢', '💬', '👁️‍🗨️', '🗨️', '🗯️', '💭', '💤', '👋', '🤚', '🖐️', '✋', '🖖', '👌', '🤌', '🤏', 
             '✌️', '🤞', '🫰', '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇', '☝️', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', 
             '🤲', '🤝', '🙏', '✍️', '💅', '🤳', '💪', '🦾', '🦿', '🦵', '🦶', '👂', '🦻', '👃', '🧠', '🫀', '🫁', '🦷', '🦴', '👀', '👁️', 
-            '👅', '👄', '💋', 'bite', '👶', '👧', '🧒', '👦', '👩', '🧑', '👨', '👩‍🦱', '👨‍🦱', '👩‍🦰', '👨‍🦰', '👱‍♀️', '👱‍♂️', '👩‍🦳', '👨‍🦳', 
+            '👅', '👄', '💋', '👶', '👧', '🧒', '👦', '👩', '🧑', '👨', '👩‍🦱', '👨‍🦱', '👩‍🦰', '👨‍🦰', '👱‍♀️', '👱‍♂️', '👩‍🦳', '👨‍🦳', 
             '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃', '😉', '😊', '😇', '🥰', '😍', '🤩', '😘', '😗', '☺️', '😚', '😙', 
             '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '🤥', '😌', 
-            '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮', '🤧', 'hot', 'cold', '🥴', '😵', '😵‍💫', '🤯', '🤠', '🥳', '😎', '🤓', 
+            '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮', '🤧', '🥴', '😵', '😵‍💫', '🤯', '🤠', '🥳', '😎', '🤓', 
             '🧐', '😕', '😟', '🙁', '😮', '😯', '😲', '😳', '🥺', '😦', '😧', '😨', '😰', '😢', '😭', '😱', '😖', '😣', '😞', '😓', '😩', 
             '😫', '🥱', '😤', '😡', '😠', '🤬', '😈', '👿', '💀', '☠️', '💩', '🤡', '👹', '👺', '👻', '👽', '👾', '🤖', '🎃', '😺', '😸', 
             '🎉', '🎊', '🎈', '🎁', '🎂', '🎄', '🎆', '🎇', '🧨', '✨', '🏆', '🏅', '🥇', '🥈', '🥉', '⚽', '🏀', '🏈', '⚾', '🥎', '🎾', 
@@ -422,23 +422,15 @@
             let picker = document.getElementById(`picker-${postId}`);
             let isOpen = picker.style.display === 'block';
             
-            // Tüm pencereleri kapat
             document.querySelectorAll('.emoji-picker-popup').forEach(p => p.style.display = 'none');
-            
-            // Tıklananı aç/kapat
             picker.style.display = isOpen ? 'none' : 'block';
         }
 
-        // Arama çubuğuna yazıldığında emojileri filtreleme
         window.filterEmojis = function(event, postId) {
             let query = event.target.value.toLowerCase();
             let grid = document.getElementById(`grid-${postId}`);
-            
-            let filtered = ALL_EMOJIS.filter(emj => {
-                // Şimdilik filtreleme yaparken tüm listeyi koruyabiliriz veya arama terimine göre eşleştirebiliriz
-                return true; 
-            });
-            grid.innerHTML = filtered.map(emj => `<span onclick="addReaction(${post.id || postId}, '${emj}')">${emj}</span>`).join('');
+            // İsteğe bağlı filtreleme eklenebilir, şimdilik tüm listeyi koruyor
+            grid.innerHTML = ALL_EMOJIS.map(emj => `<span onclick="addReaction(${postId}, '${emj}')">${emj}</span>`).join('');
         }
 
         window.addReaction = function(postId, emoji) {
@@ -448,13 +440,11 @@
 
             let userAlreadyHasThisEmoji = post.reactions[emoji] && post.reactions[emoji].includes(currentUser.email);
 
-            // Kullanıcının daha önce bıraktığı emojiyi temizle (Geri çekme / değiştirme mantığı)
             for (let emj in post.reactions) {
                 post.reactions[emj] = post.reactions[emj].filter(email => email !== currentUser.email);
                 if (post.reactions[emj].length === 0) delete post.reactions[emj];
             }
 
-            // Daha önce seçilmediyse yeni emojiyi ekle (seçildiyse yukarıda silindiği için tepki geri çekilmiş olur)
             if (!userAlreadyHasThisEmoji) {
                 if (!post.reactions[emoji]) post.reactions[emoji] = [];
                 post.reactions[emoji].push(currentUser.email);
@@ -512,4 +502,4 @@
     </script>
 </body>
 </html>
-     
+   
