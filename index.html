@@ -51,6 +51,11 @@
         .logo-area { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 1.2rem; color: var(--primary-color); cursor: pointer; }
         .logo-area img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color); }
 
+        .nav-right-actions { display: flex; align-items: center; gap: 10px; position: relative; }
+        .nav-icon-btn { background: #f1f5f9; border: 1px solid var(--border-color); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; color: #334155; transition: background 0.2s; }
+        .nav-icon-btn:hover { background: #e2e8f0; }
+        .notification-badge { position: absolute; top: -5px; right: -5px; background: var(--danger-color); color: white; font-size: 0.7rem; font-weight: bold; padding: 2px 6px; border-radius: 10px; border: 2px solid white; }
+
         .container { max-width: 650px; margin: 2rem auto; padding: 0 1rem; }
 
         .card { background: var(--card-bg); padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 1.5rem; border: 1px solid var(--border-color); position: relative; }
@@ -61,7 +66,7 @@
         .btn-success { background-color: var(--success-color); color: white; }
         .btn-google { background-color: #fff; color: #334155; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 8px; font-weight: 600; }
 
-        textarea, input[type="text"], input[type="password"] { width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; outline: none; }
+        textarea, input[type="text"], input[type="password"], input[type="date"] { width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; outline: none; }
         textarea { height: 90px; resize: none; margin-top: 10px; }
         .share-options { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
 
@@ -104,13 +109,13 @@
         /* NAVBAR AÇILIR PROFİL MENÜSÜ */
         .nav-profile-dropdown {
             position: absolute;
-            right: 2rem;
-            top: 70px;
+            right: 0;
+            top: 50px;
             background: white;
             border: 1px solid var(--border-color);
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            width: 220px;
+            width: 230px;
             display: none;
             flex-direction: column;
             z-index: 150;
@@ -181,7 +186,11 @@
             <img id="siteLogoImg" src="https://via.placeholder.com/40" alt="Logo">
             <span id="siteTitleName">Sultanbeyli Anlık</span>
         </div>
-        <div id="navAuthArea" style="position: relative;"></div>
+        <div class="nav-right-actions">
+            <!-- ÖNERİLER BUTONU (HERKES İÇİN) -->
+            <button onclick="openSuggestionsModal()" class="btn-primary" style="font-size: 0.85rem; padding: 6px 12px;"><i class="fa-solid fa-lightbulb"></i> Öneriler</button>
+            <div id="navAuthArea" style="position: relative;"></div>
+        </div>
     </header>
 
     <main class="container">
@@ -203,6 +212,82 @@
         <div id="feedContainer"></div>
     </main>
 
+    <!-- GİRMEYE ÇALIŞAN BANLI KULLANICI İÇİN İTİRAZ MODALI -->
+    <div id="bannedModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3 style="color: var(--danger-color); margin-bottom: 10px;"><i class="fa-solid fa-ban"></i> Hesabınız Askıya Alındı</h3>
+            <p id="banMessageText" style="font-size: 0.9rem; color: #475569; margin-bottom: 15px;"></p>
+            <div style="text-align: left; margin-bottom: 15px;">
+                <label style="font-size: 0.85rem; font-weight: bold;">Yöneticiye İtiraz Et:</label>
+                <textarea id="banAppealText" placeholder="Neden açılmasını istiyorsanız yazın..." style="height: 70px; margin-top: 5px;"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="document.getElementById('bannedModal').style.display='none'" class="btn-google" style="flex:1;">Kapat</button>
+                <button onclick="submitBanAppeal()" class="btn-primary" style="flex:1;">İtirazı Gönder</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- KULLANICILAR YÖNETİM MODALI (YÖNETİCİ ÖZEL) -->
+    <div id="usersListModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 480px; text-align: left;">
+            <span class="close-modal" onclick="document.getElementById('usersListModal').style.display='none'">&times;</span>
+            <h3 style="margin-bottom: 10px;"><i class="fa-solid fa-users"></i> Kayıtlı Kullanıcılar</h3>
+            <input type="text" id="userSearchInput" placeholder="Kullanıcı adı ile ara..." oninput="filterUserList()" style="margin-bottom: 12px;">
+            <div id="adminUsersContainer" style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+    </div>
+
+    <!-- İTİRAZLAR YÖNETİM MODALI (YÖNETİCİ ÖZEL) -->
+    <div id="appealsModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 480px; text-align: left;">
+            <span class="close-modal" onclick="document.getElementById('appealsModal').style.display='none'">&times;</span>
+            <h3 style="margin-bottom: 12px;"><i class="fa-solid fa-envelope-open-text"></i> Gelen İtirazlar</h3>
+            <div id="adminAppealsContainer" style="max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;"></div>
+        </div>
+    </div>
+
+    <!-- ÖNERİLER MODALI -->
+    <div id="suggestionsModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 480px; text-align: left;">
+            <span class="close-modal" onclick="document.getElementById('suggestionsModal').style.display='none'">&times;</span>
+            <h3 style="margin-bottom: 12px;"><i class="fa-solid fa-lightbulb" style="color: #eab308;"></i> Kullanıcı Önerileri</h3>
+            
+            <div id="suggestionInputBox" style="margin-bottom: 15px; display:none;">
+                <textarea id="suggestionText" placeholder="Uygulama için önerinizi yazın..." style="height: 70px;"></textarea>
+                <button onclick="submitSuggestion()" class="btn-primary" style="width: 100%; margin-top: 8px;">Öneriyi Gönder</button>
+            </div>
+
+            <div style="font-size: 0.85rem; font-weight: bold; margin-bottom: 8px;">Yapılan Öneriler:</div>
+            <div id="suggestionsListContainer" style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+    </div>
+
+    <!-- BAN TÜRÜ SEÇİM MODALI -->
+    <div id="banSelectModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 380px;">
+            <span class="close-modal" onclick="document.getElementById('banSelectModal').style.display='none'">&times;</span>
+            <h3 style="color: var(--danger-color); margin-bottom: 15px;">Kullanıcıyı Banla</h3>
+            <p id="banTargetUserInfo" style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px;"></p>
+            
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button onclick="openTemporaryBanDatePicker()" class="btn-google" style="justify-content: center; width: 100%;">Geçici Banla (Tarih Seç)</button>
+                <button onclick="executePermanentBan()" class="btn-danger" style="width: 100%;">Kalıcı Banla (Hesabı Sil)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GEÇİCİ BAN TARİH SEÇİM MODALI -->
+    <div id="tempBanDateModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 380px;">
+            <span class="close-modal" onclick="document.getElementById('tempBanDateModal').style.display='none'">&times;</span>
+            <h3 style="margin-bottom: 10px;">Geçici Ban Bitiş Tarihi</h3>
+            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px;">Kullanıcının banının kalkacağı son tarihi seçin:</p>
+            <input type="date" id="tempBanDateInput" style="margin-bottom: 15px;">
+            <button onclick="executeTemporaryBan()" class="btn-primary" style="width: 100%;">Geçici Banı Uygula</button>
+        </div>
+    </div>
+
     <!-- GMAIL HESAP SEÇİCİ MODALI -->
     <div id="gmailSelectModal" class="modal" style="display: none;">
         <div class="modal-content" style="padding: 1.5rem;">
@@ -216,6 +301,7 @@
     <!-- KAYIT OLUŞTURMA MODALI -->
     <div id="registerModal" class="modal" style="display: none;">
         <div class="modal-content">
+            <span class="modal-content">
             <span class="close-modal" onclick="closeRegisterModal()">&times;</span>
             <h2>Kayıt Ol</h2>
             <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px;">E-posta doğrulandı! Bilgilerinizi tamamlayın:</p>
@@ -280,7 +366,7 @@
             <textarea id="delReasonDesc" placeholder="Ek açıklama yazabilirsiniz (isteğe bağlı)..." style="height: 60px; margin-bottom: 15px;"></textarea>
             
             <div style="background: #fef2f2; border: 1px solid #fecaca; padding: 10px; border-radius: 6px; font-size: 0.8rem; color: #991b1b; margin-bottom: 15px;">
-                ⚠️ <strong>Emin misiniz?</strong> Hesabınızı sildiğinizde yorumlarınız kalır ancak kullanıcı adınız Instagram tarzı <strong>"instagram_kullanicisi"</strong> şeklinde anonimleşir.
+                ⚠️ <strong>Emin misiniz?</strong> Hesabınızı sildiğinizde yorumlarınız kalır ancak kullanıcı adınız <strong>"Instagram Kullanıcısı"</strong> şeklinde anonimleşir ve profil görseli kalkar.
             </div>
 
             <div style="display: flex; gap: 10px;">
@@ -342,6 +428,10 @@
             "kralbaba@gmail.com": { email: "kralbaba@gmail.com", name: "Kral Baba", username: "kralbaba", avatar: "", isAdmin: false, links: { instagram: "kralbaba", youtube: "", tiktok: "" }, lastProfileUpdate: 0 }
         };
 
+        let bannedUsers = JSON.parse(localStorage.getItem('sb_banned_users')) || {};
+        let userAppeals = JSON.parse(localStorage.getItem('sb_appeals')) || [];
+        let suggestions = JSON.parse(localStorage.getItem('sb_suggestions')) || [];
+
         let siteLogo = localStorage.getItem('sb_logo') || "https://via.placeholder.com/40";
         let currentUser = JSON.parse(localStorage.getItem('sb_current_user')) || null;
         let activePostIdForMenu = null;
@@ -349,6 +439,7 @@
         let openRepliesState = {};
         let pendingNewEmail = "";
         let generatedGmailCode = "";
+        let selectedUserEmailForBan = "";
 
         const ALL_EMOJIS = [
             '👍', '👎', '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '🔥', '✨', '⭐', '🌟', '💫', '💥', '💬', '💭', '👋', '✋', '👌', '✌️', '🤞', '🤟', '🤘', '👏', '🙌', '🙏', '💪', '👀', '🧠', '🦷', '🦴', '👶', '👧', '🧒', '👦', '👩', '🧑', '👨', '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃', '😉', '😊', '😇', '🥰', '😍', '🤩', '😘', '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '🤥', '😌', '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮', '🤧', '🥴', '😵', '🤯', '🤠', '🥳', '😎', '🤓', '🧐', '😕', '😟', '🙁', '😮', '😯', '😲', '😳', '🥺', '😦', '😧', '😨', '😰', '😢', '😭', '😱', '😖', '😣', '😞', '😓', '😩', '😫', '🥱', '😤', '😡', '😠', '🤬', '😈', '👿', '💀', '☠️', '💩', '🤡', '👹', '👺', '👻', '🎉', '🎊', '🎈', '🎁', '🎂', '🎄', '🎆', '🎇', '🏆', '🏅', '🥇', '🥈', '🥉', '⚽', '🏀', '🏈', '⚾', '🎾', '🇹🇷', '🚀'
@@ -370,6 +461,21 @@
                 adminCard.style.display = currentUser.isAdmin ? 'block' : 'none';
                 let avatarHtml = currentUser.avatar ? `<img src="${currentUser.avatar}" style="width:28px; height:28px; border-radius:50%; object-fit:cover;">` : `<i class="fa-solid fa-user"></i>`;
                 
+                let adminExtraMenu = "";
+                if (currentUser.isAdmin) {
+                    let pendingAppealsCount = userAppeals.filter(a => a.status === 'pending').length;
+                    let badgeHtml = pendingAppealsCount > 0 ? `<span class="notification-badge">${pendingAppealsCount}</span>` : "";
+
+                    adminExtraMenu = `
+                        <div class="nav-dropdown-item" onclick="openUsersListModal()">
+                            <i class="fa-solid fa-users"></i> Kullanıcılar
+                        </div>
+                        <div class="nav-dropdown-item" onclick="openAppealsModal()" style="position:relative;">
+                            <i class="fa-solid fa-bell"></i> İtirazlar ${badgeHtml}
+                        </div>
+                    `;
+                }
+
                 let deleteAccountOption = !currentUser.isAdmin ? `
                     <div class="nav-dropdown-item text-danger" onclick="openDeleteAccountModalFromNav()">
                         <i class="fa-solid fa-user-slash"></i> Hesabı Sil
@@ -381,6 +487,7 @@
                         <div class="nav-dropdown-item" onclick="openUserProfile('${currentUser.email}')">
                             <i class="fa-solid fa-user-pen"></i> Profili Düzenle
                         </div>
+                        ${adminExtraMenu}
                         <div class="nav-dropdown-item" onclick="logout()">
                             <i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap
                         </div>
@@ -411,6 +518,133 @@
         function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; }
         function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
 
+        function openSuggestionsModal() {
+            let sModal = document.getElementById('suggestionsModal');
+            let inputBox = document.getElementById('suggestionInputBox');
+            
+            if (currentUser && !currentUser.isAdmin) {
+                inputBox.style.display = 'block';
+            } else {
+                inputBox.style.display = 'none'; // Yönetici veya giriş yapmamışsa sadece okur
+            }
+            renderSuggestionsList();
+            sModal.style.display = 'flex';
+        }
+
+        function submitSuggestion() {
+            let text = document.getElementById('suggestionText').value.trim();
+            if (!text) return alert("Öneri boş olamaz!");
+            
+            suggestions.unshift({
+                id: Date.now(),
+                name: currentUser.name,
+                email: currentUser.email,
+                text: text,
+                time: new Date().toLocaleDateString()
+            });
+            localStorage.setItem('sb_suggestions', JSON.stringify(suggestions));
+            document.getElementById('suggestionText').value = "";
+            renderSuggestionsList();
+            alert("Öneriniz gönderildi.");
+        }
+
+        function renderSuggestionsList() {
+            let container = document.getElementById('suggestionsListContainer');
+            if (suggestions.length === 0) {
+                container.innerHTML = `<div style="font-size: 0.85rem; color: #94a3b8;">Henüz öneri yapılmamış.</div>`;
+                return;
+            }
+            container.innerHTML = suggestions.map(s => `
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px;">
+                    <div style="font-size: 0.8rem; font-weight: bold; color: var(--primary-color); margin-bottom: 3px;">${s.name}</div>
+                    <div style="font-size: 0.9rem; color: #1e293b;">${s.text}</div>
+                </div>
+            `).join('');
+        }
+
+        function openUsersListModal() {
+            let dropdown = document.getElementById('navProfileDropdown');
+            if (dropdown) dropdown.style.display = 'none';
+            renderUsersListTable("");
+            document.getElementById('usersListModal').style.display = 'flex';
+        }
+
+        function filterUserList() {
+            let q = document.getElementById('userSearchInput').value.trim().toLowerCase();
+            renderUsersListTable(q);
+        }
+
+        function renderUsersListTable(query) {
+            let container = document.getElementById('adminUsersContainer');
+            let usersArr = Object.values(registeredUsers);
+            if (query) {
+                usersArr = usersArr.filter(u => u.username.toLowerCase().includes(query) || u.name.toLowerCase().includes(query));
+            }
+
+            if (usersArr.length === 0) {
+                container.innerHTML = `<div style="font-size: 0.85rem; color: #94a3b8;">Kayıtlı kullanıcı bulunamadı.</div>`;
+                return;
+            }
+
+            container.innerHTML = usersArr.map(u => `
+                <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="openUserProfile('${u.email}')">
+                        <div class="comment-avatar">${u.name.charAt(0)}</div>
+                        <div>
+                            <div style="font-weight: bold; font-size: 0.9rem;">${u.name}</div>
+                            <div style="font-size: 0.75rem; color: #64748b;">@${u.username}</div>
+                        </div>
+                    </div>
+                    <button onclick="openUserProfile('${u.email}')" class="btn-primary" style="font-size: 0.8rem; padding: 4px 8px;">Profili Gör</button>
+                </div>
+            `).join('');
+        }
+
+        function openAppealsModal() {
+            let dropdown = document.getElementById('navProfileDropdown');
+            if (dropdown) dropdown.style.display = 'none';
+            renderAppealsList();
+            document.getElementById('appealsModal').style.display = 'flex';
+        }
+
+        function renderAppealsList() {
+            let container = document.getElementById('adminAppealsContainer');
+            let pending = userAppeals.filter(a => a.status === 'pending');
+
+            if (pending.length === 0) {
+                container.innerHTML = `<div style="font-size: 0.85rem; color: #94a3b8;">Bekleyen itiraz bulunmuyor.</div>`;
+                return;
+            }
+
+            container.innerHTML = pending.map(app => `
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px;">
+                    <div style="font-weight: bold; font-size: 0.9rem; color: var(--primary-color);">${app.email}</div>
+                    <div style="font-size: 0.85rem; margin: 6px 0;">"${app.reason}"</div>
+                    <div style="display: flex; gap: 8px; margin-top: 8px;">
+                        <button onclick="resolveAppeal('${app.id}', 'approved')" class="btn-success" style="flex:1; font-size:0.8rem;">Onayla</button>
+                        <button onclick="resolveAppeal('${app.id}', 'rejected')" class="btn-danger" style="flex:1; font-size:0.8rem;">Reddet</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function resolveAppeal(appealId, status) {
+            let app = userAppeals.find(a => a.id === appealId);
+            if (!app) return;
+            app.status = status;
+
+            if (status === 'approved') {
+                if (bannedUsers[app.email]) {
+                    delete bannedUsers[app.email];
+                    localStorage.setItem('sb_banned_users', JSON.stringify(bannedUsers));
+                }
+            }
+            localStorage.setItem('sb_appeals', JSON.stringify(userAppeals));
+            renderAppealsList();
+            renderNavbar();
+            alert(status === 'approved' ? "İtiraz onaylandı, ban kaldırıldı." : "İtiraz reddedildi.");
+        }
+
         function openGmailSelector() {
             closeLoginModal();
             let mockAccounts = [
@@ -440,6 +674,28 @@
 
         function selectGmailAccount(email) {
             closeGmailModal();
+            
+            // Ban kontrolü
+            if (bannedUsers[email]) {
+                let bInfo = bannedUsers[email];
+                if (bInfo.type === 'permanent') {
+                    alert("Bu hesap kalıcı olarak banlanmıştır.");
+                    return;
+                } else if (bInfo.type === 'temporary') {
+                    let now = new Date();
+                    let expiry = new Date(bInfo.expiryDate);
+                    if (now < expiry) {
+                        document.getElementById('banMessageText').innerText = `Hesabınız ${bInfo.expiryDate} tarihine kadar geçici olarak banlanmıştır.`;
+                        selectedUserEmailForBan = email; // İtiraz için geçici tut
+                        document.getElementById('bannedModal').style.display = 'flex';
+                        return;
+                    } else {
+                        delete bannedUsers[email];
+                        localStorage.setItem('sb_banned_users', JSON.stringify(bannedUsers));
+                    }
+                }
+            }
+
             pendingGmailEmail = email;
 
             if (registeredUsers[email]) {
@@ -453,6 +709,21 @@
                 checkUsernameAvailability();
                 document.getElementById('registerModal').style.display = 'flex';
             }
+        }
+
+        function submitBanAppeal() {
+            let text = document.getElementById('banAppealText').value.trim();
+            if (!text) return alert("İtiraz metni boş olamaz!");
+
+            userAppeals.push({
+                id: Date.now().toString(),
+                email: selectedUserEmailForBan,
+                reason: text,
+                status: 'pending'
+            });
+            localStorage.setItem('sb_appeals', JSON.stringify(userAppeals));
+            document.getElementById('bannedModal').style.display = 'none';
+            alert("İtirazınız yöneticiye gönderildi.");
         }
 
         function closeRegisterModal() { document.getElementById('registerModal').style.display = 'none'; }
@@ -520,7 +791,7 @@
             init();
         }
 
-        // PROFİL GÖRÜNTÜLEME VE DÜZENLEME MODALI
+        // PROFİL GÖRÜNTÜLEME VE DÜZENLEME (YÖNETİCİ GÖRÜNÜMÜ VEYA KENDİ PROFİLİ)
         window.openUserProfile = function(userEmail) {
             let targetUser = registeredUsers[userEmail];
             if (!targetUser && userEmail === "admin") {
@@ -536,7 +807,8 @@
             let contentHtml = "";
             let avatarSrc = targetUser.avatar || "https://via.placeholder.com/80";
 
-            if (isMe || isAdminViewer) {
+            if (isMe) {
+                // Kendi profili -> Düzenleme ekranı
                 let now = Date.now();
                 let lastUpdate = targetUser.lastProfileUpdate || 0;
                 let sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
@@ -547,11 +819,10 @@
                     <h2>Profilini Düzenle</h2>
                     <div style="margin: 12px 0; display: flex; flex-direction: column; align-items: center; gap: 8px;">
                         <img src="${avatarSrc}" style="width: 75px; height: 75px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color);">
-                        ${isMe ? `
                         <label style="font-size: 0.8rem; background: #e2e8f0; padding: 4px 10px; border-radius: 6px; cursor: pointer;">
                             <i class="fa-solid fa-camera"></i> Fotoğrafı Değiştir
                             <input type="file" accept="image/*" style="display: none;" onchange="updateProfileAvatar(this)">
-                        </label>` : ''}
+                        </label>
                     </div>
 
                     ${!canChangeInfo ? `<div style="background:#fef3c7; border:1px solid #f59e0b; color:#b45309; padding:8px; border-radius:6px; font-size:0.8rem; margin-bottom:10px;">⚠️ Bilgilerinizi son 7 gün içinde değiştirdiğiniz için yeni değişiklik için <strong>${remainingDays} gün</strong> beklemelisiniz.</div>` : ''}
@@ -571,11 +842,17 @@
                         </div>
                     </div>
 
-                    ${canChangeInfo && isMe ? `
+                    ${canChangeInfo ? `
                         <button onclick="requestEmailChange('${userEmail}')" class="btn-primary" style="width: 100%; margin-top: 12px; font-size:0.9rem;">Değişiklikleri Kaydet</button>` : ''}
                 `;
             } else {
+                // Başkasının profili (Yönetici bakıyorsa rapor düğmesi ekle)
                 let links = targetUser.links || {};
+                let reportBtnHtml = "";
+                if (isAdminViewer && !targetUser.isAdmin && targetUser.email) {
+                    reportBtnHtml = `<button onclick="openBanSelectModal('${targetUser.email}', '${targetUser.name}')" class="btn-danger" style="margin-top: 15px; width: 100%; font-size: 0.9rem;"><i class="fa-solid fa-triangle-exclamation"></i> Rapor Et / Banla</button>`;
+                }
+
                 contentHtml = `
                     <div style="margin: 15px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
                         <img src="${avatarSrc}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color);">
@@ -588,11 +865,46 @@
                         ${links.youtube ? `<a href="https://youtube.com/@${links.youtube}" target="_blank" title="YouTube"><i class="fa-brands fa-youtube"></i></a>` : ''}
                         ${links.tiktok ? `<a href="https://tiktok.com/@${links.tiktok}" target="_blank" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>` : ''}
                     </div>
+                    ${reportBtnHtml}
                 `;
             }
 
             document.getElementById('profileModalContentBody').innerHTML = contentHtml;
             document.getElementById('profileModal').style.display = 'flex';
+        }
+
+        function openBanSelectModal(email, name) {
+            selectedUserEmailForBan = email;
+            document.getElementById('banTargetUserInfo').innerText = `${name} (${email}) kullanıcısına uygulanacak işlem türünü seçin:`;
+            document.getElementById('profileModal').style.display = 'none';
+            document.getElementById('banSelectModal').style.display = 'flex';
+        }
+
+        function openTemporaryBanDatePicker() {
+            document.getElementById('banSelectModal').style.display = 'none';
+            document.getElementById('tempBanDateModal').style.display = 'flex';
+        }
+
+        function executePermanentBan() {
+            bannedUsers[selectedUserEmailForBan] = { type: 'permanent' };
+            localStorage.setItem('sb_banned_users', JSON.stringify(bannedUsers));
+            delete registeredUsers[selectedUserEmailForBan];
+            localStorage.setItem('sb_registered_users', JSON.stringify(registeredUsers));
+
+            document.getElementById('banSelectModal').style.display = 'none';
+            alert("Kullanıcı kalıcı olarak banlandı ve hesabı silindi.");
+            renderFeed();
+        }
+
+        function executeTemporaryBan() {
+            let dateVal = document.getElementById('tempBanDateInput').value;
+            if (!dateVal) return alert("Lütfen bir tarih seçin!");
+
+            bannedUsers[selectedUserEmailForBan] = { type: 'temporary', expiryDate: dateVal };
+            localStorage.setItem('sb_banned_users', JSON.stringify(bannedUsers));
+
+            document.getElementById('tempBanDateModal').style.display = 'none';
+            alert(`Kullanıcı ${dateVal} tarihine kadar geçici olarak banlandı.`);
         }
 
         window.requestEmailChange = function(oldEmail) {
@@ -830,9 +1142,18 @@
                     let mainComments = post.comments.filter(c => !c.replyTo || !post.comments.some(parent => parent.id == c.replyTo));
                     
                     mainComments.forEach(c => {
+                        let isAnonymous = c.name === "Instagram Kullanıcısı";
                         let userObj = registeredUsers[c.email];
                         let avatarSrc = userObj && userObj.avatar ? userObj.avatar : "";
-                        let avatarDisplay = avatarSrc ? `<img src="${avatarSrc}" class="comment-avatar" onclick="openUserProfile('${c.email}')">` : `<div class="comment-avatar" onclick="openUserProfile('${c.email}')">${c.name.charAt(0).toUpperCase()}</div>`;
+                        
+                        let avatarDisplay = "";
+                        if (isAnonymous) {
+                            avatarDisplay = `<div class="comment-avatar" style="background:#94a3b8;"><i class="fa-solid fa-user"></i></div>`;
+                        } else if (avatarSrc) {
+                            avatarDisplay = `<img src="${avatarSrc}" class="comment-avatar" onclick="openUserProfile('${c.email}')">`;
+                        } else {
+                            avatarDisplay = `<div class="comment-avatar" onclick="openUserProfile('${c.email}')">${c.name.charAt(0).toUpperCase()}</div>`;
+                        }
                         
                         let badge = c.isAdmin ? `<span class="admin-badge">YÖNETİCİ</span>` : "";
                         let canDeleteComment = currentUser && (currentUser.email === c.email || currentUser.isAdmin);
@@ -848,12 +1169,24 @@
                                 commentsHtml += `<button class="toggle-replies-btn" onclick="toggleReplies(${c.id}, true)"><i class="fa-solid fa-angle-down"></i> ${replyCount} diğer yanıtı gör</button>`;
                             } else {
                                 replies.forEach(r => {
+                                    let rIsAnonymous = r.name === "Instagram Kullanıcısı";
                                     let rUserObj = registeredUsers[r.email];
                                     let rAvatarSrc = rUserObj && rUserObj.avatar ? rUserObj.avatar : "";
-                                    let rAvatarDisplay = rAvatarSrc ? `<img src="${rAvatarSrc}" class="comment-avatar" onclick="openUserProfile('${r.email}')">` : `<div class="comment-avatar" onclick="openUserProfile('${r.email}')">${r.name.charAt(0).toUpperCase()}</div>`;
+                                    
+                                    let rAvatarDisplay = "";
+                                    if (rIsAnonymous) {
+                                        rAvatarDisplay = `<div class="comment-avatar" style="background:#94a3b8;"><i class="fa-solid fa-user"></i></div>`;
+                                    } else if (rAvatarSrc) {
+                                        rAvatarDisplay = `<img src="${rAvatarSrc}" class="comment-avatar" onclick="openUserProfile('${r.email}')">`;
+                                    } else {
+                                        rAvatarDisplay = `<div class="comment-avatar" onclick="openUserProfile('${r.email}')">${r.name.charAt(0).toUpperCase()}</div>`;
+                                    }
+
                                     let rBadge = r.isAdmin ? `<span class="admin-badge">YÖNETİCİ</span>` : "";
                                     let canDelR = currentUser && (currentUser.email === r.email || currentUser.isAdmin);
                                     let delRBtn = canDelR ? `<button style="background:none; border:none; color:var(--danger-color); font-size:0.75rem; cursor:pointer; margin-left:8px;" onclick="deleteComment(${post.id}, ${r.id})"><i class="fa-solid fa-trash"></i></button>` : "";
+
+                                    let rUserClick = rIsAnonymous ? `<span>${r.name}</span>` : `<span class="comment-user" onclick="openUserProfile('${r.email}')">${r.name}</span>`;
 
                                     repliesHtml += `
                                         <div class="comment-item" style="margin-top: 6px;">
@@ -861,7 +1194,7 @@
                                             <div class="comment-bubble">
                                                 <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                                                     <div>
-                                                        <span class="comment-user" onclick="openUserProfile('${r.email}')">${r.name}</span> ${rBadge}
+                                                        ${rUserClick} ${rBadge}
                                                         <span class="reply-tag">@${c.name}</span> ${r.text}
                                                     </div>
                                                     <div style="display:flex; align-items:center;">
@@ -882,13 +1215,15 @@
                             }
                         }
 
+                        let userClickAttr = isAnonymous ? `<span>${c.name}</span>` : `<span class="comment-user" onclick="openUserProfile('${c.email}')">${c.name}</span>`;
+
                         commentsHtml += `
                             <div class="comment-item">
                                 ${avatarDisplay}
                                 <div class="comment-bubble">
                                     <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                                         <div>
-                                            <span class="comment-user" onclick="openUserProfile('${c.email}')">${c.name}</span> ${badge}
+                                            ${userClickAttr} ${badge}
                                             ${c.text}
                                         </div>
                                         <div style="display:flex; align-items:center;">
@@ -904,6 +1239,30 @@
                 let currentReply = replyTargets[post.id];
                 let replyInfoStyle = currentReply ? "display: flex;" : "display: none;";
                 let replyInfoText = currentReply ? `@${currentReply.targetName} kişisine yanıt veriliyor` : "";
+
+                // Yalnızca yönetici cevap yazabilir ve emoji atabilir kontrolü
+                let canInteract = currentUser && currentUser.isAdmin;
+                let emojiBarHtml = canInteract ? `
+                    <div class="quick-emoji-bar">
+                        <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '❤️')">❤️</button>
+                        <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '😂')">😂</button>
+                        <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '😮')">😮</button>
+                        <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '😢')">😢</button>
+                        <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '😡')">😡</button>
+                        <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '👍')">👍</button>
+                        <div class="add-more-emoji-btn" onclick="openEmojiModal(${post.id})"><i class="fa-solid fa-plus"></i></div>
+                    </div>` : '';
+
+                let commentInputBoxHtml = canInteract ? `
+                    <div id="reply-info-${post.id}" class="reply-target-info" style="${replyInfoStyle}">
+                        <span>${replyInfoText}</span>
+                        <span style="cursor:pointer; font-weight:bold;" onclick="clearReplyTarget(${post.id})">&times; İptal</span>
+                    </div>
+
+                    <div class="comment-input-box">
+                        <input type="text" id="comment-input-${post.id}" placeholder="Yorum yaz...">
+                        <button class="btn-primary" onclick="addComment(${post.id})">Gönder</button>
+                    </div>` : `<div style="font-size:0.8rem; color:#64748b; margin-top:8px; text-align:center;"><em>Yalnızca yönetici yorum yapabilir ve emoji atabilir.</em></div>`;
 
                 container.innerHTML += `
                     <div class="card post-card" 
@@ -924,31 +1283,14 @@
                         ${pollHtml}
                         
                         <div class="post-footer-actions">
-                            <div class="quick-emoji-bar">
-                                <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '❤️')">❤️</button>
-                                <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '😂')">😂</button>
-                                <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '😮')">😮</button>
-                                <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '😢')">😢</button>
-                                <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '😡')">😡</button>
-                                <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '👍')">👍</button>
-                                <div class="add-more-emoji-btn" onclick="openEmojiModal(${post.id})"><i class="fa-solid fa-plus"></i></div>
-                            </div>
+                            ${emojiBarHtml}
                             <div class="reaction-badges">${reactionsHtml}</div>
                         </div>
 
                         <div class="comments-section">
                             <div style="font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">Yorumlar</div>
                             <div style="max-height: 250px; overflow-y: auto;">${commentsHtml || '<div style="font-size:0.8rem; color:#94a3b8;">Henüz yorum yapılmamış.</div>'}</div>
-                            
-                            <div id="reply-info-${post.id}" class="reply-target-info" style="${replyInfoStyle}">
-                                <span>${replyInfoText}</span>
-                                <span style="cursor:pointer; font-weight:bold;" onclick="clearReplyTarget(${post.id})">&times; İptal</span>
-                            </div>
-
-                            <div class="comment-input-box">
-                                <input type="text" id="comment-input-${post.id}" placeholder="Yorum yaz...">
-                                <button class="btn-primary" onclick="addComment(${post.id})">Gönder</button>
-                            </div>
+                            ${commentInputBoxHtml}
                         </div>
                     </div>`;
             });
@@ -960,7 +1302,7 @@
         }
 
         window.addReaction = function(postId, emoji) {
-            if (!currentUser) { openLoginModal(); return; }
+            if (!currentUser || !currentUser.isAdmin) return; // Sadece yönetici emoji atabilir
             let post = posts.find(p => p.id === postId);
             if (!post) return;
             if (!post.reactions) post.reactions = {};
@@ -982,10 +1324,11 @@
         }
 
         window.setReplyTarget = function(postId, targetUserName, parentCommentId) {
-            if (!currentUser) { openLoginModal(); return; }
+            if (!currentUser || !currentUser.isAdmin) return;
             replyTargets[postId] = { targetName: targetUserName, parentId: parentCommentId };
             renderFeed();
-            document.getElementById(`comment-input-${postId}`).focus();
+            let inp = document.getElementById(`comment-input-${postId}`);
+            if (inp) inp.focus();
         }
 
         window.clearReplyTarget = function(postId) {
@@ -994,7 +1337,7 @@
         }
 
         window.addComment = function(postId) {
-            if (!currentUser) { openLoginModal(); return; }
+            if (!currentUser || !currentUser.isAdmin) return;
             let input = document.getElementById(`comment-input-${postId}`);
             let text = input.value.trim();
             if (!text) return;
@@ -1022,16 +1365,12 @@
             renderFeed();
         }
 
+        // Yorum silme: Yorumu tamamen siler, yanıtlar kalır. (Hesap silme ile karıştırılmasın)
         window.deleteComment = function(postId, commentId) {
             let post = posts.find(p => p.id === postId);
             if (!post || !post.comments) return;
             
-            let targetComment = post.comments.find(c => c.id === commentId);
-            if (targetComment) {
-                targetComment.name = "Instagram Kullanıcısı";
-                targetComment.email = "";
-                targetComment.isAdmin = false;
-            }
+            post.comments = post.comments.filter(c => c.id !== commentId);
 
             localStorage.setItem('sb_posts', JSON.stringify(posts));
             renderFeed();
@@ -1060,4 +1399,3 @@
     </script>
 </body>
 </html>
-  
