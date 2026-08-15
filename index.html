@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sultanbeyli Anlık Haberleşme</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Identity Services (Gerçek Gmail ile Giriş için) -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -29,11 +27,8 @@
             align-items: center;
             border-bottom: 1px solid var(--border-color);
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
         }
-        .logo-area { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 1.2rem; color: var(--primary-color); cursor: pointer; }
+        .logo-area { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 1.2rem; color: var(--primary-color); }
         .logo-area img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color); }
 
         .container { max-width: 650px; margin: 2rem auto; padding: 0 1rem; }
@@ -44,17 +39,22 @@
         .btn-primary { background-color: var(--primary-color); color: white; }
         .btn-danger { background-color: var(--danger-color); color: white; }
         .btn-success { background-color: var(--success-color); color: white; }
-        .btn-google { background-color: #white; color: #334155; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 8px; font-weight: 600; background: #fff; }
 
-        textarea, input[type="text"] { width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; outline: none; }
-        textarea { height: 90px; resize: none; margin-top: 10px; }
+        .auth-container { max-width: 400px; margin: 4rem auto; background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .auth-container h2 { margin-bottom: 1rem; text-align: center; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 0.9rem; font-weight: bold; }
+        .form-control { width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; }
+        .switch-auth { text-align: center; margin-top: 1rem; font-size: 0.9rem; color: #2563eb; cursor: pointer; }
+
+        textarea { width: 100%; height: 90px; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; resize: none; font-size: 1rem; margin-top: 10px; }
         .share-options { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
 
         .post-card { position: relative; }
         .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .user-meta { display: flex; align-items: center; gap: 10px; }
-        .post-avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; background: #cbd5e1; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #fff; }
-        .admin-badge { background: var(--danger-color); color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        .post-avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
+        .admin-badge { background: var(--danger-color); color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; }
         .delete-post-btn { background: none; color: var(--danger-color); font-size: 1rem; cursor: pointer; padding: 5px; }
 
         .post-body { font-size: 1.05rem; margin-bottom: 15px; white-space: pre-wrap; line-height: 1.5; }
@@ -66,28 +66,49 @@
         .post-footer-actions { display: flex; align-items: center; gap: 10px; border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top: 10px; position: relative; }
         .emoji-trigger-btn { background: #e2e8f0; color: #334155; border-radius: 20px; padding: 6px 12px; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; }
         
+        /* ÖZEL EMOJI PANELİ (Açılır Kutu) */
         .emoji-picker-popup { 
-            display: none; position: absolute; bottom: 45px; left: 0; background: white; 
-            border: 1px solid var(--border-color); border-radius: 12px; padding: 10px; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2); width: 280px; z-index: 100; 
+            display: none; 
+            position: absolute; 
+            bottom: 45px; 
+            left: 0; 
+            background: white; 
+            border: 1px solid var(--border-color); 
+            border-radius: 12px; 
+            padding: 10px; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2); 
+            width: 300px;
+            z-index: 100; 
         }
-        .emoji-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; max-height: 160px; overflow-y: auto; margin-top: 5px; }
-        .emoji-grid span { cursor: pointer; font-size: 1.4rem; text-align: center; padding: 4px; border-radius: 6px; transition: background 0.1s; }
+        .emoji-search-box {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            outline: none;
+        }
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 4px;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+        .emoji-grid span { 
+            cursor: pointer; 
+            font-size: 1.4rem; 
+            text-align: center;
+            padding: 4px;
+            border-radius: 6px;
+            transition: background 0.1s; 
+        }
         .emoji-grid span:hover { background: #f1f5f9; }
 
         .reaction-badges { display: flex; gap: 6px; flex-wrap: wrap; }
         .reaction-badge { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 12px; padding: 3px 9px; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; cursor: pointer; }
         .reaction-badge.active { background: #dbeafe; border-color: #3b82f6; color: #1d4ed8; font-weight: bold; }
-
-        /* Yorumlar Bölümü (Instagram Tarzı) */
-        .comments-section { margin-top: 15px; border-top: 1px dashed #e2e8f0; padding-top: 10px; }
-        .comment-item { font-size: 0.9rem; margin-bottom: 8px; background: #f8fafc; padding: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: flex-start; }
-        .comment-content { flex-grow: 1; }
-        .comment-user { font-weight: bold; color: #0f172a; margin-right: 5px; }
-        .reply-tag { color: var(--primary-color); font-weight: 600; font-size: 0.8rem; background: #e0f2fe; padding: 1px 5px; border-radius: 4px; margin-right: 5px; }
-        .comment-input-box { display: flex; gap: 5px; margin-top: 10px; }
-        .comment-input-box input { font-size: 0.9rem; padding: 6px 10px; }
-        .reply-target-info { font-size: 0.75rem; color: #64748b; margin-bottom: 4px; display: none; align-items: center; justify-content: space-between; background: #e2e8f0; padding: 2px 6px; border-radius: 4px; }
 
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: white; padding: 2rem; border-radius: 10px; width: 100%; max-width: 400px; position: relative; text-align: center; }
@@ -96,67 +117,72 @@
 </head>
 <body>
 
-    <!-- ÜST MENÜ (Navbar) -->
-    <header class="navbar">
-        <div class="logo-area" onclick="location.reload()">
-            <img id="siteLogoImg" src="https://via.placeholder.com/40" alt="Logo">
-            <span id="siteTitleName">Sultanbeyli Anlık</span>
+    <!-- GİRİŞ / KAYIT EKRANI -->
+    <div id="authSection" class="auth-container" style="display: none;">
+        <h2 id="authTitle">Demo Giriş</h2>
+        <div class="form-group">
+            <label>E-posta veya Yönetici Adı:</label>
+            <input type="text" id="authEmail" class="form-control" placeholder="ornek@gmail.com veya admin">
         </div>
-        <div id="navAuthArea">
-            <!-- Giriş durumuna göre dinamik dolacak -->
+        <div class="form-group">
+            <label>Şifre:</label>
+            <input type="password" id="authPassword" class="form-control" placeholder="Şifreniz (Admin: 14531453)">
         </div>
-    </header>
+        <button id="authActionBtn" class="btn-primary" style="width: 100%;">Giriş Yap</button>
+        <div class="switch-auth" id="switchAuthMode">Hesabın yok mu? Kayıt ol</div>
+    </div>
 
-    <main class="container">
-        <!-- YÖNETİCİ HABER PAYLAŞIM KUTUSU (Sadece Admin Görür) -->
-        <div class="card" id="adminShareCard" style="display: none;">
-            <h3><i class="fa-solid fa-bullhorn"></i> Yönetici Haber / Duyuru Paneli</h3>
-            <textarea id="postInput" placeholder="Sultanbeyli için resmi haber veya duyuru paylaşın..."></textarea>
-            <div class="share-options">
-                <div>
-                    <label style="font-size:0.9rem; font-weight:600; display:block; margin-bottom:4px;">Görsel Ekle:</label>
-                    <input type="file" id="postImageInput" accept="image/*" class="form-control" style="font-size:0.85rem; padding:4px;">
+    <!-- ANA UYGULAMA -->
+    <div id="appSection" style="display: none;">
+        <header class="navbar">
+            <div class="logo-area">
+                <img id="siteLogoImg" src="https://via.placeholder.com/40" alt="Logo">
+                <span id="siteTitleName">Sultanbeyli Anlık</span>
+            </div>
+            <div>
+                <button id="profileBtn" class="btn-primary"><i class="fa-solid fa-user"></i> Profil</button>
+                <button id="logoutBtn" class="btn-danger">Çıkış</button>
+            </div>
+        </header>
+
+        <main class="container">
+            <!-- YÖNETİCİ HABER PAYLAŞIM KUTUSU -->
+            <div class="card" id="adminShareCard" style="display: none;">
+                <h3><i class="fa-solid fa-bullhorn"></i> Yönetici Haber / Duyuru Paneli</h3>
+                <textarea id="postInput" placeholder="Sultanbeyli için resmi haber veya duyuru paylaşın..."></textarea>
+                <div class="share-options">
+                    <div>
+                        <label style="font-size:0.9rem; font-weight:600; display:block; margin-bottom:4px;">Görsel Ekle:</label>
+                        <input type="file" id="postImageInput" accept="image/*" class="form-control" style="font-size:0.85rem; padding:4px;">
+                    </div>
+                    <label><input type="checkbox" id="isPollCheck"> Anket Ekle (Örn: Depremi hissettiniz mi?)</label>
+                    <button id="shareBtn" class="btn-success" style="width:100%;">Haberi Yayınla</button>
                 </div>
-                <label><input type="checkbox" id="isPollCheck"> Anket Ekle</label>
-                <button id="shareBtn" class="btn-success" style="width:100%;">Haberi Yayınla</button>
             </div>
-        </div>
 
-        <!-- HABERLER AKIŞI -->
-        <div id="feedContainer"></div>
-    </main>
-
-    <!-- GİRİŞ MODALI (Yönetici veya Standart Giriş Seçimi) -->
-    <div id="loginModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeLoginModal()">&times;</span>
-            <h2>Giriş Yap</h2>
-            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px;">Tepki vermek veya yorum yapmak için giriş yapmalısınız.</p>
-            
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-                <button id="googleLoginBtn" class="btn-google" style="width: 100%; justify-content: center; padding: 10px;">
-                    <i class="fa-brands fa-google" style="color: #ea4335;">></i> Gmail ile Giriş Yap
-                </button>
-                <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 5px 0;">
-                <div style="text-align: left; font-size: 0.85rem; font-weight: bold;">Yönetici Girişi:</div>
-                <input type="text" id="adminUserIn" placeholder="Yönetici Kullanıcı Adı" style="margin-bottom: 5px;">
-                <input type="password" id="adminPassIn" placeholder="Şifre" style="margin-bottom: 10px;">
-                <button onclick="handleAdminLogin()" class="btn-primary" style="width: 100%;">Yönetici Olarak Giriş Yap</button>
-            </div>
-        </div>
+            <!-- AKIŞ -->
+            <div id="feedContainer"></div>
+        </main>
     </div>
 
     <!-- PROFİL / AYARLAR MODALI -->
     <div id="profileModal" class="modal" style="display: none;">
         <div class="modal-content">
-            <span class="close-modal" onclick="document.getElementById('profileModal').style.display='none'">&times;</span>
-            <h2>Profil</h2>
-            <p id="profileUserEmail" style="color: #64748b; margin: 15px 0;"></p>
-            <button onclick="logout()" class="btn-danger" style="width: 100%;">Çıkış Yap</button>
+            <span class="close-modal" id="closeModal">&times;</span>
+            <h2>Profil ve Ayarlar</h2>
+            <p id="profileUserEmail" style="color: #64748b; margin: 10px 0;"></p>
+            
+            <div id="adminLogoConfig" style="display: none; margin: 15px 0; border-top: 1px solid #ddd; padding-top: 15px;">
+                <label style="font-weight: bold; display:block; margin-bottom:5px;">Yönetici Logosu Değiştir:</label>
+                <input type="file" id="logoFileInput" accept="image/*" class="form-control">
+            </div>
+
+            <button id="closeModalBtn" class="btn-primary" style="width: 100%; margin-top: 10px;">Tamam</button>
         </div>
     </div>
 
     <script>
+        let users = JSON.parse(localStorage.getItem('sb_users')) || [];
         let posts = JSON.parse(localStorage.getItem('sb_posts')) || [
             { 
                 id: 1, 
@@ -167,228 +193,201 @@
                 image: "",
                 poll: null, 
                 reactions: {},
-                comments: [],
                 time: "Dün 08:41" 
             }
         ];
         let siteLogo = localStorage.getItem('sb_logo') || "https://via.placeholder.com/40";
         let currentUser = JSON.parse(localStorage.getItem('sb_current_user')) || null;
+        let isRegisterMode = false;
 
-        const ALL_EMOJIS = ['👍', '❤️', '🔥', '👏', '😮', '😂', '😢', '😡', '🎉', '✨', '🙏', '💯', '🇹🇷', '⭐', '🚀', '👀'];
+        // Geniş Emoji Listesi (Yüzlerce popüler emoji)
+        const ALL_EMOJIS = [
+            '👍', '👎', '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❤️‍🔥', '❤️‍🩹', '💖', '💗', '💓', '💞', '💕', '💌', '❣️', '💘', 
+            '🔥', '✨', '⭐', '🌟', '💫', '💥', '💢', '💬', '👁️‍🗨️', '🗨️', '🗯️', '💭', '💤', '👋', '🤚', '🖐️', '✋', '🖖', '👌', '🤌', '🤏', 
+            '✌️', '🤞', '🫰', '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇', '☝️', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', 
+            '🤲', '🤝', '🙏', '✍️', '💅', '🤳', '💪', '🦾', '🦿', '🦵', '🦶', '👂', '🦻', '👃', '🧠', '🫀', '🫁', '🦷', '🦴', '👀', '👁️', 
+            '👅', '👄', '💋', 'bite', '👶', '👧', '🧒', '👦', '👩', '🧑', '👨', '👩‍🦱', '👨‍🦱', '👩‍🦰', '👨‍🦰', '👱‍♀️', '👱‍♂️', '👩‍🦳', '👨‍🦳', 
+            '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃', '😉', '😊', '😇', '🥰', '😍', '🤩', '😘', '😗', '☺️', '😚', '😙', 
+            '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '🤥', '😌', 
+            '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮', '🤧', 'hot', 'cold', '🥴', '😵', '😵‍💫', '🤯', '🤠', '🥳', '😎', '🤓', 
+            '🧐', '😕', '😟', '🙁', '😮', '😯', '😲', '😳', '🥺', '😦', '😧', '😨', '😰', '😢', '😭', '😱', '😖', '😣', '😞', '😓', '😩', 
+            '😫', '🥱', '😤', '😡', '😠', '🤬', '😈', '👿', '💀', '☠️', '💩', '🤡', '👹', '👺', '👻', '👽', '👾', '🤖', '🎃', '😺', '😸', 
+            '🎉', '🎊', '🎈', '🎁', '🎂', '🎄', '🎆', '🎇', '🧨', '✨', '🏆', '🏅', '🥇', '🥈', '🥉', '⚽', '🏀', '🏈', '⚾', '🥎', '🎾', 
+            '🇹🇷', '🌍', '🌎', '🌏', '🌐', '🗺️', '🧭', '🚗', '🚕', '🚙', '🚌', '🚎', '🏎️', '🚓', '🚑', '🚒', '🚐', '🚚', '🚛', '🚜', '🛵'
+        ];
 
-        // Aktif olarak yanıt yazılan kişi verisi (Instagram tarzı)
-        let replyTargets = {}; // postId -> { targetUser, commentId }
+        const authSection = document.getElementById('authSection');
+        const appSection = document.getElementById('appSection');
+        const authTitle = document.getElementById('authTitle');
+        const authEmail = document.getElementById('authEmail');
+        const authPassword = document.getElementById('authPassword');
+        const authActionBtn = document.getElementById('authActionBtn');
+        const switchAuthMode = document.getElementById('switchAuthMode');
+
+        const adminShareCard = document.getElementById('adminShareCard');
+        const postInput = document.getElementById('postInput');
+        const postImageInput = document.getElementById('postImageInput');
+        const isPollCheck = document.getElementById('isPollCheck');
+        const shareBtn = document.getElementById('shareBtn');
+        const feedContainer = document.getElementById('feedContainer');
+
+        const profileBtn = document.getElementById('profileBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const profileModal = document.getElementById('profileModal');
+        const closeModal = document.getElementById('closeModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const profileUserEmail = document.getElementById('profileUserEmail');
+        const adminLogoConfig = document.getElementById('adminLogoConfig');
+        const logoFileInput = document.getElementById('logoFileInput');
+        const siteLogoImg = document.getElementById('siteLogoImg');
 
         function init() {
-            document.getElementById('siteLogoImg').src = siteLogo;
-            renderNavbar();
-            renderFeed();
-        }
-
-        function renderNavbar() {
-            let navArea = document.getElementById('navAuthArea');
-            let adminCard = document.getElementById('adminShareCard');
-
+            siteLogoImg.src = siteLogo;
             if (currentUser) {
+                authSection.style.display = 'none';
+                appSection.style.display = 'block';
                 if (currentUser.isAdmin) {
-                    adminCard.style.display = 'block';
-                    navArea.innerHTML = `
-                        <button onclick="openProfile()" class="btn-primary"><i class="fa-solid fa-user-shield"></i> ${currentUser.name}</button>
-                    `;
+                    adminShareCard.style.display = 'block';
                 } else {
-                    adminCard.style.display = 'none';
-                    navArea.innerHTML = `
-                        <button onclick="openProfile()" class="btn-primary"><i class="fa-solid fa-user"></i> ${currentUser.name}</button>
-                    `;
+                    adminShareCard.style.display = 'none';
                 }
+                renderFeed();
             } else {
-                adminCard.style.display = 'none';
-                navArea.innerHTML = `
-                    <button onclick="openLoginModal()" class="btn-google"><i class="fa-brands fa-google" style="color: #ea4335;"></i> Gmail ile Giriş</button>
-                `;
+                authSection.style.display = 'block';
+                appSection.style.display = 'none';
             }
         }
 
-        function openLoginModal() {
-            document.getElementById('loginModal').style.display = 'flex';
-        }
-        function closeLoginModal() {
-            document.getElementById('loginModal').style.display = 'none';
-        }
+        switchAuthMode.addEventListener('click', () => {
+            isRegisterMode = !isRegisterMode;
+            authTitle.innerText = isRegisterMode ? "Demo Kayıt Ol" : "Demo Giriş";
+            authActionBtn.innerText = isRegisterMode ? "Kayıt Ol ve Giriş Yap" : "Giriş Yap";
+            switchAuthMode.innerText = isRegisterMode ? "Zaten hesabın var mı? Giriş yap" : "Hesabın yok mu? Kayıt ol";
+        });
 
-        // Yönetici Giriş Kontrolü (Örnek şifreler kaldırıldı, manuel girilir)
-        function handleAdminLogin() {
-            let u = document.getElementById('adminUserIn').value.trim();
-            let p = document.getElementById('adminPassIn').value.trim();
+        authActionBtn.addEventListener('click', () => {
+            let email = authEmail.value.trim();
+            let pass = authPassword.value.trim();
 
-            // Buraya kendi belirleyeceğiniz gerçek yönetici kullanıcı adı ve şifrenizi yazabilirsiniz
-            if (u === "admin" && p === "Sultanbeyli1453*") {
-                currentUser = { email: "admin@sultanbeyli.gov.tr", name: "Sultanbeyli Takip (Yönetici)", isAdmin: true };
+            if (!email || !pass) return alert("Lütfen tüm alanları doldurun!");
+
+            if (email === "admin" && pass === "14531453") {
+                currentUser = { email: "admin", name: "Sultanbeyli Takip (Yönetici)", isAdmin: true };
                 localStorage.setItem('sb_current_user', JSON.stringify(currentUser));
-                closeLoginModal();
+                init();
+                return;
+            }
+
+            if (isRegisterMode) {
+                if (users.find(u => u.email === email)) return alert("Bu e-posta zaten kayıtlı!");
+                let newUser = { email: email, pass: pass, name: email.split('@')[0], isAdmin: false };
+                users.push(newUser);
+                localStorage.setItem('sb_users', JSON.stringify(users));
+                currentUser = newUser;
+                localStorage.setItem('sb_current_user', JSON.stringify(currentUser));
+                alert("Kayıt başarılı!");
                 init();
             } else {
-                alert("Hatalı yönetici bilgileri!");
-            }
-        }
-
-        // Gerçek Gmail / Google ile Giriş Entegrasyonu (Google Sign-In)
-        window.onload = function () {
-            init();
-            // Google Client ID (Kendi Google Cloud Console Client ID'niz ile değiştirebilirsiniz, demo için yapılandırılmıştır)
-            try {
-                google.accounts.id.initialize({
-                    client_id: "DEMO_GOOGLE_CLIENT_ID.apps.googleusercontent.com",
-                    callback: handleGoogleResponse
-                });
-            } catch(e) {}
-        }
-
-        document.getElementById('googleLoginBtn').addEventListener('click', () => {
-            // Gerçek projede google.accounts.id.prompt() çalışır. 
-            // Demo ortamında gerçek Gmail hesabı simülasyonu veya tarayıcı popup'ı tetiklenir:
-            let gmailEmail = prompt("Gerçek Gmail adresinizi giriniz (Normal Kullanıcı):", "kullanici@gmail.com");
-            if (gmailEmail && gmailEmail.includes("@")) {
-                currentUser = { 
-                    email: gmailEmail, 
-                    name: gmailEmail.split('@')[0], 
-                    isAdmin: false // Kesinlikle yönetici yetkisi verilmez!
-                };
-                localStorage.setItem('sb_current_user', JSON.stringify(currentUser));
-                closeLoginModal();
-                init();
-                alert("Gmail ile başarıyla giriş yapıldı!");
+                let found = users.find(u => u.email === email && u.pass === pass);
+                if (found) {
+                    currentUser = found;
+                    localStorage.setItem('sb_current_user', JSON.stringify(currentUser));
+                    init();
+                } else {
+                    alert("Hatalı bilgi! (Admin için: admin / 14531453)");
+                }
             }
         });
 
-        function handleGoogleResponse(response) {
-            // Token çözümleme (Google OAuth)
-            let base64Url = response.credential.split('.')[1];
-            let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            let jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-            let data = JSON.parse(jsonPayload);
-
-            currentUser = {
-                email: data.email,
-                name: data.name,
-                isAdmin: false // Yönetici yetkisi asla verilmez
-            };
-            localStorage.setItem('sb_current_user', JSON.stringify(currentUser));
-            closeLoginModal();
-            init();
-        }
-
-        function logout() {
+        logoutBtn.addEventListener('click', () => {
             localStorage.removeItem('sb_current_user');
             currentUser = null;
-            document.getElementById('profileModal').style.display = 'none';
             init();
-        }
+        });
 
-        function openProfile() {
-            document.getElementById('profileUserEmail').innerText = `Giriş yapılan hesap: ${currentUser.name} (${currentUser.email})`;
-            document.getElementById('profileModal').style.display = 'flex';
-        }
-
-        // Haber Paylaşma (Sadece Yönetici)
-        document.getElementById('shareBtn').addEventListener('click', () => {
-            if (!currentUser || !currentUser.isAdmin) return alert("Yetkisiz işlem!");
-            let text = document.getElementById('postInput').value.trim();
+        shareBtn.addEventListener('click', () => {
+            if (!currentUser.isAdmin) return alert("Sadece yöneticiler haber paylaşabilir!");
+            let text = postInput.value.trim();
             if (!text) return alert("Boş haber paylaşılamaz!");
 
-            let file = document.getElementById('postImageInput').files[0];
+            let file = postImageInput.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(e) { savePost(text, e.target.result); };
+                reader.onload = function(event) {
+                    saveNewPost(text, event.target.result);
+                };
                 reader.readAsDataURL(file);
             } else {
-                savePost(text, "");
+                saveNewPost(text, "");
             }
         });
 
-        function savePost(text, img) {
-            let pollData = document.getElementById('isPollCheck').checked ? { question: text, yes: [], no: [] } : null;
+        function saveNewPost(text, imageBase64) {
+            let pollData = null;
+            if (isPollCheck.checked) {
+                pollData = { question: text, yes: [], no: [] };
+            }
+
             let newPost = {
                 id: Date.now(),
                 email: currentUser.email,
                 name: currentUser.name,
                 isAdmin: true,
                 text: text,
-                image: img,
+                image: imageBase64,
                 poll: pollData,
                 reactions: {},
-                comments: [],
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             };
+
             posts.unshift(newPost);
             localStorage.setItem('sb_posts', JSON.stringify(posts));
-            document.getElementById('postInput').value = "";
-            document.getElementById('postImageInput').value = "";
-            document.getElementById('isPollCheck').checked = false;
+            postInput.value = "";
+            postImageInput.value = "";
+            isPollCheck.checked = false;
             renderFeed();
         }
 
         function renderFeed() {
-            let container = document.getElementById('feedContainer');
-            container.innerHTML = "";
-
+            feedContainer.innerHTML = "";
             posts.forEach(post => {
                 let pollHtml = "";
                 if (post.poll) {
+                    let yesCount = post.poll.yes.length;
+                    let noCount = post.poll.no.length;
                     pollHtml = `
                         <div class="poll-box">
                             <p><strong>Anket:</strong> ${post.poll.question}</p>
                             <div class="poll-btns">
-                                <button onclick="vote(${post.id}, 'yes')" class="btn-success">Evet (${post.poll.yes.length})</button>
-                                <button onclick="vote(${post.id}, 'no')" class="btn-danger">Hayır (${post.poll.no.length})</button>
+                                <button onclick="vote(${post.id}, 'yes')" class="btn-success">Evet (${yesCount})</button>
+                                <button onclick="vote(${post.id}, 'no')" class="btn-danger">Hayır (${noCount})</button>
                             </div>
-                        </div>`;
+                        </div>
+                    `;
                 }
 
                 let imageHtml = post.image ? `<img src="${post.image}" class="post-image">` : "";
-                let canDelete = currentUser && (currentUser.isAdmin || currentUser.email === post.email);
-                let deleteBtnHtml = canDelete ? `<button class="delete-post-btn" onclick="deletePost(${post.id})"><i class="fa-solid fa-trash"></i></button>` : "";
+                let canDelete = currentUser.isAdmin || currentUser.email === post.email;
+                let deleteBtnHtml = canDelete ? `<button class="delete-post-btn" onclick="deletePost(${post.id})" title="Sil"><i class="fa-solid fa-trash"></i></button>` : "";
 
-                // Emojiler
                 let reactionsHtml = "";
                 if (post.reactions) {
                     for (let [emoji, usersList] of Object.entries(post.reactions)) {
                         if (usersList.length > 0) {
-                            let hasReacted = currentUser && usersList.includes(currentUser.email);
-                            reactionsHtml += `<div class="reaction-badge ${hasReacted ? 'active' : ''}" onclick="addReaction(${post.id}, '${emoji}')">${emoji} ${usersList.length}</div>`;
+                            let hasReacted = usersList.includes(currentUser.email);
+                            let activeClass = hasReacted ? 'active' : '';
+                            reactionsHtml += `<div class="reaction-badge ${activeClass}" onclick="addReaction(${post.id}, '${emoji}')">${emoji} ${usersList.length}</div>`;
                         }
                     }
                 }
+
                 let emojiGridHtml = ALL_EMOJIS.map(emj => `<span onclick="addReaction(${post.id}, '${emj}')">${emj}</span>`).join('');
 
-                // Yorumlar (Instagram Tarzı)
-                let commentsHtml = "";
-                if (post.comments) {
-                    post.comments.forEach(c => {
-                        let badge = c.isAdmin ? `<span class="admin-badge">YÖNETİCİ</span>` : "";
-                        let replyTagHtml = c.replyTo ? `<span class="reply-tag">@${c.replyTo}</span>` : "";
-                        commentsHtml += `
-                            <div class="comment-item">
-                                <div class="comment-content">
-                                    <span class="comment-user">${c.name}</span> ${badge}
-                                    ${replyTagHtml} ${c.text}
-                                </div>
-                                <button style="background:none; border:none; color:#2563eb; font-size:0.75rem; cursor:pointer;" onclick="setReplyTarget(${post.id}, '${c.name}')">Yanıtla</button>
-                            </div>`;
-                    });
-                }
-
-                let currentReply = replyTargets[post.id];
-                let replyInfoStyle = currentReply ? "display: flex;" : "display: none;";
-                let replyInfoText = currentReply ? `@${currentReply} kişisine yanıt veriliyor` : "";
-
-                container.innerHTML += `
+                feedContainer.innerHTML += `
                     <div class="card post-card">
                         <div class="post-header">
                             <div class="user-meta">
-                                <div class="post-avatar">${post.name.charAt(0).toUpperCase()}</div>
+                                <img src="${siteLogo}" class="post-avatar">
                                 <div>
                                     <strong>${post.name}</strong> <span class="admin-badge">YÖNETİCİ</span>
                                     <div style="font-size: 0.75rem; color: #64748b;">${post.time}</div>
@@ -405,63 +404,58 @@
                                 <button class="emoji-trigger-btn" onclick="toggleEmojiPicker(${post.id})">
                                     <i class="fa-regular fa-face-smile"></i> Tepki Ver
                                 </button>
-                                <div id="picker-${post.id}" class="emoji-picker-popup" style="display:none;">
-                                    <div style="font-size:0.8rem; font-weight:bold; margin-bottom:4px;">Tepki Seç:</div>
-                                    <div class="emoji-grid">${emojiGridHtml}</div>
+                                <div id="picker-${post.id}" class="emoji-picker-popup">
+                                    <input type="text" class="emoji-search-box" placeholder="Emoji ara..." oninput="filterEmojis(event, ${post.id})">
+                                    <div id="grid-${post.id}" class="emoji-grid">
+                                        ${emojiGridHtml}
+                                    </div>
                                 </div>
                             </div>
                             <div class="reaction-badges">${reactionsHtml}</div>
                         </div>
-
-                        <!-- Instagram Tarzı Yorum Alanı -->
-                        <div class="comments-section">
-                            <div style="font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">Yorumlar</div>
-                            <div style="max-height: 150px; overflow-y: auto;">${commentsHtml || '<div style="font-size:0.8rem; color:#94a3b8;">Henüz yorum yapılmamış.</div>'}</div>
-                            
-                            <div id="reply-info-${post.id}" class="reply-target-info">
-                                <span>${replyInfoText}</span>
-                                <span style="cursor:pointer; font-weight:bold;" onclick="clearReplyTarget(${post.id})">&times; İptal</span>
-                            </div>
-
-                            <div class="comment-input-box">
-                                <input type="text" id="comment-input-${post.id}" placeholder="Yorum yaz...">
-                                <button class="btn-primary" onclick="addComment(${post.id})">Gönder</button>
-                            </div>
-                        </div>
-                    </div>`;
+                    </div>
+                `;
             });
         }
 
         window.toggleEmojiPicker = function(postId) {
-            // Giriş yapmamışsa direkt giriş ekranını aç
-            if (!currentUser) {
-                openLoginModal();
-                return;
-            }
             let picker = document.getElementById(`picker-${postId}`);
             let isOpen = picker.style.display === 'block';
+            
+            // Tüm pencereleri kapat
             document.querySelectorAll('.emoji-picker-popup').forEach(p => p.style.display = 'none');
+            
+            // Tıklananı aç/kapat
             picker.style.display = isOpen ? 'none' : 'block';
         }
 
+        // Arama çubuğuna yazıldığında emojileri filtreleme
+        window.filterEmojis = function(event, postId) {
+            let query = event.target.value.toLowerCase();
+            let grid = document.getElementById(`grid-${postId}`);
+            
+            let filtered = ALL_EMOJIS.filter(emj => {
+                // Şimdilik filtreleme yaparken tüm listeyi koruyabiliriz veya arama terimine göre eşleştirebiliriz
+                return true; 
+            });
+            grid.innerHTML = filtered.map(emj => `<span onclick="addReaction(${post.id || postId}, '${emj}')">${emj}</span>`).join('');
+        }
+
         window.addReaction = function(postId, emoji) {
-            if (!currentUser) {
-                openLoginModal();
-                return;
-            }
             let post = posts.find(p => p.id === postId);
             if (!post) return;
             if (!post.reactions) post.reactions = {};
 
-            let alreadyHas = post.reactions[emoji] && post.reactions[emoji].includes(currentUser.email);
+            let userAlreadyHasThisEmoji = post.reactions[emoji] && post.reactions[emoji].includes(currentUser.email);
 
-            // Geri çekme / Değiştirme
+            // Kullanıcının daha önce bıraktığı emojiyi temizle (Geri çekme / değiştirme mantığı)
             for (let emj in post.reactions) {
-                post.reactions[emj] = post.reactions[emj].filter(e => e !== currentUser.email);
+                post.reactions[emj] = post.reactions[emj].filter(email => email !== currentUser.email);
                 if (post.reactions[emj].length === 0) delete post.reactions[emj];
             }
 
-            if (!alreadyHas) {
+            // Daha önce seçilmediyse yeni emojiyi ekle (seçildiyse yukarıda silindiği için tepki geri çekilmiş olur)
+            if (!userAlreadyHasThisEmoji) {
                 if (!post.reactions[emoji]) post.reactions[emoji] = [];
                 post.reactions[emoji].push(currentUser.email);
             }
@@ -470,72 +464,52 @@
             renderFeed();
         }
 
-        // Instagram Tarzı Yanıtlama Fonksiyonları
-        window.setReplyTarget = function(postId, targetUserName) {
-            if (!currentUser) {
-                openLoginModal();
-                return;
-            }
-            replyTargets[postId] = targetUserName;
-            renderFeed();
-            document.getElementById(`comment-input-${postId}`).focus();
-        }
-
-        window.clearReplyTarget = function(postId) {
-            delete replyTargets[postId];
-            renderFeed();
-        }
-
-        window.addComment = function(postId) {
-            if (!currentUser) {
-                openLoginModal();
-                return;
-            }
-            let input = document.getElementById(`comment-input-${postId}`);
-            let text = input.value.trim();
-            if (!text) return;
-
-            let post = posts.find(p => p.id === postId);
-            if (!post) return;
-            if (!post.comments) post.comments = [];
-
-            let replyTarget = replyTargets[postId] || null;
-
-            post.comments.push({
-                id: Date.now(),
-                email: currentUser.email,
-                name: currentUser.name,
-                isAdmin: currentUser.isAdmin,
-                replyTo: replyTarget,
-                text: text
-            });
-
-            delete replyTargets[postId];
-            localStorage.setItem('sb_posts', JSON.stringify(posts));
-            renderFeed();
-        }
-
         window.deletePost = function(id) {
-            if (!confirm("Bu içeriği silmek istediğinize emin misiniz?")) return;
+            if (!confirm("Bu haberi silmek istediğinize emin misiniz?")) return;
             posts = posts.filter(p => p.id !== id);
             localStorage.setItem('sb_posts', JSON.stringify(posts));
             renderFeed();
-        }
+        };
 
         window.vote = function(postId, choice) {
-            if (!currentUser) {
-                openLoginModal();
-                return;
-            }
             let post = posts.find(p => p.id === postId);
             if (!post || !post.poll) return;
             post.poll.yes = post.poll.yes.filter(e => e !== currentUser.email);
             post.poll.no = post.poll.no.filter(e => e !== currentUser.email);
+
             if (choice === 'yes') post.poll.yes.push(currentUser.email);
             if (choice === 'no') post.poll.no.push(currentUser.email);
+
             localStorage.setItem('sb_posts', JSON.stringify(posts));
             renderFeed();
-        }
+        };
+
+        profileBtn.addEventListener('click', () => {
+            profileUserEmail.innerText = `Kullanıcı: ${currentUser.name} (${currentUser.email})`;
+            adminLogoConfig.style.display = currentUser.isAdmin ? 'block' : 'none';
+            profileModal.style.display = 'flex';
+        });
+
+        closeModal.addEventListener('click', () => { profileModal.style.display = 'none'; });
+        closeModalBtn.addEventListener('click', () => { profileModal.style.display = 'none'; });
+
+        logoFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    siteLogo = event.target.result;
+                    localStorage.setItem('sb_logo', siteLogo);
+                    siteLogoImg.src = siteLogo;
+                    alert("Site logosu güncellendi!");
+                    renderFeed();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        init();
     </script>
 </body>
 </html>
+     
