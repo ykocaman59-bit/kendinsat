@@ -40,13 +40,26 @@ loginBtn.addEventListener('click', () => {
 });
 
 // OTURUM DURUMU İZLEME
-auth.onAuthStateChanged((user) => {
+auth.onAuthStateChanged(async (user) => {
     if (user) {
         currentUser = user;
         shareBox.style.display = 'block';
         
-        // Admin kontrolü (Örn: Belirli e-posta veya admin şifre doğrulama akışı)
         let isAdmin = user.email === "admin@sultanbeyli.com" || localStorage.getItem("isAdmin") === "true";
+
+        // Kullanıcı verilerini Firestore'da saklayıp senkronize edelim (Instagram ve profil bilgileri için)
+        const userRef = db.collection('users').doc(user.uid);
+        const userDoc = await userRef.get();
+        if (!userDoc.exists) {
+            await userRef.set({
+                name: user.displayName || "Sultanbeyli Sakini",
+                email: user.email,
+                photoURL: user.photoURL || "",
+                instagram: "",
+                isAdmin: isAdmin,
+                lastProfileUpdate: 0
+            }, { merge: true });
+        }
 
         userMenuSection.innerHTML = `
             <button class="btn-primary" id="openProfileBtn" style="display:flex; align-items:center; gap:8px;">
@@ -56,10 +69,7 @@ auth.onAuthStateChanged((user) => {
         `;
 
         document.getElementById('openProfileBtn').addEventListener('click', () => {
-            modalUserName.value = user.displayName || '';
-            modalUserEmail.innerText = user.email;
-            modalUserPhoto.src = user.photoURL || 'https://via.placeholder.com/80';
-            profileModal.style.display = 'flex';
+            openUserProfile(user.email);
         });
 
     } else {
@@ -68,7 +78,6 @@ auth.onAuthStateChanged((user) => {
         userMenuSection.innerHTML = `
             <button id="loginBtn" class="btn-primary"><i class="fa-brands fa-google"></i> Gmail ile Giriş Yap</button>
         `;
-        // Yeniden bağla
         document.getElementById('loginBtn').addEventListener('click', () => {
             const provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithPopup(provider);
@@ -76,6 +85,104 @@ auth.onAuthStateChanged((user) => {
     }
     loadPosts();
 });
+
+// PROFİL GÖRÜNTÜLEME VE DÜZENLEME (Instagram ve 7 Gün Kısıtlaması Dahil)
+window.openUserProfile = async function(userEmail) {
+    const snapshot = await db.collection('users').where('email', '==', userEmail).get();
+    if (snapshot.empty) return alert("Kullanıcı bulunamadı!");
+    
+    let targetDoc = snapshot.docs[0];
+    let targetData = targetDoc.data();
+    let targetUid = targetDoc.id;
+
+    let isMe = currentUser && currentUser.email === userEmail;
+    let isAdminViewer = currentUser && (currentUser.email === "admin@sultanbeyli.com" || localStorage.getItem("isAdmin") === "true");
+    
+    // 7 Gün Sınırı Kontrolü (Adminler muaf, normal kullanıcılar 7 günde 1 güncelleyebilir)
+    let lastUpdate = targetData.lastProfileUpdate || 0;
+    let daysSinceUpdate = (Date.now() - lastUpdate) / (1000 * 60 * 60 * 24);
+    let canUpdate = isAdminViewer || isMe && (daysSinceUpdate >= 7 || lastUpdate === 0);
+
+    let modalBody = profileModal.querySelector('.modal-content') || profileModal; // Yapına göre container seçimi
+    
+    // Modal içeriğini dinamik olarak dolduruyoruz
+    modalUserName.value = targetData.name || '';
+    modalUserEmail.innerText = targetData.email;
+    modalUserPhoto.src = targetData.photoURL || 'https://via.placeholder.com/80';
+
+    // Instagram input alanı eklemek için modale geçici alan kontrolü
+    let existingInstaInput = document.getElementById('modalUserInstagram');
+    if (!existingInstaInput) {
+        const instaDiv = document.createElement('div');
+        instaDiv.style.marginTop = "10px";
+        instaDiv.innerHTML = `
+            <label style="font-size:0.85rem; display:block; text-align:left; margin-bottom:4px;">Instagram Profil Linki:</label>
+            <input type="text" id="modalUserInstagram" class="swal2-input" style="width:100%; padding:8px; box-sizing:border-box;" placeholder="https://instagram.com/kullanici">
+        `;
+        modalUserName.parentNode.insertBefore(instaDiv, saveProfileBtn);
+    }
+    document.getElementById('modalUserInstagram').value = targetData.instagram || '';
+    document.getElementById('modalUserInstagram').disabled = !isMe;
+
+    // Mail Gönderme Butonu Ekleme (Eğer yoksa)
+    let existingMailBtn = document.getElementById('modalMailBtn');
+    if (!existingMailBtn && !isMe) {
+        const mailBtn = document.createElement('a');
+        mailBtn.id = 'modalMailBtn';
+        mailBtn.className = 'btn-primary';
+        mailBtn.style.cssText = "display:inline-block; margin-top:10px; text-decoration:none; text-align:center; background:#4f46e5; color:white; padding:8px 12px; border-radius:6px;";
+        mailBtn.innerHTML = `<i class="fa-solid fa-envelope"></i> E-posta Gönder`;
+        saveProfileBtn.parentNode.insertBefore(mailBtn, saveProfileBtn);
+    }
+    if (document.getElementById('modalMailBtn')) {
+        document.getElementById('modalMailBtn').style.display = isMe ? 'none' : 'block';
+        document.getElementById('modalMailBtn').href = `mailto:${targetData.email}`;
+    }
+
+    // Instagram İkonu Profil Görünümü İçin
+    let existingInstaIcon = document.getElementById('modalInstaLink');
+    if (!existingInstaIcon) {
+        const instaIcon = document.createElement('a');
+        instaIcon.id = 'modalInstaLink';
+        instaIcon.target = "_blank";
+        instaIcon.style.cssText = "font-size: 1.5rem; margin-top: 8px; color: #E1306C; display: inline-block;";
+        instaIcon.innerHTML = `<i class="fa-brands fa-instagram"></i>`;
+        modalUserPhoto.parentNode.appendChild(instaIcon);
+    }
+    if (targetData.instagram) {
+        document.getElementById('modalInstaLink').href = targetData.instagram;
+        document.getElementById('modalInstaLink').style.display = 'inline-block';
+    } else {
+        document.getElementById('modalInstaLink').style.display = 'none';
+    }
+
+    // Kaydet butonunu yetkiye göre ayarla
+    saveProfileBtn.style.display = isMe ? 'block' : 'none';
+    modalUserName.disabled = !isMe;
+
+    profileModal.style.display = 'flex';
+
+    // Kaydetme Olayı (7 gün kuralı ve admin muafiyeti entegre edilmiş hali)
+    saveProfileBtn.onclick = async () => {
+        if (!canUpdate) {
+            return alert("Profilinizi sadece 7 günde bir güncelleyebilirsiniz!");
+        }
+
+        const newName = modalUserName.value;
+        const newInsta = document.getElementById('modalUserInstagram').value;
+
+        await currentUser.updateProfile({ displayName: newName });
+        await db.collection('users').doc(currentUser.uid).update({
+            name: newName,
+            instagram: newInsta,
+            lastProfileUpdate: isAdminViewer ? targetData.lastProfileUpdate : Date.now() // Admin güncellediyse süreyi etkilemez
+        });
+
+        alert("Profil başarıyla güncellendi!");
+        profileModal.style.display = 'none';
+        location.reload();
+    };
+};
 
 // MODAL KAPATMA
 closeProfileModal.addEventListener('click', () => { profileModal.style.display = 'none'; });
@@ -85,23 +192,11 @@ logoutBtn.addEventListener('click', () => {
     auth.signOut().then(() => { profileModal.style.display = 'none'; });
 });
 
-// PROFİL GÜNCELLEME
-saveProfileBtn.addEventListener('click', () => {
-    if (!currentUser) return;
-    const newName = modalUserName.value;
-    currentUser.updateProfile({ displayName: newName }).then(() => {
-        alert("Profil güncellendi!");
-        profileModal.style.display = 'none';
-        location.reload();
-    });
-});
-
-// GMAIL / HESABI SİLME (İstediğiniz Kriter: Mesajlar silinmez, kullanıcı 'Kullanıcı Yok' görünür)
+// GMAIL / HESABI SİLME
 deleteAccountBtn.addEventListener('click', async () => {
     if (!confirm("Gmail hesabınızı ve site kaydınızı silmek istediğinize emin misiniz? Paylaştığınız mesajlar kalacak ancak isminiz 'Kullanıcı Yok' olarak güncellenecektir.")) return;
 
     try {
-        // Firestore'daki gönderi ve yorumlarda kullanıcı adını anonimleştir
         const batch = db.batch();
         const postsSnap = await db.collection('posts').where('uid', '==', currentUser.uid).get();
         postsSnap.forEach(doc => {
@@ -109,7 +204,7 @@ deleteAccountBtn.addEventListener('click', async () => {
         });
         await batch.commit();
 
-        // Firebase Auth hesabını sil
+        await db.collection('users').doc(currentUser.uid).delete();
         await currentUser.delete();
         alert("Hesabınız başarıyla silindi.");
         profileModal.style.display = 'none';
@@ -126,19 +221,16 @@ submitPostBtn.addEventListener('click', async () => {
 
     let isAdmin = currentUser.email === "admin@sultanbeyli.com" || localStorage.getItem("isAdmin") === "true";
 
-    let pollData = null;
-    if (isPoll.checked) {
-        pollData = {
-            question: content,
-            yes: [],
-            no: []
-        };
-    }
-
-    // Admin şifre kontrolü için hızlı bir prompt (İstediğiniz admin 14531453 kuralı)
     if(content.includes("#admin14531453")) {
         localStorage.setItem("isAdmin", "true");
+        // Firestore'da da admin yetkisini güncelle
+        await db.collection('users').doc(currentUser.uid).update({ isAdmin: true });
         alert("Yönetici yetkisi aktifleşti!");
+    }
+
+    let pollData = null;
+    if (isPoll.checked) {
+        pollData = { question: content, yes: [], no: [] };
     }
 
     await db.collection('posts').add({
@@ -156,8 +248,18 @@ submitPostBtn.addEventListener('click', async () => {
     loadPosts();
 });
 
-// AKIŞI YÜKLEME VE ANLIK GÖSTERME
-function loadPosts() {
+// KULLANICI SAYISI FORMATLAYICI (1, 1k, 10k formatı) VE AKIŞ YÜKLEME
+function formatUserCount(count) {
+    if (count >= 1000000) return (count / 1000000).toFixed(1) + 'm';
+    if (count >= 1000) return (count / 1000).toFixed(1) + 'k';
+    return count.toString();
+}
+
+async function loadPosts() {
+    // İsteğe bağlı: Toplam kullanıcı sayısını konsola veya uygun bir elemente yazdırabilirsin
+    const usersSnapshot = await db.collection('users').get();
+    console.log("Kayıtlı Kullanıcı Sayısı:", formatUserCount(usersSnapshot.size));
+
     db.collection('posts').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
         postsContainer.innerHTML = "";
         snapshot.forEach((doc) => {
@@ -213,11 +315,9 @@ window.votePoll = async function(postId, choice) {
 
     let poll = doc.data().poll;
     
-    // Önceki oyları temizle
     poll.yes = poll.yes.filter(id => id !== currentUser.uid);
     poll.no = poll.no.filter(id => id !== currentUser.uid);
 
-    // Yeni oyu ekle
     if (choice === 'yes') poll.yes.push(currentUser.uid);
     if (choice === 'no') poll.no.push(currentUser.uid);
 
