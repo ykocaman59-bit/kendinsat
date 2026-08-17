@@ -181,18 +181,20 @@
 <body onclick="closeNavDropdownOutside(event)">
 
     <!-- NAVBAR -->
-    <header class="navbar">
-        <div class="logo-area" onclick="location.reload()">
-            <img id="siteLogoImg" src="https://via.placeholder.com/40" alt="Logo">
-            <span id="siteTitleName">Sultanbeyli Anlık</span>
-        </div>
-        <div class="nav-right-actions">
-            <!-- ÖNERİLER BUTONU (HERKES İÇİN) -->
-            <button onclick="openSuggestionsModal()" class="btn-primary" style="font-size: 0.85rem; padding: 6px 12px;"><i class="fa-solid fa-lightbulb"></i> Öneriler</button>
-            <div id="navAuthArea" style="position: relative;"></div>
-        </div>
-    </header>
-
+<header class="navbar">
+    <div class="logo-area" onclick="location.reload()">
+        <img id="siteLogoImg" src="https://i.imgur.com/your-logo-url.png" alt="Logo">
+        <span id="siteTitleName">İstanbul Sende Anlık</span>
+    </div>
+    <div class="nav-right-actions">
+        <!-- Öneriler butonunu korumak istiyorsanız burada kalabilir -->
+        <button onclick="openSuggestionsModal()" class="btn-primary" style="font-size: 0.85rem; padding: 6px 12px;"><i class="fa-solid fa-lightbulb"></i> Öneriler</button>
+        
+        <!-- JavaScript'in giriş/profil butonunu eklediği alan (Değiştirmeyin) -->
+        <div id="navAuthArea" style="position: relative;"></div>
+    </div>
+</header>
+    
     <main class="container">
         <!-- YÖNETİCİ HABER PAYLAŞIM KUTUSU -->
         <div class="card" id="adminShareCard" style="display: none;">
