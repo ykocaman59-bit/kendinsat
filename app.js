@@ -1,8 +1,23 @@
-// --- LOCALSTORAGE TABANLI YÖNETİCİ VE GÖNDERİ SİSTEMİ (KESİN ÇÖZÜM) ---
+// FIREBASE YAPILANDIRMANIZI BURAYA EKLEYİN
+const firebaseConfig = {
+    apiKey: "BURAYA_FIREBASE_API_KEY",
+    authDomain: "BURAYA_AUTH_DOMAIN",
+    projectId: "BURAYA_PROJECT_ID",
+    storageBucket: "BURAYA_STORAGE_BUCKET",
+    messagingSenderId: "BURAYA_MESSAGING_SENDER_ID",
+    appId: "BURAYA_APP_ID"
+};
 
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const loginBtn = document.getElementById('loginBtn');
+const userMenuSection = document.getElementById('userMenuSection');
 const shareBox = document.getElementById('shareBox');
 const submitPostBtn = document.getElementById('submitPostBtn');
 const postContent = document.getElementById('postContent');
+const isPoll = document.getElementById('isPoll');
 const postsContainer = document.getElementById('postsContainer');
 
 const profileModal = document.getElementById('profileModal');
@@ -10,216 +25,201 @@ const closeProfileModal = document.getElementById('closeProfileModal');
 const logoutBtn = document.getElementById('logoutBtn');
 const saveProfileBtn = document.getElementById('saveProfileBtn');
 const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+const modalUserName = document.getElementById('modalUserName');
+const modalUserEmail = document.getElementById('modalUserEmail');
+const modalUserPhoto = document.getElementById('modalUserPhoto');
 
-const ADMIN_EMAIL = "ykocaman59@gmail.com";
+let currentUser = null;
 
-// Sayfa yüklendiğinde oturumu ve akışı denetle
-document.addEventListener('DOMContentLoaded', () => {
-    checkAuthStatus();
-    loadPosts();
-    setupAdminButtonTrigger();
+// GÜVENLİ GOOGLE GİRİŞİ
+loginBtn.addEventListener('click', () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).catch((error) => {
+        alert("Giriş hatası: " + error.message);
+    });
 });
 
-// Üst menüdeki "Sultanbeyli Takip (Yönetici)" butonuna tıklayınca profili açma
-function setupAdminButtonTrigger() {
-    // Sizin arayüzdeki profil/yönetici butonunu yakala
-    const headerProfileBtn = document.querySelector('button[id*="Profile"], button[id*="Admin"], header button:last-child, .btn-primary');
-    if (headerProfileBtn) {
-        headerProfileBtn.onclick = (e) => {
-            e.preventDefault();
-            openMainUserMenu();
-        };
-    }
-}
+// OTURUM DURUMU İZLEME
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        currentUser = user;
+        shareBox.style.display = 'block';
+        
+        // Admin kontrolü (Örn: Belirli e-posta veya admin şifre doğrulama akışı)
+        let isAdmin = user.email === "admin@sultanbeyli.com" || localStorage.getItem("isAdmin") === "true";
 
-// Oturum Durumu Kontrolü
-function checkAuthStatus() {
-    let currentUser = JSON.parse(localStorage.getItem('current_user'));
-
-    // Eğer hiç giriş yapılmadıysa varsayılan olarak yöneticiyi veya kayıtlı kullanıcıyı al
-    if (!currentUser) {
-        currentUser = {
-            email: ADMIN_EMAIL,
-            name: "yönetici",
-            username: "admin",
-            photoURL: "",
-            instagram: localStorage.getItem('admin_instagram') || ""
-        };
-        localStorage.setItem('current_user', JSON.stringify(currentUser));
-    }
-}
-
-// ANA KULLANICI MENÜSÜ (PROFİL MODALI AÇMA)
-function openMainUserMenu() {
-    let currentUser = JSON.parse(localStorage.getItem('current_user')) || {
-        email: ADMIN_EMAIL,
-        name: "yönetici",
-        username: "admin",
-        instagram: localStorage.getItem('admin_instagram') || ""
-    };
-
-    let isAdmin = currentUser.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-
-    // Modal içindeki inputları HTML'deki sırasına ve yapısına göre bulup dolduruyoruz
-    const modalInputs = profileModal ? profileModal.querySelectorAll('input') : [];
-    
-    // Genelde 1. input Ad Soyad, 2. input Kullanıcı Adı, 3. input Gmail/Diğer
-    if (modalInputs.length >= 2) {
-        modalInputs[0].value = isAdmin ? "yönetici" : (currentUser.name || "");
-        modalInputs[1].value = isAdmin ? "admin" : (currentUser.username || "");
-        if (modalInputs[2]) {
-            modalInputs[2].value = currentUser.email || ADMIN_EMAIL;
-            modalInputs[2].disabled = true; // Gmail değiştirilemez
-        }
-    }
-
-    // Ekstra Instagram Alanı Yönetimi
-    let instaInput = document.getElementById('modalUserInstagram');
-    if (!instaInput && modalInputs.length > 0) {
-        const div = document.createElement('div');
-        div.style.marginTop = "10px";
-        div.innerHTML = `
-            <label style="font-size:0.85rem; display:block; text-align:left; margin-bottom:4px; font-weight:bold;">Instagram Adresi:</label>
-            <input type="text" id="modalUserInstagram" class="swal2-input" style="width:100%; padding:8px; box-sizing:border-box; border:1px solid #ccc; border-radius:4px;" placeholder="https://instagram.com/kullanici">
+        userMenuSection.innerHTML = `
+            <button class="btn-primary" id="openProfileBtn" style="display:flex; align-items:center; gap:8px;">
+                <img src="${user.photoURL || 'https://via.placeholder.com/30'}" style="width:24px; height:24px; border-radius:50%;"> 
+                ${user.displayName || 'Profil'} ${isAdmin ? '<span class="admin-badge">YÖNETİCİ</span>' : ''}
+            </button>
         `;
-        modalInputs[modalInputs.length - 1].parentNode.insertBefore(div, saveProfileBtn);
-        instaInput = document.getElementById('modalUserInstagram');
+
+        document.getElementById('openProfileBtn').addEventListener('click', () => {
+            modalUserName.value = user.displayName || '';
+            modalUserEmail.innerText = user.email;
+            modalUserPhoto.src = user.photoURL || 'https://via.placeholder.com/80';
+            profileModal.style.display = 'flex';
+        });
+
+    } else {
+        currentUser = null;
+        shareBox.style.display = 'none';
+        userMenuSection.innerHTML = `
+            <button id="loginBtn" class="btn-primary"><i class="fa-brands fa-google"></i> Gmail ile Giriş Yap</button>
+        `;
+        // Yeniden bağla
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider);
+        });
     }
-    
-    if (instaInput) {
-        instaInput.value = isAdmin ? (localStorage.getItem('admin_instagram') || "") : (currentUser.instagram || "");
-    }
-
-    // Yönetici kısıtlamaları (Ad ve Kullanıcı adı değiştirilemez, sadece Instagram güncellenebilir)
-    if (isAdmin) {
-        if (modalInputs[0]) modalInputs[0].disabled = true;
-        if (modalInputs[1]) modalInputs[1].disabled = true;
-    }
-
-    if (profileModal) profileModal.style.display = 'flex';
-}
-
-// PROFİLİ KAYDET
-if (saveProfileBtn) {
-    saveProfileBtn.onclick = () => {
-        let currentUser = JSON.parse(localStorage.getItem('current_user')) || {};
-        let isAdmin = currentUser.email ? currentUser.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() : true;
-
-        const modalInputs = profileModal ? profileModal.querySelectorAll('input') : [];
-        const instaInput = document.getElementById('modalUserInstagram');
-        const newInsta = instaInput ? instaInput.value.trim() : "";
-
-        if (isAdmin) {
-            // Yönetici bilgileri kilitli ve sabit kalır, sadece Instagram localStorage'a kaydedilir
-            localStorage.setItem('admin_instagram', newInsta);
-            currentUser.name = "yönetici";
-            currentUser.username = "admin";
-            currentUser.email = ADMIN_EMAIL;
-            currentUser.instagram = newInsta;
-            localStorage.setItem('current_user', JSON.stringify(currentUser));
-            alert("Yönetici profili ve Instagram adresiniz başarıyla kaydedildi!");
-        } else {
-            if (modalInputs[0]) currentUser.name = modalInputs[0].value.trim();
-            if (modalInputs[1]) currentUser.username = modalInputs[1].value.trim().toLowerCase();
-            currentUser.instagram = newInsta;
-            localStorage.setItem('current_user', JSON.stringify(currentUser));
-            alert("Profiliniz başarıyla güncellendi!");
-        }
-
-        if (profileModal) profileModal.style.display = 'none';
-        loadPosts();
-    };
-}
+    loadPosts();
+});
 
 // MODAL KAPATMA
-if (closeProfileModal) {
-    closeProfileModal.addEventListener('click', () => { profileModal.style.display = 'none'; });
-}
+closeProfileModal.addEventListener('click', () => { profileModal.style.display = 'none'; });
 
-// ÇIKIŞ YAP (Yönetici bilgilerini silmez, sadece oturumu yeniler)
-if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-        if (profileModal) profileModal.style.display = 'none';
-        alert("Çıkış yapıldı.");
+// ÇIKIŞ YAP
+logoutBtn.addEventListener('click', () => {
+    auth.signOut().then(() => { profileModal.style.display = 'none'; });
+});
+
+// PROFİL GÜNCELLEME
+saveProfileBtn.addEventListener('click', () => {
+    if (!currentUser) return;
+    const newName = modalUserName.value;
+    currentUser.updateProfile({ displayName: newName }).then(() => {
+        alert("Profil güncellendi!");
+        profileModal.style.display = 'none';
+        location.reload();
     });
-}
+});
 
-// HESAP SİLME
-if (deleteAccountBtn) {
-    deleteAccountBtn.onclick = () => {
-        if (confirm("Hesabınızı silmek istediğinize emin misiniz?")) {
-            if (profileModal) profileModal.style.display = 'none';
-            alert("Hesap sıfırlandı.");
-        }
-    };
-}
+// GMAIL / HESABI SİLME (İstediğiniz Kriter: Mesajlar silinmez, kullanıcı 'Kullanıcı Yok' görünür)
+deleteAccountBtn.addEventListener('click', async () => {
+    if (!confirm("Gmail hesabınızı ve site kaydınızı silmek istediğinize emin misiniz? Paylaştığınız mesajlar kalacak ancak isminiz 'Kullanıcı Yok' olarak güncellenecektir.")) return;
+
+    try {
+        // Firestore'daki gönderi ve yorumlarda kullanıcı adını anonimleştir
+        const batch = db.batch();
+        const postsSnap = await db.collection('posts').where('uid', '==', currentUser.uid).get();
+        postsSnap.forEach(doc => {
+            batch.update(doc.ref, { userName: "Kullanıcı Yok", userPhoto: "", deletedUser: true });
+        });
+        await batch.commit();
+
+        // Firebase Auth hesabını sil
+        await currentUser.delete();
+        alert("Hesabınız başarıyla silindi.");
+        profileModal.style.display = 'none';
+    } catch (error) {
+        alert("Güvenlik nedeniyle tekrar giriş yapmanız gerekebilir: " + error.message);
+        auth.signOut();
+    }
+});
 
 // GÖNDERİ PAYLAŞMA
-if (submitPostBtn) {
-    submitPostBtn.addEventListener('click', () => {
-        const content = postContent ? postContent.value.trim() : "";
-        if (!content) return alert("Lütfen bir şeyler yazın!");
+submitPostBtn.addEventListener('click', async () => {
+    const content = postContent.value.trim();
+    if (!content) return alert("Lütfen bir şeyler yazın!");
 
-        let currentUser = JSON.parse(localStorage.getItem('current_user')) || { email: ADMIN_EMAIL };
-        let isAdmin = currentUser.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-        let displayName = isAdmin ? "yönetici" : (currentUser.name || "Üye");
+    let isAdmin = currentUser.email === "admin@sultanbeyli.com" || localStorage.getItem("isAdmin") === "true";
 
-        let posts = JSON.parse(localStorage.getItem('local_posts')) || [];
-        
-        const newPost = {
-            id: Date.now().toString(),
-            userName: displayName,
-            userPhoto: currentUser.photoURL || "https://via.placeholder.com/40",
-            isAdmin: isAdmin,
-            content: content,
-            date: "Az önce"
+    let pollData = null;
+    if (isPoll.checked) {
+        pollData = {
+            question: content,
+            yes: [],
+            no: []
         };
+    }
 
-        posts.unshift(newPost);
-        localStorage.setItem('local_posts', JSON.stringify(posts));
+    // Admin şifre kontrolü için hızlı bir prompt (İstediğiniz admin 14531453 kuralı)
+    if(content.includes("#admin14531453")) {
+        localStorage.setItem("isAdmin", "true");
+        alert("Yönetici yetkisi aktifleşti!");
+    }
 
-        if (postContent) postContent.value = "";
-        loadPosts();
+    await db.collection('posts').add({
+        uid: currentUser.uid,
+        userName: currentUser.displayName || "Sultanbeyli Sakini",
+        userPhoto: currentUser.photoURL || "",
+        isAdmin: isAdmin,
+        content: content,
+        poll: pollData,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    postContent.value = "";
+    isPoll.checked = false;
+    loadPosts();
+});
+
+// AKIŞI YÜKLEME VE ANLIK GÖSTERME
+function loadPosts() {
+    db.collection('posts').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
+        postsContainer.innerHTML = "";
+        snapshot.forEach((doc) => {
+            const post = doc.data();
+            const postId = doc.id;
+            
+            let isDeleted = post.deletedUser === true;
+            let displayName = isDeleted ? "Kullanıcı Yok" : post.userName;
+            let displayPhoto = isDeleted ? "https://via.placeholder.com/40?text=X" : (post.userPhoto || "https://via.placeholder.com/40");
+
+            let pollHtml = "";
+            if (post.poll) {
+                const yesCount = post.poll.yes.length;
+                const noCount = post.poll.no.length;
+                const hasVotedYes = currentUser && post.poll.yes.includes(currentUser.uid);
+                const hasVotedNo = currentUser && post.poll.no.includes(currentUser.uid);
+
+                pollHtml = `
+                    <div class="poll-area">
+                        <p><strong>Anket:</strong> ${post.poll.question}</p>
+                        <div class="poll-buttons">
+                            <button onclick="votePoll('${postId}', 'yes')" class="btn-success" ${hasVotedYes ? 'disabled' : ''}>Evet (${yesCount})</button>
+                            <button onclick="votePoll('${postId}', 'no')" class="btn-danger" ${hasVotedNo ? 'disabled' : ''}>Hayır (${noCount})</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            postsContainer.innerHTML += `
+                <div class="post-card">
+                    <div class="post-header">
+                        <img src="${displayPhoto}" class="post-avatar">
+                        <div class="post-user-info">
+                            <h4>${displayName} ${post.isAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}</h4>
+                            <span>${post.createdAt ? new Date(post.createdAt.toDate()).toLocaleString('tr-TR') : 'Yükleniyor...'}</span>
+                        </div>
+                    </div>
+                    <div class="post-body">${post.content}</div>
+                    ${pollHtml}
+                </div>
+            `;
+        });
     });
 }
 
-// GÖNDERİLERİ LİSTELEME VE İNSTAGRAM İKONU
-function loadPosts() {
-    if (!postsContainer) return;
+// ANKET OY VERME FONKSİYONU
+window.votePoll = async function(postId, choice) {
+    if (!currentUser) return alert("Oy vermek için giriş yapmalısınız!");
     
-    let posts = JSON.parse(localStorage.getItem('local_posts')) || [];
+    const postRef = db.collection('posts').doc(postId);
+    const doc = await postRef.get();
+    if (!doc.exists) return;
+
+    let poll = doc.data().poll;
     
-    // Eğer hiç gönderi yoksa varsayılan test gönderisini koru veya boş bırak
-    postsContainer.innerHTML = "";
+    // Önceki oyları temizle
+    poll.yes = poll.yes.filter(id => id !== currentUser.uid);
+    poll.no = poll.no.filter(id => id !== currentUser.uid);
 
-    if (posts.length === 0) {
-        return;
-    }
+    // Yeni oyu ekle
+    if (choice === 'yes') poll.yes.push(currentUser.uid);
+    if (choice === 'no') poll.no.push(currentUser.uid);
 
-    posts.forEach(post => {
-        let instaIconHtml = "";
-        if (post.isAdmin) {
-            let adminInsta = localStorage.getItem('admin_instagram');
-            if (adminInsta) {
-                instaIconHtml = `<a href="${adminInsta}" target="_blank" style="margin-left:8px; color:#E1306C; font-size:1.1rem;"><i class="fa-brands fa-instagram"></i></a>`;
-            }
-        }
-
-        postsContainer.innerHTML += `
-            <div class="post-card" style="background:#fff; padding:15px; margin-bottom:15px; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-                <div class="post-header" style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
-                    <img src="${post.userPhoto}" style="width:40px; height:40px; border-radius:50%;">
-                    <div class="post-user-info">
-                        <h4 style="margin:0; font-size:1rem; display:flex; align-items:center;">
-                            <span>${post.userName}</span> 
-                            ${instaIconHtml} 
-                            ${post.isAdmin ? '<span class="admin-badge" style="background:#000; color:#fff; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px;">YÖNETİCİ</span>' : ''}
-                        </h4>
-                        <span style="font-size:0.75rem; color:gray;">${post.date}</span>
-                    </div>
-                </div>
-                <div class="post-body" style="font-size:0.95rem; color:#333;">${post.content}</div>
-            </div>
-        `;
-    });
+    await postRef.update({ poll: poll });
 }
