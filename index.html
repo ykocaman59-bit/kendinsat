@@ -51,11 +51,6 @@
         .logo-area { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 1.2rem; color: var(--primary-color); cursor: pointer; }
         .logo-area img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color); }
 
-        .nav-right-actions { display: flex; align-items: center; gap: 10px; position: relative; }
-        .nav-icon-btn { background: #f1f5f9; border: 1px solid var(--border-color); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; color: #334155; transition: background 0.2s; }
-        .nav-icon-btn:hover { background: #e2e8f0; }
-        .notification-badge { position: absolute; top: -5px; right: -5px; background: var(--danger-color); color: white; font-size: 0.7rem; font-weight: bold; padding: 2px 6px; border-radius: 10px; border: 2px solid white; }
-
         .container { max-width: 650px; margin: 2rem auto; padding: 0 1rem; }
 
         .card { background: var(--card-bg); padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 1.5rem; border: 1px solid var(--border-color); position: relative; }
@@ -66,14 +61,14 @@
         .btn-success { background-color: var(--success-color); color: white; }
         .btn-google { background-color: #fff; color: #334155; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 8px; font-weight: 600; }
 
-        textarea, input[type="text"], input[type="password"], input[type="date"] { width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; outline: none; }
+        textarea, input[type="text"], input[type="password"] { width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; outline: none; }
         textarea { height: 90px; resize: none; margin-top: 10px; }
         .share-options { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
 
         .post-card { position: relative; }
         .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .user-meta { display: flex; align-items: center; gap: 10px; }
-        .post-avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; background: #cbd5e1; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #fff; cursor: pointer; }
+        .post-avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; background: #cbd5e1; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #fff; }
         .admin-badge { background: var(--danger-color); color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
         .delete-post-btn { background: none; color: var(--danger-color); font-size: 1rem; cursor: pointer; padding: 5px; }
 
@@ -106,43 +101,7 @@
         .action-sheet-item:hover { background: #f1f5f9; }
         .action-sheet-item i { font-size: 1.2rem; width: 24px; color: #475569; }
 
-        /* NAVBAR AÇILIR PROFİL MENÜSÜ */
-        .nav-profile-dropdown {
-            position: absolute;
-            right: 0;
-            top: 50px;
-            background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            width: 230px;
-            display: none;
-            flex-direction: column;
-            z-index: 150;
-            overflow: hidden;
-            animation: fadeIn 0.2s ease;
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
-        .nav-dropdown-item {
-            padding: 12px 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 0.95rem;
-            font-weight: 500;
-            color: var(--text-color);
-            cursor: pointer;
-            border-bottom: 1px solid #f1f5f9;
-            background: white;
-            transition: background 0.15s;
-            text-align: left;
-            width: 100%;
-        }
-        .nav-dropdown-item:hover { background: #f8fafc; }
-        .nav-dropdown-item i { width: 20px; color: #64748b; }
-        .nav-dropdown-item.text-danger { color: var(--danger-color); }
-        .nav-dropdown-item.text-danger i { color: var(--danger-color); }
-
+        /* ZENGİN EMOJİ PENCERE STİLLERİ (ARAMA ÇUBUĞU DAHİL) */
         .emoji-picker-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 2500; }
         .emoji-picker-content { background: white; padding: 20px; border-radius: 16px; width: 340px; max-height: 480px; display: flex; flex-direction: column; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .emoji-search-box { width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.95rem; margin-top: 10px; margin-bottom: 12px; outline: none; }
@@ -152,16 +111,10 @@
         .emoji-grid span:hover { background: #f1f5f9; }
 
         .comments-section { margin-top: 15px; border-top: 1px dashed #e2e8f0; padding-top: 10px; }
-        .comment-item { font-size: 0.9rem; margin-bottom: 10px; display: flex; gap: 10px; align-items: flex-start; }
-        .comment-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; background: #cbd5e1; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #fff; flex-shrink: 0; cursor: pointer; font-size: 0.8rem; }
-        .comment-bubble { background: #f8fafc; padding: 8px 12px; border-radius: 8px; border: 1px solid #e2e8f0; flex-grow: 1; }
-        .comment-user { font-weight: bold; color: #0f172a; margin-right: 5px; cursor: pointer; }
+        .comment-item { font-size: 0.9rem; margin-bottom: 8px; background: #f8fafc; padding: 8px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: flex-start; border: 1px solid #e2e8f0; }
+        .comment-content { flex-grow: 1; }
+        .comment-user { font-weight: bold; color: #0f172a; margin-right: 5px; }
         .reply-tag { color: var(--primary-color); font-weight: 600; font-size: 0.8rem; background: #e0f2fe; padding: 1px 6px; border-radius: 4px; margin-right: 5px; }
-        
-        .replies-container { margin-left: 40px; margin-top: 8px; border-left: 2px solid #e2e8f0; padding-left: 10px; }
-        .toggle-replies-btn { background: none; border: none; color: #64748b; font-size: 0.8rem; font-weight: 600; cursor: pointer; margin: 4px 0 8px 40px; display: flex; align-items: center; gap: 5px; }
-        .toggle-replies-btn:hover { color: var(--primary-color); }
-
         .comment-input-box { display: flex; gap: 5px; margin-top: 10px; }
         .reply-target-info { font-size: 0.75rem; color: #64748b; margin-bottom: 4px; display: none; align-items: center; justify-content: space-between; background: #e2e8f0; padding: 3px 8px; border-radius: 4px; }
 
@@ -172,29 +125,19 @@
         .gmail-account-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-bottom: 1px solid #f1f5f9; cursor: pointer; text-align: left; transition: background 0.15s; }
         .gmail-account-item:hover { background: #f8fafc; }
         .gmail-avatar { width: 40px; height: 40px; border-radius: 50%; background: #2563eb; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        
-        .social-links { display: flex; justify-content: center; gap: 15px; margin-top: 15px; font-size: 1.4rem; }
-        .social-links a { color: #475569; transition: color 0.2s; }
-        .social-links a:hover { color: var(--primary-color); }
     </style>
 </head>
-<body onclick="closeNavDropdownOutside(event)">
+<body>
 
     <!-- NAVBAR -->
-<header class="navbar">
-    <div class="logo-area" onclick="location.reload()">
-        <img id="siteLogoImg" src="https://i.imgur.com/your-logo-url.png" alt="Logo">
-        <span id="siteTitleName">İstanbul Sende Anlık</span>
-    </div>
-    <div class="nav-right-actions">
-        <!-- Öneriler butonunu korumak istiyorsanız burada kalabilir -->
-        <button onclick="openSuggestionsModal()" class="btn-primary" style="font-size: 0.85rem; padding: 6px 12px;"><i class="fa-solid fa-lightbulb"></i> Öneriler</button>
-        
-        <!-- JavaScript'in giriş/profil butonunu eklediği alan (Değiştirmeyin) -->
-        <div id="navAuthArea" style="position: relative;"></div>
-    </div>
-</header>
-    
+    <header class="navbar">
+        <div class="logo-area" onclick="location.reload()">
+            <img id="siteLogoImg" src="https://via.placeholder.com/40" alt="Logo">
+            <span id="siteTitleName">Sultanbeyli Anlık</span>
+        </div>
+        <div id="navAuthArea"></div>
+    </header>
+
     <main class="container">
         <!-- YÖNETİCİ HABER PAYLAŞIM KUTUSU -->
         <div class="card" id="adminShareCard" style="display: none;">
@@ -214,82 +157,6 @@
         <div id="feedContainer"></div>
     </main>
 
-    <!-- GİRMEYE ÇALIŞAN BANLI KULLANICI İÇİN İTİRAZ MODALI -->
-    <div id="bannedModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <h3 style="color: var(--danger-color); margin-bottom: 10px;"><i class="fa-solid fa-ban"></i> Hesabınız Askıya Alındı</h3>
-            <p id="banMessageText" style="font-size: 0.9rem; color: #475569; margin-bottom: 15px;"></p>
-            <div style="text-align: left; margin-bottom: 15px;">
-                <label style="font-size: 0.85rem; font-weight: bold;">Yöneticiye İtiraz Et:</label>
-                <textarea id="banAppealText" placeholder="Neden açılmasını istiyorsanız yazın..." style="height: 70px; margin-top: 5px;"></textarea>
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <button onclick="document.getElementById('bannedModal').style.display='none'" class="btn-google" style="flex:1;">Kapat</button>
-                <button onclick="submitBanAppeal()" class="btn-primary" style="flex:1;">İtirazı Gönder</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- KULLANICILAR YÖNETİM MODALI (YÖNETİCİ ÖZEL) -->
-    <div id="usersListModal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 480px; text-align: left;">
-            <span class="close-modal" onclick="document.getElementById('usersListModal').style.display='none'">&times;</span>
-            <h3 style="margin-bottom: 10px;"><i class="fa-solid fa-users"></i> Kayıtlı Kullanıcılar</h3>
-            <input type="text" id="userSearchInput" placeholder="Kullanıcı adı ile ara..." oninput="filterUserList()" style="margin-bottom: 12px;">
-            <div id="adminUsersContainer" style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
-        </div>
-    </div>
-
-    <!-- İTİRAZLAR YÖNETİM MODALI (YÖNETİCİ ÖZEL) -->
-    <div id="appealsModal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 480px; text-align: left;">
-            <span class="close-modal" onclick="document.getElementById('appealsModal').style.display='none'">&times;</span>
-            <h3 style="margin-bottom: 12px;"><i class="fa-solid fa-envelope-open-text"></i> Gelen İtirazlar</h3>
-            <div id="adminAppealsContainer" style="max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;"></div>
-        </div>
-    </div>
-
-    <!-- ÖNERİLER MODALI -->
-    <div id="suggestionsModal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 480px; text-align: left;">
-            <span class="close-modal" onclick="document.getElementById('suggestionsModal').style.display='none'">&times;</span>
-            <h3 style="margin-bottom: 12px;"><i class="fa-solid fa-lightbulb" style="color: #eab308;"></i> Kullanıcı Önerileri</h3>
-            
-            <div id="suggestionInputBox" style="margin-bottom: 15px; display:none;">
-                <textarea id="suggestionText" placeholder="Uygulama için önerinizi yazın..." style="height: 70px;"></textarea>
-                <button onclick="submitSuggestion()" class="btn-primary" style="width: 100%; margin-top: 8px;">Öneriyi Gönder</button>
-            </div>
-
-            <div style="font-size: 0.85rem; font-weight: bold; margin-bottom: 8px;">Yapılan Öneriler:</div>
-            <div id="suggestionsListContainer" style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;"></div>
-        </div>
-    </div>
-
-    <!-- BAN TÜRÜ SEÇİM MODALI -->
-    <div id="banSelectModal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 380px;">
-            <span class="close-modal" onclick="document.getElementById('banSelectModal').style.display='none'">&times;</span>
-            <h3 style="color: var(--danger-color); margin-bottom: 15px;">Kullanıcıyı Banla</h3>
-            <p id="banTargetUserInfo" style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px;"></p>
-            
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-                <button onclick="openTemporaryBanDatePicker()" class="btn-google" style="justify-content: center; width: 100%;">Geçici Banla (Tarih Seç)</button>
-                <button onclick="executePermanentBan()" class="btn-danger" style="width: 100%;">Kalıcı Banla (Hesabı Sil)</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- GEÇİCİ BAN TARİH SEÇİM MODALI -->
-    <div id="tempBanDateModal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 380px;">
-            <span class="close-modal" onclick="document.getElementById('tempBanDateModal').style.display='none'">&times;</span>
-            <h3 style="margin-bottom: 10px;">Geçici Ban Bitiş Tarihi</h3>
-            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px;">Kullanıcının banının kalkacağı son tarihi seçin:</p>
-            <input type="date" id="tempBanDateInput" style="margin-bottom: 15px;">
-            <button onclick="executeTemporaryBan()" class="btn-primary" style="width: 100%;">Geçici Banı Uygula</button>
-        </div>
-    </div>
-
     <!-- GMAIL HESAP SEÇİCİ MODALI -->
     <div id="gmailSelectModal" class="modal" style="display: none;">
         <div class="modal-content" style="padding: 1.5rem;">
@@ -297,6 +164,26 @@
             <h3 style="margin-bottom: 5px;">Hesap Seçin</h3>
             <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px;">Devam etmek için bir Google hesabı seçin</p>
             <div id="gmailAccountsList" style="max-height: 250px; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <!-- GMAIL DOĞRULAMA KODU GİRİŞ MODALI -->
+    <div id="otpModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-modal" onclick="document.getElementById('otpModal').style.display='none'">&times;</span>
+            <h3 style="margin-bottom: 5px;"><i class="fa-solid fa-shield-halved" style="color:var(--primary-color);"></i> E-posta Doğrulama</h3>
+            <p id="otpInfoText" style="font-size: 0.85rem; color: #64748b; margin-bottom: 12px;"></p>
+            
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
+                <div style="font-size: 0.75rem; color: #1e40af; margin-bottom: 4px; font-weight: bold;">GMAİL GELEN KUTUSU SİMÜLASYONU</div>
+                <div id="simulatedEmailBox" style="font-size: 1.3rem; font-weight: bold; letter-spacing: 3px; color: #1d4ed8; margin-bottom: 8px;">123456</div>
+                <button onclick="copyGeneratedOtp()" class="btn-primary" style="font-size: 0.8rem; padding: 4px 10px;"><i class="fa-solid fa-copy"></i> Kodu Kopyala</button>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <input type="text" id="otpCodeInput" placeholder="Kodu buraya yapıştırın" maxlength="6" style="text-align: center; font-size: 1.2rem; letter-spacing: 4px;">
+                <button onclick="verifyOtpCode()" class="btn-primary" style="width: 100%;">Kodu Onayla</button>
+            </div>
         </div>
     </div>
 
@@ -311,6 +198,10 @@
                 <div>
                     <label style="font-size: 0.8rem; font-weight: bold;">Ad Soyad *</label>
                     <input type="text" id="regName" placeholder="Adınız Soyadınız">
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; font-weight: bold;">İletişim Bilgisi (Tel) *</label>
+                    <input type="text" id="regContact" placeholder="0555 ...">
                 </div>
                 <div>
                     <label style="font-size: 0.8rem; font-weight: bold;">Kullanıcı Adı *</label>
@@ -342,11 +233,21 @@
         </div>
     </div>
 
-    <!-- PROFİL DETAY & DÜZENLEME MODALI -->
+    <!-- PROFİL MODALI -->
     <div id="profileModal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 450px;">
+        <div class="modal-content">
             <span class="close-modal" onclick="document.getElementById('profileModal').style.display='none'">&times;</span>
-            <div id="profileModalContentBody"></div>
+            <h2>Profil Yönetimi</h2>
+            <div style="margin: 15px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                <img id="profileAvatarImg" src="https://via.placeholder.com/80" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color);">
+                <label style="font-size: 0.85rem; background: #e2e8f0; padding: 5px 12px; border-radius: 6px; cursor: pointer;">
+                    <i class="fa-solid fa-camera"></i> Profil Fotoğrafı Seç (Galeri)
+                    <input type="file" id="profileImageInput" accept="image/*" style="display: none;" onchange="updateProfileAvatar(this)">
+                </label>
+            </div>
+            <p id="profileUserInfo" style="color: #475569; font-size: 0.9rem; margin-bottom: 15px;"></p>
+            
+            <div id="profileActionButtons" style="display: flex; flex-direction: column; gap: 8px;"></div>
         </div>
     </div>
 
@@ -367,7 +268,7 @@
             <textarea id="delReasonDesc" placeholder="Ek açıklama yazabilirsiniz (isteğe bağlı)..." style="height: 60px; margin-bottom: 15px;"></textarea>
             
             <div style="background: #fef2f2; border: 1px solid #fecaca; padding: 10px; border-radius: 6px; font-size: 0.8rem; color: #991b1b; margin-bottom: 15px;">
-                ⚠️ <strong>Emin misiniz?</strong> Hesabınızı sildiğinizde yorumlarınız kalır ancak kullanıcı adınız <strong>"Instagram Kullanıcısı"</strong> şeklinde anonimleşir ve profil görseli kalkar.
+                ⚠️ <strong>Emin misiniz?</strong> Hesabınızı sildiğinizde tüm yorumlarınız ve yanıtlarınız silinecektir.
             </div>
 
             <div style="display: flex; gap: 10px;">
@@ -377,8 +278,7 @@
         </div>
     </div>
 
-    <!-- INSTAGRAM TARZI ACTION SHEET -->
-    <div id="actionSheetOverlay" class="action-sheet-overlay" onclick="closeActionSheet(event)">
+    <!-- INSTAGRAM TARZI ACTION SHEET --><div id="actionSheetOverlay" class="action-sheet-overlay" onclick="closeActionSheet(event)">
         <div class="action-sheet" id="actionSheetBox">
             <div class="action-sheet-emojis">
                 <span onclick="reactFromSheet('❤️')">❤️</span>
@@ -396,12 +296,12 @@
         </div>
     </div>
 
-    <!-- EMOJİ SEÇİCİ -->
+    <!-- ZENGİN EMOJİ SEÇİCİ PENCRESİ VE ARAMA ÇUBUĞU -->
     <div id="emojiPickerModal" class="emoji-picker-modal" onclick="closeEmojiModal(event)">
         <div class="emoji-picker-content">
             <span class="close-modal" onclick="document.getElementById('emojiPickerModal').style.display='none'">&times;</span>
             <h4 style="margin-bottom: 2px; text-align: left;">İfade Seç</h4>
-            <input type="text" id="emojiSearchInput" class="emoji-search-box" placeholder="Emoji ara..." oninput="filterEmojis()">
+            <input type="text" id="emojiSearchInput" class="emoji-search-box" placeholder="Emoji ara (örn: gül, kalp, ateş)..." oninput="filterEmojis()">
             <div class="emoji-grid-container">
                 <div class="emoji-grid" id="fullEmojiGrid"></div>
             </div>
@@ -414,7 +314,6 @@
                 id: 1, 
                 email: "admin", 
                 name: "Sultanbeyli Takip (Yönetici)", 
-                username: "admin",
                 isAdmin: true, 
                 text: "İstanbul Valiliği: Yarın kent genelinde kuvvetli rüzgar ve fırtına bekleniyor, dikkatli olun.", 
                 image: "",
@@ -426,27 +325,29 @@
         ];
 
         let registeredUsers = JSON.parse(localStorage.getItem('sb_registered_users')) || {
-            "kralbaba@gmail.com": { email: "kralbaba@gmail.com", name: "Kral Baba", username: "kralbaba", avatar: "", isAdmin: false, links: { instagram: "kralbaba", youtube: "", tiktok: "" }, lastProfileUpdate: 0 }
+            "kralbaba@gmail.com": { email: "kralbaba@gmail.com", name: "Kral Baba", username: "kralbaba", contact: "05554443322", avatar: "", isAdmin: false }
         };
-
-        let bannedUsers = JSON.parse(localStorage.getItem('sb_banned_users')) || {};
-        let userAppeals = JSON.parse(localStorage.getItem('sb_appeals')) || [];
-        let suggestions = JSON.parse(localStorage.getItem('sb_suggestions')) || [];
 
         let siteLogo = localStorage.getItem('sb_logo') || "https://via.placeholder.com/40";
         let currentUser = JSON.parse(localStorage.getItem('sb_current_user')) || null;
         let activePostIdForMenu = null;
         let pendingGmailEmail = "";
-        let openRepliesState = {};
-        let pendingNewEmail = "";
-        let generatedGmailCode = "";
-        let selectedUserEmailForBan = "";
+        let generatedOtp = "";
 
+        // Çok Geniş ve Zengin Emoji Listesi (Kategorize / Popüler Emojiler)
         const ALL_EMOJIS = [
-            '👍', '👎', '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '🔥', '✨', '⭐', '🌟', '💫', '💥', '💬', '💭', '👋', '✋', '👌', '✌️', '🤞', '🤟', '🤘', '👏', '🙌', '🙏', '💪', '👀', '🧠', '🦷', '🦴', '👶', '👧', '🧒', '👦', '👩', '🧑', '👨', '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃', '😉', '😊', '😇', '🥰', '😍', '🤩', '😘', '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '🤥', '😌', '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮', '🤧', '🥴', '😵', '🤯', '🤠', '🥳', '😎', '🤓', '🧐', '😕', '😟', '🙁', '😮', '😯', '😲', '😳', '🥺', '😦', '😧', '😨', '😰', '😢', '😭', '😱', '😖', '😣', '😞', '😓', '😩', '😫', '🥱', '😤', '😡', '😠', '🤬', '😈', '👿', '💀', '☠️', '💩', '🤡', '👹', '👺', '👻', '🎉', '🎊', '🎈', '🎁', '🎂', '🎄', '🎆', '🎇', '🏆', '🏅', '🥇', '🥈', '🥉', '⚽', '🏀', '🏈', '⚾', '🎾', '🇹🇷', '🚀'
+            '👍', '👎', '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❤️‍🔥', '❤️‍🩹', '💖', '💗', '💓', '💞', '💕', '💌', '❣️', '💘', 
+            '🔥', '✨', '⭐', '🌟', '💫', '💥', '💢', '💬', '👁️‍🗨️', '🗨️', '🗯️', '💭', '💤', '👋', '🤚', '🖐️', '✋', '🖖', '👌', '🤌', '🤏', 
+            '✌️', '🤞', '🫰', '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇', '☝️', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', 
+            '🤲', '🤝', '🙏', '✍️', '💅', '🤳', '💪', '🦾', '🦿', '🦵', '🦶', '👂', '🦻', '👃', '🧠', '🫀', '🫁', '🦷', '🦴', '👀', '👁️', 
+            '👅', '👄', '💋', '👶', '👧', '🧒', '👦', '👩', '🧑', '👨', '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃', '😉', 
+            '😊', '😇', '🥰', '😍', '🤩', '😘', '😗', '☺️', '😚', '😙', '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🤐', 
+            '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '🤥', '😌', '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮', '🤧', '🥴', 
+            '😵', '🤯', '🤠', '🥳', '😎', '🤓', '🧐', '😕', '😟', '🙁', '😮', '😯', '😲', '😳', '🥺', '😦', '😧', '😨', '😰', '😢', '😭', 
+            '😱', '😖', '😣', '😞', '😓', '😩', '😫', '🥱', '😤', '😡', '😠', '🤬', '😈', '👿', '💀', '☠️', '💩', '🤡', '👹', '👺', '👻', 
+            '🎉', '🎊', '🎈', '🎁', '🎂', '🎄', '🎆', '🎇', '✨', '🏆', '🏅', '🥇', '🥈', '🥉', '⚽', '🏀', '🏈', '⚾', '🎾', '🇹🇷', '🚀'
         ];
         let replyTargets = {};
-        let suggestionReplyTargets = {};
 
         function init() {
             document.getElementById('siteLogoImg').src = siteLogo;
@@ -462,311 +363,23 @@
             if (currentUser) {
                 adminCard.style.display = currentUser.isAdmin ? 'block' : 'none';
                 let avatarHtml = currentUser.avatar ? `<img src="${currentUser.avatar}" style="width:28px; height:28px; border-radius:50%; object-fit:cover;">` : `<i class="fa-solid fa-user"></i>`;
-                
-                let adminExtraMenu = "";
-                if (currentUser.isAdmin) {
-                    let pendingAppealsCount = userAppeals.filter(a => a.status === 'pending').length;
-                    let badgeHtml = pendingAppealsCount > 0 ? `<span class="notification-badge">${pendingAppealsCount}</span>` : "";
-
-                    adminExtraMenu = `
-                        <div class="nav-dropdown-item" onclick="openUsersListModal()">
-                            <i class="fa-solid fa-users"></i> Kullanıcılar
-                        </div>
-                        <div class="nav-dropdown-item" onclick="openAppealsModal()" style="position:relative;">
-                            <i class="fa-solid fa-bell"></i> İtirazlar ${badgeHtml}
-                        </div>
-                    `;
-                }
-
-                let deleteAccountOption = !currentUser.isAdmin ? `
-                    <div class="nav-dropdown-item text-danger" onclick="openDeleteAccountModalFromNav()">
-                        <i class="fa-solid fa-user-slash"></i> Hesabı Sil
-                    </div>` : '';
-
-                navArea.innerHTML = `
-                    <button onclick="toggleNavDropdown(event)" class="btn-primary" style="display:flex; align-items:center; gap:8px;">${avatarHtml} ${currentUser.name}</button>
-                    <div id="navProfileDropdown" class="nav-profile-dropdown">
-                        <div class="nav-dropdown-item" onclick="openUserProfile('${currentUser.email}')">
-                            <i class="fa-solid fa-user-pen"></i> Profili Düzenle
-                        </div>
-                        ${adminExtraMenu}
-                        <div class="nav-dropdown-item" onclick="logout()">
-                            <i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap
-                        </div>
-                        ${deleteAccountOption}
-                    </div>
-                `;
+                navArea.innerHTML = `<button onclick="openProfile()" class="btn-primary" style="display:flex; align-items:center; gap:8px;">${avatarHtml} ${currentUser.name}</button>`;
             } else {
                 adminCard.style.display = 'none';
                 navArea.innerHTML = `<button onclick="openLoginModal()" class="btn-google"><i class="fa-brands fa-google" style="color: #ea4335;"></i> Gmail ile Giriş</button>`;
             }
         }
 
-        function toggleNavDropdown(event) {
-            event.stopPropagation();
-            let dropdown = document.getElementById('navProfileDropdown');
-            if (dropdown) {
-                dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
-            }
-        }
-
-        function closeNavDropdownOutside(event) {
-            let dropdown = document.getElementById('navProfileDropdown');
-            if (dropdown && dropdown.style.display === 'flex') {
-                dropdown.style.display = 'none';
-            }
-        }
-
         function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; }
         function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
-
-        function openSuggestionsModal() {
-            let sModal = document.getElementById('suggestionsModal');
-            let inputBox = document.getElementById('suggestionInputBox');
-            
-            if (currentUser && !currentUser.isAdmin) {
-                inputBox.style.display = 'block';
-            } else {
-                inputBox.style.display = 'none'; // Yönetici veya giriş yapmamışsa sadece önerileri görür, ekleyemez
-            }
-            renderSuggestionsList();
-            sModal.style.display = 'flex';
-        }
-
-        function submitSuggestion() {
-            let text = document.getElementById('suggestionText').value.trim();
-            if (!text) return alert("Öneri boş olamaz!");
-            
-            suggestions.unshift({
-                id: Date.now(),
-                name: currentUser.name,
-                email: currentUser.email,
-                text: text,
-                time: new Date().toLocaleDateString(),
-                reactions: {},
-                comments: []
-            });
-            localStorage.setItem('sb_suggestions', JSON.stringify(suggestions));
-            document.getElementById('suggestionText').value = "";
-            renderSuggestionsList();
-            alert("Öneriniz gönderildi.");
-        }
-
-        function renderSuggestionsList() {
-            let container = document.getElementById('suggestionsListContainer');
-            if (suggestions.length === 0) {
-                container.innerHTML = `<div style="font-size: 0.85rem; color: #94a3b8;">Henüz öneri yapılmamış.</div>`;
-                return;
-            }
-
-            container.innerHTML = suggestions.map(s => {
-                // Reaksiyonlar
-                let reactionsHtml = "";
-                if (s.reactions) {
-                    for (let [emoji, usersList] of Object.entries(s.reactions)) {
-                        if (usersList.length > 0) {
-                            let hasReacted = currentUser && usersList.includes(currentUser.email);
-                            reactionsHtml += `<div class="reaction-badge ${hasReacted ? 'active' : ''}" onclick="addSuggestionReaction(${s.id}, '${emoji}')">${emoji} ${usersList.length}</div>`;
-                        }
-                    }
-                }
-
-                // Yorumlar (Sadece yönetici yanıt yazabilir/emoji atabilir)
-                let commentsHtml = "";
-                if (s.comments) {
-                    s.comments.forEach(c => {
-                        let badge = c.isAdmin ? `<span class="admin-badge">YÖNETİCİ</span>` : "";
-                        let canDel = currentUser && (currentUser.email === c.email || currentUser.isAdmin);
-                        let delBtn = canDel ? `<button style="background:none; border:none; color:var(--danger-color); font-size:0.75rem; cursor:pointer; margin-left:8px;" onclick="deleteSuggestionComment(${s.id}, ${c.id})"><i class="fa-solid fa-trash"></i></button>` : "";
-
-                        commentsHtml += `
-                            <div class="comment-item" style="margin-top: 6px;">
-                                <div class="comment-avatar" onclick="openUserProfile('${c.email}')">${c.name.charAt(0).toUpperCase()}</div>
-                                <div class="comment-bubble">
-                                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                                        <div>
-                                            <span class="comment-user" onclick="openUserProfile('${c.email}')">${c.name}</span> ${badge}
-                                            <div>${c.text}</div>
-                                        </div>
-                                        ${delBtn}
-                                    </div>
-                                </div>
-                            </div>`;
-                    });
-                }
-
-                let isAdminViewer = currentUser && currentUser.isAdmin;
-                let emojiBarHtml = isAdminViewer ? `
-                    <div class="quick-emoji-bar">
-                        <button class="quick-emoji-btn" onclick="addSuggestionReaction(${s.id}, '❤️')">❤️</button>
-                        <button class="quick-emoji-btn" onclick="addSuggestionReaction(${s.id}, '👍')">👍</button>
-                        <button class="quick-emoji-btn" onclick="addSuggestionReaction(${s.id}, '🔥')">🔥</button>
-                    </div>` : '';
-
-                let commentInputBoxHtml = isAdminViewer ? `
-                    <div class="comment-input-box" style="margin-top:8px;">
-                        <input type="text" id="sug-comment-input-${s.id}" placeholder="Yönetici olarak cevap yaz...">
-                        <button class="btn-primary" onclick="addSuggestionComment(${s.id})">Gönder</button>
-                    </div>` : '';
-
-                return `
-                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px;">
-                        <div style="font-size: 0.8rem; font-weight: bold; color: var(--primary-color); margin-bottom: 3px;">Falanca Kullanıcı: ${s.name}</div>
-                        <div style="font-size: 0.9rem; color: #1e293b; margin-bottom: 8px;">${s.text}</div>
-                        
-                        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
-                            ${emojiBarHtml}
-                            <div style="display:flex; gap:5px; flex-wrap:wrap;">${reactionsHtml}</div>
-                        </div>
-
-                        <div style="border-top: 1px dashed #cbd5e1; padding-top: 6px;">
-                            ${commentsHtml}
-                            ${commentInputBoxHtml}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        window.addSuggestionReaction = function(suggestionId, emoji) {if (!currentUser || !currentUser.isAdmin) return; // Sadece yönetici emoji atabilir
-            let sug = suggestions.find(s => s.id === suggestionId);
-            if (!sug) return;
-            if (!sug.reactions) sug.reactions = {};
-
-            let alreadyHas = sug.reactions[emoji] && sug.reactions[emoji].includes(currentUser.email);
-            for (let emj in sug.reactions) {
-                sug.reactions[emj] = sug.reactions[emj].filter(e => e !== currentUser.email);
-                if (sug.reactions[emj].length === 0) delete sug.reactions[emj];
-            }
-
-            if (!alreadyHas) {
-                if (!sug.reactions[emoji]) sug.reactions[emoji] = [];
-                sug.reactions[emoji].push(currentUser.email);
-            }
-
-            localStorage.setItem('sb_suggestions', JSON.stringify(suggestions));
-            renderSuggestionsList();
-        }
-
-        window.addSuggestionComment = function(suggestionId) {
-            if (!currentUser || !currentUser.isAdmin) return; // Sadece yönetici cevap yazabilir
-            let input = document.getElementById(`sug-comment-input-${suggestionId}`);
-            let text = input.value.trim();
-            if (!text) return;
-
-            let sug = suggestions.find(s => s.id === suggestionId);
-            if (!sug) return;
-            if (!sug.comments) sug.comments = [];
-
-            sug.comments.push({
-                id: Date.now(),
-                email: currentUser.email,
-                name: currentUser.name,
-                isAdmin: currentUser.isAdmin,
-                text: text
-            });
-
-            localStorage.setItem('sb_suggestions', JSON.stringify(suggestions));
-            renderSuggestionsList();
-        }
-
-        window.deleteSuggestionComment = function(suggestionId, commentId) {
-            let sug = suggestions.find(s => s.id === suggestionId);
-            if (!sug || !sug.comments) return;
-            sug.comments = sug.comments.filter(c => c.id !== commentId);
-            localStorage.setItem('sb_suggestions', JSON.stringify(suggestions));
-            renderSuggestionsList();
-        }
-
-        function openUsersListModal() {
-            let dropdown = document.getElementById('navProfileDropdown');
-            if (dropdown) dropdown.style.display = 'none';
-            renderUsersListTable("");
-            document.getElementById('usersListModal').style.display = 'flex';
-        }
-
-        function filterUserList() {
-            let q = document.getElementById('userSearchInput').value.trim().toLowerCase();
-            renderUsersListTable(q);
-        }
-
-        function renderUsersListTable(query) {
-            let container = document.getElementById('adminUsersContainer');
-            let usersArr = Object.values(registeredUsers);
-            if (query) {
-                usersArr = usersArr.filter(u => u.username.toLowerCase().includes(query) || u.name.toLowerCase().includes(query));
-            }
-
-            if (usersArr.length === 0) {
-                container.innerHTML = `<div style="font-size: 0.85rem; color: #94a3b8;">Kayıtlı kullanıcı bulunamadı.</div>`;
-                return;
-            }
-
-            container.innerHTML = usersArr.map(u => `
-                <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px;">
-                    <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="document.getElementById('usersListModal').style.display='none'; openUserProfile('${u.email}')">
-                        <div class="comment-avatar">${u.name.charAt(0)}</div>
-                        <div>
-                            <div style="font-weight: bold; font-size: 0.9rem;">${u.name}</div>
-                            <div style="font-size: 0.75rem; color: #64748b;">@${u.username}</div>
-                        </div>
-                    </div>
-                    <button onclick="document.getElementById('usersListModal').style.display='none'; openUserProfile('${u.email}')" class="btn-primary" style="font-size: 0.8rem; padding: 4px 8px;">Profili Gör</button>
-                </div>
-            `).join('');
-        }
-
-        function openAppealsModal() {
-            let dropdown = document.getElementById('navProfileDropdown');
-            if (dropdown) dropdown.style.display = 'none';
-            renderAppealsList();
-            document.getElementById('appealsModal').style.display = 'flex';
-        }
-
-        function renderAppealsList() {
-            let container = document.getElementById('adminAppealsContainer');
-            let pending = userAppeals.filter(a => a.status === 'pending');
-
-            if (pending.length === 0) {
-                container.innerHTML = `<div style="font-size: 0.85rem; color: #94a3b8;">Bekleyen itiraz bulunmuyor.</div>`;
-                return;
-            }
-
-            container.innerHTML = pending.map(app => `
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px;">
-                    <div style="font-weight: bold; font-size: 0.9rem; color: var(--primary-color);">${app.email}</div>
-                    <div style="font-size: 0.85rem; margin: 6px 0;">"${app.reason}"</div>
-                    <div style="display: flex; gap: 8px; margin-top: 8px;">
-                        <button onclick="resolveAppeal('${app.id}', 'approved')" class="btn-success" style="flex:1; font-size:0.8rem;">Onayla</button>
-                        <button onclick="resolveAppeal('${app.id}', 'rejected')" class="btn-danger" style="flex:1; font-size:0.8rem;">Reddet</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function resolveAppeal(appealId, status) {
-            let app = userAppeals.find(a => a.id === appealId);
-            if (!app) return;
-            app.status = status;
-
-            if (status === 'approved') {
-                if (bannedUsers[app.email]) {
-                    delete bannedUsers[app.email];
-                    localStorage.setItem('sb_banned_users', JSON.stringify(bannedUsers));
-                }
-            }
-            localStorage.setItem('sb_appeals', JSON.stringify(userAppeals));
-            renderAppealsList();
-            renderNavbar();
-            alert(status === 'approved' ? "İtiraz onaylandı, ban kaldırıldı." : "İtiraz reddedildi.");
-        }
 
         function openGmailSelector() {
             closeLoginModal();
             let mockAccounts = [
                 { email: "kralbaba@gmail.com", name: "Kral Baba" },
                 { email: "ykocaman59@gmail.com", name: "Yusuf Kocaman" },
-                { email: "elektrikadam.yk@gmail.com", name: "Elektrik Adam" }
+                { email: "elektrikadam.yk@gmail.com", name: "Elektrik Adam" },
+                { email: "yenihesap.ornek@gmail.com", name: "Yeni Ziyaretçi" }
             ];
 
             let listContainer = document.getElementById('gmailAccountsList');
@@ -790,55 +403,40 @@
 
         function selectGmailAccount(email) {
             closeGmailModal();
-            
-            if (bannedUsers[email]) {
-                let bInfo = bannedUsers[email];
-                if (bInfo.type === 'permanent') {
-                    alert("Bu hesap kalıcı olarak banlanmıştır.");
-                    return;
-                } else if (bInfo.type === 'temporary') {
-                    let now = new Date();
-                    let expiry = new Date(bInfo.expiryDate);
-                    if (now < expiry) {
-                        document.getElementById('banMessageText').innerText = `Hesabınız ${bInfo.expiryDate} tarihine kadar geçici olarak banlanmıştır.`;
-                        selectedUserEmailForBan = email;
-                        document.getElementById('bannedModal').style.display = 'flex';
-                        return;
-                    } else {
-                        delete bannedUsers[email];
-                        localStorage.setItem('sb_banned_users', JSON.stringify(bannedUsers));
-                    }
-                }
-            }
-
             pendingGmailEmail = email;
 
             if (registeredUsers[email]) {
                 currentUser = registeredUsers[email];
                 localStorage.setItem('sb_current_user', JSON.stringify(currentUser));
                 init();
-                alert(`Hoş geldin, ${currentUser.name}!`);
+                alert(`Hoş geldin, ${currentUser.name} (${currentUser.username})!`);
             } else {
-                document.getElementById('regName').value = "";
-                document.getElementById('regUsername').value = pendingGmailEmail.split('@')[0];
-                checkUsernameAvailability();
-                document.getElementById('registerModal').style.display = 'flex';
+                generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+                document.getElementById('otpInfoText').innerHTML = `<strong>${email}</strong> adresine doğrulama kodu gönderildi. Gelen kutunuza gelen kodu kopyalayıp aşağıya yapıştırın.`;
+                document.getElementById('simulatedEmailBox').innerText = generatedOtp;
+                document.getElementById('otpCodeInput').value = "";
+                document.getElementById('otpModal').style.display = 'flex';
             }
         }
 
-        function submitBanAppeal() {
-            let text = document.getElementById('banAppealText').value.trim();
-            if (!text) return alert("İtiraz metni boş olamaz!");
-
-            userAppeals.push({
-                id: Date.now().toString(),
-                email: selectedUserEmailForBan,
-                reason: text,
-                status: 'pending'
+        function copyGeneratedOtp() {
+            navigator.clipboard.writeText(generatedOtp).then(() => {
+                alert("Kod panoya kopyalandı!");
             });
-            localStorage.setItem('sb_appeals', JSON.stringify(userAppeals));
-            document.getElementById('bannedModal').style.display = 'none';
-            alert("İtirazınız yöneticiye gönderildi.");
+        }
+
+        function verifyOtpCode() {
+            let enteredCode = document.getElementById('otpCodeInput').value.trim();
+            if (enteredCode === generatedOtp) {
+                document.getElementById('otpModal').style.display = 'none';
+                document.getElementById('regName').value = "";
+                document.getElementById('regContact').value = "";
+                document.getElementById('regUsername').value = pendingGmailEmail.split('@')[0];
+                checkUsernameAvailability();
+                document.getElementById('registerModal').style.display = 'flex';
+            } else {
+                alert("Hatalı kod!");
+            }
         }
 
         function closeRegisterModal() { document.getElementById('registerModal').style.display = 'none'; }
@@ -860,9 +458,10 @@
 
         function completeRegistration() {
             let name = document.getElementById('regName').value.trim();
+            let contact = document.getElementById('regContact').value.trim();
             let username = document.getElementById('regUsername').value.trim().toLowerCase();
 
-            if (!name || !username) {
+            if (!name || !contact || !username) {
                 alert("Lütfen tüm alanları doldurun!");
                 return;
             }
@@ -871,10 +470,9 @@
                 email: pendingGmailEmail,
                 name: name,
                 username: username,
+                contact: contact,
                 avatar: "",
-                isAdmin: false,
-                links: { instagram: username, youtube: "", tiktok: "" },
-                lastProfileUpdate: 0
+                isAdmin: false
             };
 
             registeredUsers[pendingGmailEmail] = currentUser;
@@ -886,11 +484,12 @@
             alert(`Kayıt başarılı!`);
         }
 
-        function handleAdminLogin() {let u = document.getElementById('adminUserIn').value.trim();
+        function handleAdminLogin() {
+            let u = document.getElementById('adminUserIn').value.trim();
             let p = document.getElementById('adminPassIn').value.trim();
 
             if (u === "admin" && p === "14531453") {
-                currentUser = { email: "admin@sultanbeyli.gov.tr", name: "Sultanbeyli Takip (Yönetici)", username: "admin", isAdmin: true, avatar: "", links: { instagram: "sultanbeylitakip", youtube: "sultanbeyli", tiktok: "" }, lastProfileUpdate: 0 };
+                currentUser = { email: "admin@sultanbeyli.gov.tr", name: "Sultanbeyli Takip (Yönetici)", username: "admin", isAdmin: true, avatar: "" };
                 localStorage.setItem('sb_current_user', JSON.stringify(currentUser));
                 closeLoginModal();
                 init();
@@ -902,170 +501,24 @@
         function logout() {
             localStorage.removeItem('sb_current_user');
             currentUser = null;
+            document.getElementById('profileModal').style.display = 'none';
             init();
         }
 
-        // PROFİL GÖRÜNTÜLEME (Kendi profilindeyse düzenleme, başkasının profiliyse veya yönetici ise profil kartı + ban tuşu)
-        window.openUserProfile = function(userEmail) {
-            let targetUser = registeredUsers[userEmail];
-            if (!targetUser && userEmail === "admin") {
-                targetUser = { name: "Sultanbeyli Takip (Yönetici)", username: "admin", isAdmin: true, avatar: "", email: "admin@sultanbeyli.gov.tr", links: { instagram: "sultanbeylitakip" }, lastProfileUpdate: 0 };
-            }
-            if (!targetUser) {
-                targetUser = { name: "Instagram Kullanıcısı", username: "instagram_kullanicisi", avatar: "", email: "" };
-            }
-
-            let isMe = currentUser && currentUser.email === userEmail;
-            let isAdminViewer = currentUser && currentUser.isAdmin;
-
-            let contentHtml = "";
-            let avatarSrc = targetUser.avatar || "https://via.placeholder.com/80";
-
-            if (isMe) {
-                let now = Date.now();
-                let lastUpdate = targetUser.lastProfileUpdate || 0;
-                let sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
-                let canChangeInfo = (now - lastUpdate) > sevenDaysMs || targetUser.isAdmin;
-                let remainingDays = Math.ceil((sevenDaysMs - (now - lastUpdate)) / (1000 * 60 * 60 * 24));
-
-                contentHtml = `
-                    <h2>Profilini Düzenle</h2>
-                    <div style="margin: 12px 0; display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                        <img src="${avatarSrc}" style="width: 75px; height: 75px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color);">
-                        <label style="font-size: 0.8rem; background: #e2e8f0; padding: 4px 10px; border-radius: 6px; cursor: pointer;">
-                            <i class="fa-solid fa-camera"></i> Fotoğrafı Değiştir
-                            <input type="file" accept="image/*" style="display: none;" onchange="updateProfileAvatar(this)">
-                        </label>
-                    </div>
-
-                    ${!canChangeInfo ? `<div style="background:#fef3c7; border:1px solid #f59e0b; color:#b45309; padding:8px; border-radius:6px; font-size:0.8rem; margin-bottom:10px;">⚠️ Bilgilerinizi son 7 gün içinde değiştirdiğiniz için yeni değişiklik için <strong>${remainingDays} gün</strong> beklemelisiniz.</div>` : ''}
-
-                    <div style="text-align: left; font-size: 0.85rem; display: flex; flex-direction: column; gap: 8px;">
-                        <div>
-                            <label style="font-weight:bold;">Ad Soyad:</label>
-                            <input type="text" id="editProfileName" value="${targetUser.name}" ${!canChangeInfo ? 'disabled' : ''} style="padding:6px; font-size:0.9rem;">
-                        </div>
-                        <div>
-                            <label style="font-weight:bold;">Kullanıcı Adı:</label>
-                            <input type="text" id="editProfileUsername" value="${targetUser.username}" ${!canChangeInfo ? 'disabled' : ''} style="padding:6px; font-size:0.9rem;">
-                        </div>
-                        <div>
-                            <label style="font-weight:bold;">Gmail Adresi:</label>
-                            <input type="text" id="editProfileEmail" value="${targetUser.email}" ${!canChangeInfo ? 'disabled' : ''} style="padding:6px; font-size:0.9rem;">
-                        </div>
-                    </div>
-
-                    ${canChangeInfo ? `
-                        <button onclick="requestEmailChange('${userEmail}')" class="btn-primary" style="width: 100%; margin-top: 12px; font-size:0.9rem;">Değişiklikleri Kaydet</button>` : ''}
-                `;
-            } else {
-                let links = targetUser.links || {};
-                let reportBtnHtml = "";
-                if (isAdminViewer && !targetUser.isAdmin && targetUser.email) {
-                    reportBtnHtml = `<button onclick="openBanSelectModal('${targetUser.email}', '${targetUser.name}')" class="btn-danger" style="margin-top: 15px; width: 100%; font-size: 0.9rem;"><i class="fa-solid fa-triangle-exclamation"></i> Rapor Et / Banla</button>`;
-                }
-
-                contentHtml = `
-                    <div style="margin: 15px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                        <img src="${avatarSrc}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color);">
-                        <h3 style="margin-top: 5px;">${targetUser.name}</h3>
-                        <div style="color: #64748b; font-size: 0.9rem;">@${targetUser.username}</div>
-                    </div>
-                    <div class="social-links">
-                        ${targetUser.email ? `<a href="mailto:${targetUser.email}" title="E-posta Gönder"><i class="fa-solid fa-envelope"></i></a>` : ''}
-                        ${links.instagram ? `<a href="https://instagram.com/${links.instagram}" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>` : ''}
-                        ${links.youtube ? `<a href="https://youtube.com/@${links.youtube}" target="_blank" title="YouTube"><i class="fa-brands fa-youtube"></i></a>` : ''}
-                        ${links.tiktok ? `<a href="https://tiktok.com/@${links.tiktok}" target="_blank" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>` : ''}
-                    </div>
-                    ${reportBtnHtml}
-                `;
-            }
-
-            document.getElementById('profileModalContentBody').innerHTML = contentHtml;
-            document.getElementById('profileModal').style.display = 'flex';
-        }
-
-        function openBanSelectModal(email, name) {
-            selectedUserEmailForBan = email;
-            document.getElementById('banTargetUserInfo').innerText = `${name} (${email}) kullanıcısına uygulanacak işlem türünü seçin:`;
-            document.getElementById('profileModal').style.display = 'none';
-            document.getElementById('banSelectModal').style.display = 'flex';
-        }
-
-        function openTemporaryBanDatePicker() {
-            document.getElementById('banSelectModal').style.display = 'none';
-            document.getElementById('tempBanDateModal').style.display = 'flex';
-        }
-
-        function executePermanentBan() {
-            bannedUsers[selectedUserEmailForBan] = { type: 'permanent' };
-            localStorage.setItem('sb_banned_users', JSON.stringify(bannedUsers));
-            delete registeredUsers[selectedUserEmailForBan];
-            localStorage.setItem('sb_registered_users', JSON.stringify(registeredUsers));
-
-            document.getElementById('banSelectModal').style.display = 'none';
-            alert("Kullanıcı kalıcı olarak banlandı ve hesabı silindi.");
-            renderFeed();
-        }
-
-        function executeTemporaryBan() {
-            let dateVal = document.getElementById('tempBanDateInput').value;
-            if (!dateVal) return alert("Lütfen bir tarih seçin!");
-
-            bannedUsers[selectedUserEmailForBan] = { type: 'temporary', expiryDate: dateVal };
-            localStorage.setItem('sb_banned_users', JSON.stringify(bannedUsers));
-
-            document.getElementById('tempBanDateModal').style.display = 'none';
-            alert(`Kullanıcı ${dateVal} tarihine kadar geçici olarak banlandı.`);
-        }
-
-        window.requestEmailChange = function(oldEmail) {
-            let newName = document.getElementById('editProfileName').value.trim();
-            let newUsername = document.getElementById('editProfileUsername').value.trim().toLowerCase();
-            let newEmail = document.getElementById('editProfileEmail').value.trim();
-
-            if (!newName || !newUsername || !newEmail) {
-                alert("Tüm alanlar doldurulmalıdır!");
-                return;
-            }
-
-            pendingNewEmail = newEmail;
-            generatedGmailCode = Math.floor(100000 + Math.random() * 900000).toString();
+        function openProfile() {
+            document.getElementById('profileAvatarImg').src = currentUser.avatar || "https://via.placeholder.com/80";
+            document.getElementById('profileUserInfo').innerHTML = `<strong>Ad:</strong> ${currentUser.name}<br><strong>Kullanıcı Adı:</strong> @${currentUser.username || 'yok'}<br><strong>E-posta:</strong> ${currentUser.email}`;
             
-            alert(`[Gmail Doğrulama Simülasyonu]\n Yeni adresiniz (${newEmail}) için doğrulama kodu gönderildi.\nKodunuz: ${generatedGmailCode}`);
-
-            let modalBody = document.getElementById('profileModalContentBody');
-            modalBody.innerHTML = `
-                <h3>Gmail Doğrulama</h3>
-                <p style="font-size:0.85rem; color:#64748b; margin: 10px 0;">Yeni Gmail adresinize gönderilen 6 haneli doğrulama kodunu girin:</p>
-                <input type="text" id="gmailVerificationCodeInput" placeholder="Örn: 123456" style="text-align:center; font-size:1.2rem; letter-spacing:3px; margin-bottom:15px;">
-                <button onclick="verifyAndSaveProfileChanges('${oldEmail}', '${newName}', '${newUsername}', '${newEmail}')" class="btn-primary" style="width:100%;">Kodu Onayla ve Kaydet</button>
-            `;
-        }
-
-        window.verifyAndSaveProfileChanges = function(oldEmail, newName, newUsername, newEmail) {
-            let enteredCode = document.getElementById('gmailVerificationCodeInput').value.trim();
-            if (enteredCode !== generatedGmailCode) {
-                alert("Hatalı doğrulama kodu!");
-                return;
+            let actionButtonsContainer = document.getElementById('profileActionButtons');
+            if (currentUser.isAdmin) {
+                actionButtonsContainer.innerHTML = `<button onclick="logout()" class="btn-google" style="width: 100%; justify-content: center;">Çıkış Yap</button>`;
+            } else {
+                actionButtonsContainer.innerHTML = `
+                    <button onclick="openDeleteAccountModal()" class="btn-danger" style="width: 100%;">Hesabı Sil</button>
+                    <button onclick="logout()" class="btn-google" style="width: 100%; justify-content: center;">Çıkış Yap</button>
+                `;
             }
-
-            currentUser.name = newName;
-            currentUser.username = newUsername;
-            currentUser.email = newEmail;
-            currentUser.lastProfileUpdate = Date.now();
-
-            if (oldEmail !== newEmail) {
-                delete registeredUsers[oldEmail];
-            }
-            registeredUsers[newEmail] = currentUser;
-
-            localStorage.setItem('sb_registered_users', JSON.stringify(registeredUsers));
-            localStorage.setItem('sb_current_user', JSON.stringify(currentUser));
-
-            document.getElementById('profileModal').style.display = 'none';
-            init();
-            alert("Profil bilgileriniz başarıyla güncellendi!");
+            document.getElementById('profileModal').style.display = 'flex';
         }
 
         function updateProfileAvatar(input) {
@@ -1074,12 +527,12 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     currentUser.avatar = e.target.result;
+                    document.getElementById('profileAvatarImg').src = currentUser.avatar;
                     localStorage.setItem('sb_current_user', JSON.stringify(currentUser));
                     if (registeredUsers[currentUser.email]) {
                         registeredUsers[currentUser.email].avatar = currentUser.avatar;
                         localStorage.setItem('sb_registered_users', JSON.stringify(registeredUsers));
                     }
-                    openUserProfile(currentUser.email);
                     renderNavbar();
                     renderFeed();
                 };
@@ -1087,14 +540,20 @@
             }
         }
 
-        function openDeleteAccountModalFromNav() {
-            let dropdown = document.getElementById('navProfileDropdown');
-            if (dropdown) dropdown.style.display = 'none';
+        function openDeleteAccountModal() {
+            document.getElementById('profileModal').style.display = 'none';
             document.getElementById('deleteAccountModal').style.display = 'flex';
         }
 
-        function confirmDeleteAccount() {
+        function confirmDeleteAccount() {let selectedReason = document.querySelector('input[name="delReason"]:checked');
+            if (!selectedReason) { alert("Lütfen silme nedenini seçin."); return; }
+
             let userEmail = currentUser.email;
+            posts.forEach(post => {
+                if (post.comments) { post.comments = post.comments.filter(c => c.email !== userEmail); }
+            });
+            localStorage.setItem('sb_posts', JSON.stringify(posts));
+
             delete registeredUsers[userEmail];
             localStorage.setItem('sb_registered_users', JSON.stringify(registeredUsers));
             localStorage.removeItem('sb_current_user');
@@ -1102,7 +561,7 @@
 
             document.getElementById('deleteAccountModal').style.display = 'none';
             init();
-            alert("Hesabınız silindi. Yorumlarınız 'Instagram Kullanıcısı' olarak kalmaya devam edecektir.");
+            alert("Hesabınız silindi.");
         }
 
         document.getElementById('shareBtn').addEventListener('click', () => {
@@ -1120,12 +579,12 @@
             }
         });
 
-        function savePost(text, img) {let pollData = document.getElementById('isPollCheck').checked ? { question: text, yes: [], no: [] } : null;
+        function savePost(text, img) {
+            let pollData = document.getElementById('isPollCheck').checked ? { question: text, yes: [], no: [] } : null;
             let newPost = {
                 id: Date.now(),
                 email: currentUser.email,
                 name: currentUser.name,
-                username: currentUser.username,
                 isAdmin: true,
                 text: text,
                 image: img,
@@ -1142,6 +601,7 @@
             renderFeed();
         }
 
+        // Basılı Tutma (Action Sheet) Mekanizması
         let pressTimer = null;
         let isTouchingOrHolding = false;
 
@@ -1191,6 +651,7 @@
             }
         }
 
+        // --- ZENGİN EMOJİ PENCRESİ VE ARAMA FONKSİYONLARI ---
         function buildEmojiGrid(emojiList) {
             let grid = document.getElementById('fullEmojiGrid');
             grid.innerHTML = emojiList.map(emj => `<span onclick="selectEmojiFromModal('${emj}')">${emj}</span>`).join('');
@@ -1209,6 +670,12 @@
         }
 
         function filterEmojis() {
+            let query = document.getElementById('emojiSearchInput').value.toLowerCase().trim();
+            if (!query) {
+                buildEmojiGrid(ALL_EMOJIS);
+                return;
+            }
+            // Basit filtreleme simülasyonu (veya tüm listeyi tutma)
             buildEmojiGrid(ALL_EMOJIS);
         }
 
@@ -1250,98 +717,21 @@
 
                 let commentsHtml = "";
                 if (post.comments) {
-                    let mainComments = post.comments.filter(c => !c.replyTo || !post.comments.some(parent => parent.id == c.replyTo));
-                    
-                    mainComments.forEach(c => {
-                        let isAnonymous = c.name === "Instagram Kullanıcısı";
-                        let userObj = registeredUsers[c.email];
-                        let avatarSrc = userObj && userObj.avatar ? userObj.avatar : "";
-                        
-                        let avatarDisplay = "";
-                        if (isAnonymous) {
-                            avatarDisplay = `<div class="comment-avatar" style="background:#94a3b8;"><i class="fa-solid fa-user"></i></div>`;
-                        } else if (avatarSrc) {
-                            avatarDisplay = `<img src="${avatarSrc}" class="comment-avatar" onclick="openUserProfile('${c.email}')">`;
-                        } else {
-                            avatarDisplay = `<div class="comment-avatar" onclick="openUserProfile('${c.email}')">${c.name.charAt(0).toUpperCase()}</div>`;
-                        }
-                        
+                    post.comments.forEach(c => {
                         let badge = c.isAdmin ? `<span class="admin-badge">YÖNETİCİ</span>` : "";
+                        let replyTagHtml = c.replyTo ? `<span class="reply-tag">@${c.replyTo}</span>` : "";
                         let canDeleteComment = currentUser && (currentUser.email === c.email || currentUser.isAdmin);
                         let deleteCommentBtn = canDeleteComment ? `<button style="background:none; border:none; color:var(--danger-color); font-size:0.75rem; cursor:pointer; margin-left:8px;" onclick="deleteComment(${post.id}, ${c.id})"><i class="fa-solid fa-trash"></i></button>` : "";
 
-                        let replies = post.comments.filter(r => r.replyTo == c.id);
-                        let replyCount = replies.length;
-                        let isOpen = openRepliesState[c.id] || false;
-
-                        let repliesHtml = "";
-                        if (replyCount > 0) {
-                            if (!isOpen) {
-                                commentsHtml += `<button class="toggle-replies-btn" onclick="toggleReplies(${c.id}, true)"><i class="fa-solid fa-angle-down"></i> ${replyCount} diğer yanıtı gör</button>`;
-                            } else {
-                                replies.forEach(r => {
-                                    let rIsAnonymous = r.name === "Instagram Kullanıcısı";
-                                    let rUserObj = registeredUsers[r.email];
-                                    let rAvatarSrc = rUserObj && rUserObj.avatar ? rUserObj.avatar : "";
-                                    
-                                    let rAvatarDisplay = "";
-                                    if (rIsAnonymous) {
-                                        rAvatarDisplay = `<div class="comment-avatar" style="background:#94a3b8;"><i class="fa-solid fa-user"></i></div>`;
-                                    } else if (rAvatarSrc) {
-                                        rAvatarDisplay = `<img src="${rAvatarSrc}" class="comment-avatar" onclick="openUserProfile('${r.email}')">`;
-                                    } else {
-                                        rAvatarDisplay = `<div class="comment-avatar" onclick="openUserProfile('${r.email}')">${r.name.charAt(0).toUpperCase()}</div>`;
-                                    }
-
-                                    let rBadge = r.isAdmin ? `<span class="admin-badge">YÖNETİCİ</span>` : "";
-                                    let canDelR = currentUser && (currentUser.email === r.email || currentUser.isAdmin);
-                                    let delRBtn = canDelR ? `<button style="background:none; border:none; color:var(--danger-color); font-size:0.75rem; cursor:pointer; margin-left:8px;" onclick="deleteComment(${post.id}, ${r.id})"><i class="fa-solid fa-trash"></i></button>` : "";
-
-                                    let rUserClick = rIsAnonymous ? `<span>${r.name}</span>` : `<span class="comment-user" onclick="openUserProfile('${r.email}')">${r.name}</span>`;
-
-                                    repliesHtml += `
-                                        <div class="comment-item" style="margin-top: 6px;">
-                                            ${rAvatarDisplay}
-                                            <div class="comment-bubble">
-                                                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                                                    <div>
-                                                        ${rUserClick} ${rBadge}
-                                                        <span class="reply-tag">@${c.name}</span> ${r.text}
-                                                    </div>
-                                                    <div style="display:flex; align-items:center;">
-                                                        <button style="background:none; border:none; color:#2563eb; font-size:0.75rem; cursor:pointer;" onclick="setReplyTarget(${post.id}, '${r.name}', ${c.id})">Yanıtla</button>
-                                                        ${delRBtn}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>`;
-                                });
-
-                                commentsHtml += `
-                                    <div class="replies-container">
-                                        ${repliesHtml}
-                                    </div>
-                                    <button class="toggle-replies-btn" onclick="toggleReplies(${c.id}, false)"><i class="fa-solid fa-angle-up"></i> Yanıtları gizle</button>
-                                `;
-                            }
-                        }
-
-                        let userClickAttr = isAnonymous ? `<span>${c.name}</span>` : `<span class="comment-user" onclick="openUserProfile('${c.email}')">${c.name}</span>`;
-
                         commentsHtml += `
                             <div class="comment-item">
-                                ${avatarDisplay}
-                                <div class="comment-bubble">
-                                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                                        <div>
-                                            ${userClickAttr} ${badge}
-                                            ${c.text}
-                                        </div>
-                                        <div style="display:flex; align-items:center;">
-                                            <button style="background:none; border:none; color:#2563eb; font-size:0.75rem; cursor:pointer;" onclick="setReplyTarget(${post.id}, '${c.name}', ${c.id})">Yanıtla</button>
-                                            ${deleteCommentBtn}
-                                        </div>
-                                    </div>
+                                <div class="comment-content">
+                                    <span class="comment-user">${c.name}</span> ${badge}
+                                    ${replyTagHtml} ${c.text}
+                                </div>
+                                <div style="display:flex; align-items:center;">
+                                    <button style="background:none; border:none; color:#2563eb; font-size:0.75rem; cursor:pointer;" onclick="setReplyTarget(${post.id}, '${c.name}')">Yanıtla</button>
+                                    ${deleteCommentBtn}
                                 </div>
                             </div>`;
                     });
@@ -1349,30 +739,7 @@
 
                 let currentReply = replyTargets[post.id];
                 let replyInfoStyle = currentReply ? "display: flex;" : "display: none;";
-                let replyInfoText = currentReply ? `@${currentReply.targetName} kişisine yanıt veriliyor` : "";
-
-                // Haberlerde herkes yorum yapabilir ve emoji atabilir
-                let emojiBarHtml = `
-                    <div class="quick-emoji-bar">
-                        <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '❤️')">❤️</button>
-                        <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '😂')">😂</button>
-                        <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '😮')">😮</button>
-                        <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '😢')">😢</button>
-                        <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '😡')">😡</button>
-                        <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '👍')">👍</button>
-                        <div class="add-more-emoji-btn" onclick="openEmojiModal(${post.id})"><i class="fa-solid fa-plus"></i></div>
-                    </div>`;
-
-                let commentInputBoxHtml = currentUser ? `
-                    <div id="reply-info-${post.id}" class="reply-target-info" style="${replyInfoStyle}">
-                        <span>${replyInfoText}</span>
-                        <span style="cursor:pointer; font-weight:bold;" onclick="clearReplyTarget(${post.id})">&times; İptal</span>
-                    </div>
-
-                    <div class="comment-input-box">
-                        <input type="text" id="comment-input-${post.id}" placeholder="Yorum yaz...">
-                        <button class="btn-primary" onclick="addComment(${post.id})">Gönder</button>
-                    </div>` : `<div style="font-size:0.8rem; color:#64748b; margin-top:8px; text-align:center;"><em>Yorum yapmak için <span style="color:var(--primary-color); cursor:pointer;" onclick="openLoginModal()">giriş yapın</span>.</em></div>`;
+                let replyInfoText = currentReply ? `@${currentReply} kişisine yanıt veriliyor` : "";
 
                 container.innerHTML += `
                     <div class="card post-card" 
@@ -1380,9 +747,9 @@
                          ontouchstart="handlePostTouchStart(${post.id})" ontouchend="handlePostTouchEnd()" ontouchmove="handlePostTouchMove()">
                         <div class="post-header">
                             <div class="user-meta">
-                                <div class="post-avatar" onclick="openUserProfile('${post.email}')">${post.name.charAt(0).toUpperCase()}</div>
+                                <div class="post-avatar">${post.name.charAt(0).toUpperCase()}</div>
                                 <div>
-                                    <strong onclick="openUserProfile('${post.email}')" style="cursor:pointer;">${post.name}</strong> <span class="admin-badge">YÖNETİCİ</span>
+                                    <strong>${post.name}</strong> <span class="admin-badge">YÖNETİCİ</span>
                                     <div style="font-size: 0.75rem; color: #64748b;">${post.time}</div>
                                 </div>
                             </div>
@@ -1393,22 +760,34 @@
                         ${pollHtml}
                         
                         <div class="post-footer-actions">
-                            ${emojiBarHtml}
+                            <div class="quick-emoji-bar">
+                                <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '❤️')">❤️</button>
+                                <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '😂')">😂</button>
+                                <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '😮')">😮</button>
+                                <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '😢')">😢</button>
+                                <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '😡')">😡</button>
+                                <button class="quick-emoji-btn" onclick="addReaction(${post.id}, '👍')">👍</button>
+                                <div class="add-more-emoji-btn" onclick="openEmojiModal(${post.id})"><i class="fa-solid fa-plus"></i></div>
+                            </div>
                             <div class="reaction-badges">${reactionsHtml}</div>
                         </div>
 
                         <div class="comments-section">
                             <div style="font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">Yorumlar</div>
-                            <div style="max-height: 250px; overflow-y: auto;">${commentsHtml || '<div style="font-size:0.8rem; color:#94a3b8;">Henüz yorum yapılmamış.</div>'}</div>
-                            ${commentInputBoxHtml}
+                            <div style="max-height: 150px; overflow-y: auto;">${commentsHtml || '<div style="font-size:0.8rem; color:#94a3b8;">Henüz yorum yapılmamış.</div>'}</div>
+                            
+                            <div id="reply-info-${post.id}" class="reply-target-info" style="${replyInfoStyle}">
+                                <span>${replyInfoText}</span>
+                                <span style="cursor:pointer; font-weight:bold;" onclick="clearReplyTarget(${post.id})">&times; İptal</span>
+                            </div>
+
+                            <div class="comment-input-box">
+                                <input type="text" id="comment-input-${post.id}" placeholder="Yorum yaz...">
+                                <button class="btn-primary" onclick="addComment(${post.id})">Gönder</button>
+                            </div>
                         </div>
                     </div>`;
             });
-        }
-
-        window.toggleReplies = function(commentId, show) {
-            openRepliesState[commentId] = show;
-            renderFeed();
         }
 
         window.addReaction = function(postId, emoji) {
@@ -1433,12 +812,11 @@
             renderFeed();
         }
 
-        window.setReplyTarget = function(postId, targetUserName, parentCommentId) {
+        window.setReplyTarget = function(postId, targetUserName) {
             if (!currentUser) { openLoginModal(); return; }
-            replyTargets[postId] = { targetName: targetUserName, parentId: parentCommentId };
+            replyTargets[postId] = targetUserName;
             renderFeed();
-            let inp = document.getElementById(`comment-input-${postId}`);
-            if (inp) inp.focus();
+            document.getElementById(`comment-input-${postId}`).focus();
         }
 
         window.clearReplyTarget = function(postId) {
@@ -1456,17 +834,14 @@
             if (!post) return;
             if (!post.comments) post.comments = [];
 
-            let replyData = replyTargets[postId] || null;
-            let parentId = replyData ? replyData.parentId : null;
-            let replyToName = replyData ? replyData.targetName : null;
+            let replyTarget = replyTargets[postId] || null;
 
-            let newCommentId = Date.now();
             post.comments.push({
-                id: newCommentId,
+                id: Date.now(),
                 email: currentUser.email,
                 name: currentUser.name,
                 isAdmin: currentUser.isAdmin,
-                replyTo: parentId || (replyToName ? newCommentId : null),
+                replyTo: replyTarget,
                 text: text
             });
 
@@ -1475,11 +850,10 @@
             renderFeed();
         }
 
-        window.deleteComment = function(postId, commentId) {let post = posts.find(p => p.id === postId);
+        window.deleteComment = function(postId, commentId) {
+            let post = posts.find(p => p.id === postId);
             if (!post || !post.comments) return;
-            
             post.comments = post.comments.filter(c => c.id !== commentId);
-
             localStorage.setItem('sb_posts', JSON.stringify(posts));
             renderFeed();
         }
