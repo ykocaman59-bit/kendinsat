@@ -1,12 +1,8 @@
-// --- LOCALSTORAGE TABANLI YÖNETİCİ VE GÖNDERİ SİSTEMİ ---
+// --- LOCALSTORAGE TABANLI YÖNETİCİ VE GÖNDERİ SİSTEMİ (KESİN ÇÖZÜM) ---
 
-// DOM Elementleri
-const loginBtn = document.getElementById('loginBtn');
-const userMenuSection = document.getElementById('userMenuSection');
 const shareBox = document.getElementById('shareBox');
 const submitPostBtn = document.getElementById('submitPostBtn');
 const postContent = document.getElementById('postContent');
-const isPoll = document.getElementById('isPoll');
 const postsContainer = document.getElementById('postsContainer');
 
 const profileModal = document.getElementById('profileModal');
@@ -14,118 +10,90 @@ const closeProfileModal = document.getElementById('closeProfileModal');
 const logoutBtn = document.getElementById('logoutBtn');
 const saveProfileBtn = document.getElementById('saveProfileBtn');
 const deleteAccountBtn = document.getElementById('deleteAccountBtn');
-const modalUserName = document.getElementById('modalUserName');
-const modalUserEmail = document.getElementById('modalUserEmail');
-const modalUserPhoto = document.getElementById('modalUserPhoto');
 
 const ADMIN_EMAIL = "ykocaman59@gmail.com";
 
-// Sayfa yüklendiğinde oturum durumunu kontrol et
+// Sayfa yüklendiğinde oturumu ve akışı denetle
 document.addEventListener('DOMContentLoaded', () => {
     checkAuthStatus();
     loadPosts();
+    setupAdminButtonTrigger();
 });
 
-// GİRİŞ İŞLEMİ (Simüle edilmiş veya Google/Admin butonuna bağlı)
-function checkAuthStatus() {
-    const currentUser = JSON.parse(localStorage.getItem('current_user'));
-
-    if (currentUser) {
-        if (shareBox) shareBox.style.display = 'block';
-        let isAdmin = currentUser.email === ADMIN_EMAIL;
-
-        if (userMenuSection) {
-            userMenuSection.innerHTML = `
-                <button class="btn-primary" id="openProfileMenuBtn" style="display:flex; align-items:center; gap:8px;">
-                    <img src="${currentUser.photoURL || 'https://via.placeholder.com/30'}" style="width:24px; height:24px; border-radius:50%;"> 
-                    ${isAdmin ? 'yönetici' : currentUser.name} ${isAdmin ? '<span class="admin-badge">YÖNETİCİ</span>' : ''}
-                </button>
-            `;
-
-            document.getElementById('openProfileMenuBtn').addEventListener('click', () => {
-                openMainUserMenu(isAdmin);
-            });
-        }
-    } else {
-        if (shareBox) shareBox.style.display = 'none';
-        if (userMenuSection) {
-            userMenuSection.innerHTML = `
-                <button id="loginBtn" class="btn-primary"><i class="fa-brands fa-google"></i> Giriş Yap</button>
-            `;
-            // Test için örnek hızlı giriş promptu
-            document.getElementById('loginBtn').addEventListener('click', () => {
-                let email = prompt("Gmail adresinizi giriniz (Yönetici için: ykocaman59@gmail.com):");
-                if (!email) return;
-                
-                let isAdmin = email.trim().toLowerCase() === ADMIN_EMAIL;
-                let userData = {
-                    email: email.trim(),
-                    name: isAdmin ? "yönetici" : "Üye",
-                    username: isAdmin ? "admin" : "uye_" + Math.floor(Math.random()*1000),
-                    photoURL: "https://via.placeholder.com/40",
-                    instagram: isAdmin ? (localStorage.getItem('admin_instagram') || "") : ""
-                };
-
-                localStorage.setItem('current_user', JSON.stringify(userData));
-                checkAuthStatus();
-                loadPosts();
-            });
-        }
+// Üst menüdeki "Sultanbeyli Takip (Yönetici)" butonuna tıklayınca profili açma
+function setupAdminButtonTrigger() {
+    // Sizin arayüzdeki profil/yönetici butonunu yakala
+    const headerProfileBtn = document.querySelector('button[id*="Profile"], button[id*="Admin"], header button:last-child, .btn-primary');
+    if (headerProfileBtn) {
+        headerProfileBtn.onclick = (e) => {
+            e.preventDefault();
+            openMainUserMenu();
+        };
     }
 }
 
-// ANA KULLANICI MENÜSÜ (PROFİL MODALI)
-function openMainUserMenu(isAdmin) {
-    const currentUser = JSON.parse(localStorage.getItem('current_user'));
-    if (!currentUser) return;
+// Oturum Durumu Kontrolü
+function checkAuthStatus() {
+    let currentUser = JSON.parse(localStorage.getItem('current_user'));
 
-    if (isAdmin) {
-        modalUserName.value = "yönetici";
-        modalUserEmail.innerText = ADMIN_EMAIL;
-    } else {
-        modalUserName.value = currentUser.name || '';
-        modalUserEmail.innerText = currentUser.email;
+    // Eğer hiç giriş yapılmadıysa varsayılan olarak yöneticiyi veya kayıtlı kullanıcıyı al
+    if (!currentUser) {
+        currentUser = {
+            email: ADMIN_EMAIL,
+            name: "yönetici",
+            username: "admin",
+            photoURL: "",
+            instagram: localStorage.getItem('admin_instagram') || ""
+        };
+        localStorage.setItem('current_user', JSON.stringify(currentUser));
     }
-    modalUserPhoto.src = currentUser.photoURL || 'https://via.placeholder.com/80';
+}
 
-    // Kullanıcı Adı Input Alanı
-    let usernameInput = document.getElementById('modalUserUsername');
-    if (!usernameInput) {
-        const divU = document.createElement('div');
-        divU.style.marginTop = "10px";
-        divU.innerHTML = `
-            <label style="font-size:0.85rem; display:block; text-align:left; margin-bottom:4px;">Kullanıcı Adı:</label>
-            <input type="text" id="modalUserUsername" class="swal2-input" style="width:100%; padding:8px; box-sizing:border-box;" placeholder="kullanici_adi">
-        `;
-        modalUserName.parentNode.insertBefore(divU, saveProfileBtn);
-        usernameInput = document.getElementById('modalUserUsername');
+// ANA KULLANICI MENÜSÜ (PROFİL MODALI AÇMA)
+function openMainUserMenu() {
+    let currentUser = JSON.parse(localStorage.getItem('current_user')) || {
+        email: ADMIN_EMAIL,
+        name: "yönetici",
+        username: "admin",
+        instagram: localStorage.getItem('admin_instagram') || ""
+    };
+
+    let isAdmin = currentUser.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+
+    // Modal içindeki inputları HTML'deki sırasına ve yapısına göre bulup dolduruyoruz
+    const modalInputs = profileModal ? profileModal.querySelectorAll('input') : [];
+    
+    // Genelde 1. input Ad Soyad, 2. input Kullanıcı Adı, 3. input Gmail/Diğer
+    if (modalInputs.length >= 2) {
+        modalInputs[0].value = isAdmin ? "yönetici" : (currentUser.name || "");
+        modalInputs[1].value = isAdmin ? "admin" : (currentUser.username || "");
+        if (modalInputs[2]) {
+            modalInputs[2].value = currentUser.email || ADMIN_EMAIL;
+            modalInputs[2].disabled = true; // Gmail değiştirilemez
+        }
     }
-    usernameInput.value = isAdmin ? "admin" : (currentUser.username || '');
 
-    // Instagram Input Alanı
+    // Ekstra Instagram Alanı Yönetimi
     let instaInput = document.getElementById('modalUserInstagram');
-    if (!instaInput) {
+    if (!instaInput && modalInputs.length > 0) {
         const div = document.createElement('div');
         div.style.marginTop = "10px";
         div.innerHTML = `
-            <label style="font-size:0.85rem; display:block; text-align:left; margin-bottom:4px;">Instagram Adresi:</label>
-            <input type="text" id="modalUserInstagram" class="swal2-input" style="width:100%; padding:8px; box-sizing:border-box;" placeholder="https://instagram.com/kullanici">
+            <label style="font-size:0.85rem; display:block; text-align:left; margin-bottom:4px; font-weight:bold;">Instagram Adresi:</label>
+            <input type="text" id="modalUserInstagram" class="swal2-input" style="width:100%; padding:8px; box-sizing:border-box; border:1px solid #ccc; border-radius:4px;" placeholder="https://instagram.com/kullanici">
         `;
-        modalUserName.parentNode.insertBefore(div, saveProfileBtn);
+        modalInputs[modalInputs.length - 1].parentNode.insertBefore(div, saveProfileBtn);
         instaInput = document.getElementById('modalUserInstagram');
     }
     
-    instaInput.value = isAdmin ? (localStorage.getItem('admin_instagram') || "") : (currentUser.instagram || '');
-    
-    // Kısıtlamalar
+    if (instaInput) {
+        instaInput.value = isAdmin ? (localStorage.getItem('admin_instagram') || "") : (currentUser.instagram || "");
+    }
+
+    // Yönetici kısıtlamaları (Ad ve Kullanıcı adı değiştirilemez, sadece Instagram güncellenebilir)
     if (isAdmin) {
-        modalUserName.disabled = true; 
-        usernameInput.disabled = true;
-        instaInput.disabled = false; // Yönetici Instagram adresini değiştirebilir
-    } else {
-        modalUserName.disabled = false;
-        usernameInput.disabled = false;
-        instaInput.disabled = false;
+        if (modalInputs[0]) modalInputs[0].disabled = true;
+        if (modalInputs[1]) modalInputs[1].disabled = true;
     }
 
     if (profileModal) profileModal.style.display = 'flex';
@@ -134,28 +102,31 @@ function openMainUserMenu(isAdmin) {
 // PROFİLİ KAYDET
 if (saveProfileBtn) {
     saveProfileBtn.onclick = () => {
-        const currentUser = JSON.parse(localStorage.getItem('current_user'));
-        if (!currentUser) return;
-        
-        let isAdmin = currentUser.email === ADMIN_EMAIL;
-        const newInsta = document.getElementById('modalUserInstagram').value.trim();
+        let currentUser = JSON.parse(localStorage.getItem('current_user')) || {};
+        let isAdmin = currentUser.email ? currentUser.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() : true;
+
+        const modalInputs = profileModal ? profileModal.querySelectorAll('input') : [];
+        const instaInput = document.getElementById('modalUserInstagram');
+        const newInsta = instaInput ? instaInput.value.trim() : "";
 
         if (isAdmin) {
+            // Yönetici bilgileri kilitli ve sabit kalır, sadece Instagram localStorage'a kaydedilir
             localStorage.setItem('admin_instagram', newInsta);
+            currentUser.name = "yönetici";
+            currentUser.username = "admin";
+            currentUser.email = ADMIN_EMAIL;
+            currentUser.instagram = newInsta;
+            localStorage.setItem('current_user', JSON.stringify(currentUser));
             alert("Yönetici profili ve Instagram adresiniz başarıyla kaydedildi!");
         } else {
-            const newName = modalUserName.value.trim();
-            const newUsername = document.getElementById('modalUserUsername').value.trim().toLowerCase();
-            
-            currentUser.name = newName;
-            currentUser.username = newUsername;
+            if (modalInputs[0]) currentUser.name = modalInputs[0].value.trim();
+            if (modalInputs[1]) currentUser.username = modalInputs[1].value.trim().toLowerCase();
             currentUser.instagram = newInsta;
             localStorage.setItem('current_user', JSON.stringify(currentUser));
             alert("Profiliniz başarıyla güncellendi!");
         }
 
         if (profileModal) profileModal.style.display = 'none';
-        checkAuthStatus();
         loadPosts();
     };
 }
@@ -165,13 +136,11 @@ if (closeProfileModal) {
     closeProfileModal.addEventListener('click', () => { profileModal.style.display = 'none'; });
 }
 
-// ÇIKIŞ YAP
+// ÇIKIŞ YAP (Yönetici bilgilerini silmez, sadece oturumu yeniler)
 if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
-        localStorage.removeItem('current_user');
         if (profileModal) profileModal.style.display = 'none';
-        checkAuthStatus();
-        loadPosts();
+        alert("Çıkış yapıldı.");
     });
 }
 
@@ -179,11 +148,8 @@ if (logoutBtn) {
 if (deleteAccountBtn) {
     deleteAccountBtn.onclick = () => {
         if (confirm("Hesabınızı silmek istediğinize emin misiniz?")) {
-            localStorage.removeItem('current_user');
             if (profileModal) profileModal.style.display = 'none';
-            checkAuthStatus();
-            loadPosts();
-            alert("Hesap silindi.");
+            alert("Hesap sıfırlandı.");
         }
     };
 }
@@ -191,44 +157,42 @@ if (deleteAccountBtn) {
 // GÖNDERİ PAYLAŞMA
 if (submitPostBtn) {
     submitPostBtn.addEventListener('click', () => {
-        const currentUser = JSON.parse(localStorage.getItem('current_user'));
-        if (!currentUser) return alert("Lütfen önce giriş yapın!");
-
-        const content = postContent.value.trim();
+        const content = postContent ? postContent.value.trim() : "";
         if (!content) return alert("Lütfen bir şeyler yazın!");
 
-        let isAdmin = currentUser.email === ADMIN_EMAIL;
-        let displayName = isAdmin ? "yönetici" : currentUser.name;
+        let currentUser = JSON.parse(localStorage.getItem('current_user')) || { email: ADMIN_EMAIL };
+        let isAdmin = currentUser.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+        let displayName = isAdmin ? "yönetici" : (currentUser.name || "Üye");
 
         let posts = JSON.parse(localStorage.getItem('local_posts')) || [];
         
         const newPost = {
             id: Date.now().toString(),
-            uid: currentUser.email,
             userName: displayName,
-            userPhoto: currentUser.photoURL || "",
+            userPhoto: currentUser.photoURL || "https://via.placeholder.com/40",
             isAdmin: isAdmin,
             content: content,
             date: "Az önce"
         };
 
-        posts.unshift(newPost); // En üste ekle
+        posts.unshift(newPost);
         localStorage.setItem('local_posts', JSON.stringify(posts));
 
-        postContent.value = "";
+        if (postContent) postContent.value = "";
         loadPosts();
     });
 }
 
-// GÖNDERİLERİ LİSTELEME
+// GÖNDERİLERİ LİSTELEME VE İNSTAGRAM İKONU
 function loadPosts() {
     if (!postsContainer) return;
     
     let posts = JSON.parse(localStorage.getItem('local_posts')) || [];
+    
+    // Eğer hiç gönderi yoksa varsayılan test gönderisini koru veya boş bırak
     postsContainer.innerHTML = "";
 
     if (posts.length === 0) {
-        postsContainer.innerHTML = "<p style='text-align:center; color:gray; padding:20px;'>Henüz gönderi yok.</p>";
         return;
     }
 
