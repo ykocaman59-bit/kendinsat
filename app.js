@@ -30,7 +30,7 @@ const modalUserEmail = document.getElementById('modalUserEmail');
 const modalUserPhoto = document.getElementById('modalUserPhoto');
 
 let currentUser = null;
-const ADMIN_EMAIL = "sendeistanbul@gmail.com";
+const ADMIN_EMAIL = "ykocaman59@gmail.com";
 
 // GÜVENLİ GOOGLE GİRİŞİ
 loginBtn.addEventListener('click', () => {
@@ -48,22 +48,47 @@ auth.onAuthStateChanged(async (user) => {
         
         let isAdmin = user.email === ADMIN_EMAIL;
 
-        // Kullanıcı veritabanı kontrolü (İlk defa giriyorsa kayıt ekranı/altyapısı)
+        // Kullanıcı veritabanı kontrolü
         const userRef = db.collection('users').doc(user.uid);
         const userDoc = await userRef.get();
         
         if (!userDoc.exists && !isAdmin) {
-            // Normal kullanıcı ilk kez giriyorsa ek bilgiler isteyebiliriz veya varsayılan kaydedebiliriz
+            // İlk kayıt esnasında Ad Soyad ve Kullanıcı Adı alma
             let customName = prompt("Adınızı ve Soyadınızı girin:", user.displayName || "Üye");
-            let customUsername = prompt("Kullanıcı adınızı girin:", "uye_" + Math.floor(Math.random()*1000));
+            if (!customName) customName = "Üye";
+
+            let customUsername = "";
+            let isUnique = false;
+
+            // Kullanıcı adı çakışma kontrolü döngüsü
+            while (!isUnique) {
+                let tempUsername = prompt("Kullanıcı adınızı girin:", "uye_" + Math.floor(Math.random()*1000));
+                if (!tempUsername) {
+                    customUsername = "uye_" + Math.floor(Math.random()*10000);
+                    break;
+                }
+                tempUsername = tempUsername.trim().toLowerCase();
+
+                // Veritabanında bu kullanıcı adı var mı kontrol et
+                const querySnapshot = await db.collection('users').where('username', '==', tempUsername).get();
+                if (querySnapshot.empty && tempUsername !== "admin") {
+                    customUsername = tempUsername;
+                    isUnique = true;
+                } else {
+                    let suggested = tempUsername + Math.floor(Math.random() * 900 + 100);
+                    alert(`Bu kullanıcı adı zaten alınmış! Size önerilen alternatif: @${suggested}`);
+                }
+            }
+
             let customInsta = prompt("Instagram profil linkiniz (İsteğe bağlı, boş bırakabilirsiniz):", "");
 
             await userRef.set({
-                name: customName || user.displayName,
+                name: customName,
                 username: customUsername,
                 email: user.email,
                 photoURL: user.photoURL || "",
                 instagram: customInsta || "",
+                lastUsernameChange: Date.now(),
                 isAdmin: false
             });
         } else if (isAdmin) {
@@ -74,6 +99,7 @@ auth.onAuthStateChanged(async (user) => {
                 email: ADMIN_EMAIL,
                 photoURL: user.photoURL || "",
                 instagram: "https://www.instagram.com/istanbulsende3434?igsh=ZHJxamVkeDN0c3Zl",
+                lastUsernameChange: Date.now(),
                 isAdmin: true
             }, { merge: true });
         }
@@ -85,7 +111,6 @@ auth.onAuthStateChanged(async (user) => {
             </button>
         `;
 
-        // Menü butonuna tıklandığında açılacak panel (Profil Düzenle, Kullanıcılar, İtirazlar, Çıkış)
         document.getElementById('openProfileMenuBtn').addEventListener('click', () => {
             openMainUserMenu(isAdmin);
         });
@@ -109,8 +134,22 @@ async function openMainUserMenu(isAdmin) {
     let userData = (await db.collection('users').doc(currentUser.uid).get()).data() || {};
     
     modalUserName.value = isAdmin ? "yönetici" : (userData.name || currentUser.displayName || '');
-    modalUserEmail.innerText = currentUser.email;
+    modalUserEmail.innerText = currentUser.email; // Gmail adresi gösterilir (değiştirilemez)
     modalUserPhoto.src = currentUser.photoURL || 'https://via.placeholder.com/80';
+
+    // Kullanıcı Adı Input Alanı Kontrolü
+    let usernameInput = document.getElementById('modalUserUsername');
+    if (!usernameInput) {
+        const divU = document.createElement('div');
+        divU.style.marginTop = "10px";
+        divU.innerHTML = `
+            <label style="font-size:0.85rem; display:block; text-align:left; margin-bottom:4px;">Kullanıcı Adı:</label>
+            <input type="text" id="modalUserUsername" class="swal2-input" style="width:100%; padding:8px; box-sizing:border-box;" placeholder="kullanici_adi">
+        `;
+        modalUserName.parentNode.insertBefore(divU, saveProfileBtn);
+        usernameInput = document.getElementById('modalUserUsername');
+    }
+    usernameInput.value = isAdmin ? "admin" : (userData.username || '');
 
     // Instagram input alanı yönetimi
     let instaInput = document.getElementById('modalUserInstagram');
@@ -126,18 +165,21 @@ async function openMainUserMenu(isAdmin) {
     }
     
     instaInput.value = isAdmin ? "https://www.instagram.com/istanbulsende3434?igsh=ZHJxamVkeDN0c3Zl" : (userData.instagram || '');
+    
     if (isAdmin) {
-        instaInput.disabled = true; // Yönetici bilgileri sabit
-        modalUserName.disabled = true; // Yönetici adı değiştirilemez
+        instaInput.disabled = true; 
+        modalUserName.disabled = true; 
+        usernameInput.disabled = true;
     } else {
         instaInput.disabled = false;
         modalUserName.disabled = false;
+        usernameInput.disabled = false;
     }
 
     profileModal.style.display = 'flex';
 }
 
-// PROFİL GÜNCELLEME
+// PROFİL GÜNCELLEME (7 GÜN KURALI VE ÇAKIŞMA DENETİMİ İLE)
 saveProfileBtn.onclick = async () => {
     if (!currentUser) return;
     let isAdmin = currentUser.email === ADMIN_EMAIL;
@@ -148,17 +190,51 @@ saveProfileBtn.onclick = async () => {
         return;
     }
 
-    const newName = modalUserName.value;
-    const newInsta = document.getElementById('modalUserInstagram').value;
+    const newName = modalUserName.value.trim();
+    const newUsername = document.getElementById('modalUserUsername').value.trim().toLowerCase();
+    const newInsta = document.getElementById('modalUserInstagram').value.trim();
 
-    await db.collection('users').doc(currentUser.uid).update({
+    const userRef = db.collection('users').doc(currentUser.uid);
+    const userDoc = await userRef.get();
+    const userData = userDoc.data();
+
+    // 7 Gün Kuralı Kontrolü
+    const currentTime = Date.now();
+    const lastChange = userData.lastUsernameChange || 0;
+    const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+
+    if (newUsername !== userData.username) {
+        if (currentTime - lastChange < sevenDaysInMs) {
+            const remainingDays = Math.ceil((sevenDaysInMs - (currentTime - lastChange)) / (1000 * 60 * 60 * 24));
+            alert(`Kullanıcı adınızı değiştirmek için ${remainingDays} gün daha beklemelisiniz! (7 günde bir değiştirilebilir)`);
+            return;
+        }
+
+        // Başka bir kullanıcı bu kullanıcı adını almış mı?
+        const checkQuery = await db.collection('users').where('username', '==', newUsername).get();
+        if (!checkQuery.empty) {
+            let suggested = newUsername + Math.floor(Math.random() * 900 + 100);
+            alert(`Bu kullanıcı adı başka biri tarafından kullanılıyor! Önerilen alternatif: @${suggested}`);
+            return;
+        }
+    }
+
+    let updateData = {
         name: newName,
         instagram: newInsta
-    });
+    };
 
+    if (newUsername !== userData.username) {
+        updateData.username = newUsername;
+        updateData.lastUsernameChange = currentTime;
+    }
+
+    await userRef.update(updateData);
     await currentUser.updateProfile({ displayName: newName });
-    alert("Profil güncellendi!");
+    
+    alert("Profiliniz başarıyla güncellendi!");
     profileModal.style.display = 'none';
+    loadPosts();
 };
 
 // MODAL KAPATMA
@@ -169,7 +245,7 @@ logoutBtn.addEventListener('click', () => {
     auth.signOut().then(() => { profileModal.style.display = 'none'; });
 });
 
-// HESABI SİLME (Özel onay penceresi ve "Kullanıcı mevcut değil" kuralı)
+// HESABI SİLME
 deleteAccountBtn.onclick = async () => {
     let confirmDelete = confirm("Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.");
     if (!confirmDelete) return;
@@ -220,7 +296,7 @@ submitPostBtn.addEventListener('click', async () => {
     loadPosts();
 });
 
-// BAŞKA KULLANICI PROFİLİNİ GÖRÜNTÜLEME VE İNSTAGRAM LOGOSU
+// BAŞKA KULLANICI PROFİLİNİ GÖRÜNTÜLEME
 window.viewUserProfile = async function(uid) {
     if(!uid) return;
     const userDoc = await db.collection('users').doc(uid).get();
@@ -228,8 +304,6 @@ window.viewUserProfile = async function(uid) {
         return alert("Bu kullanıcı mevcut değildir.");
     }
     let data = userDoc.data();
-    let instaHtml = data.instagram ? `<a href="${data.instagram}" target="_blank" style="font-size:1.8rem; color:#E1306C; margin-top:10px; display:inline-block;"><i class="fa-brands fa-instagram"></i></a>` : `<span style="font-size:0.85rem; color:#888;">Instagram hesabı yok</span>`;
-
     alert(`Kullanıcı: ${data.name}\nKullanıcı Adı: @${data.username || 'kullanici'}`);
 };
 
@@ -245,7 +319,6 @@ function loadPosts() {
             let displayName = isDeleted ? "Bu kullanıcı mevcut değildir" : post.userName;
             let displayPhoto = isDeleted ? "https://via.placeholder.com/40?text=X" : (post.userPhoto || "https://via.placeholder.com/40");
 
-            // Kullanıcının kayıtlı Instagram linkini çekelim
             let instaIconHtml = "";
             if (!isDeleted && post.uid) {
                 const uDoc = await db.collection('users').doc(post.uid).get();
@@ -307,4 +380,4 @@ window.votePoll = async function(postId, choice) {
     if (choice === 'no') poll.no.push(currentUser.uid);
 
     await postRef.update({ poll: poll });
-                    }
+};
