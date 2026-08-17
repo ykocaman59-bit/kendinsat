@@ -1,17 +1,6 @@
-// FIREBASE YAPILANDIRMANIZI BURAYA EKLEYİN
-const firebaseConfig = {
-    apiKey: "BURAYA_FIREBASE_API_KEY",
-    authDomain: "BURAYA_AUTH_DOMAIN",
-    projectId: "BURAYA_PROJECT_ID",
-    storageBucket: "BURAYA_STORAGE_BUCKET",
-    messagingSenderId: "BURAYA_MESSAGING_SENDER_ID",
-    appId: "BURAYA_APP_ID"
-};
+// --- LOCALSTORAGE TABANLI YÖNETİCİ VE GÖNDERİ SİSTEMİ ---
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
+// DOM Elementleri
 const loginBtn = document.getElementById('loginBtn');
 const userMenuSection = document.getElementById('userMenuSection');
 const shareBox = document.getElementById('shareBox');
@@ -29,120 +18,77 @@ const modalUserName = document.getElementById('modalUserName');
 const modalUserEmail = document.getElementById('modalUserEmail');
 const modalUserPhoto = document.getElementById('modalUserPhoto');
 
-let currentUser = null;
 const ADMIN_EMAIL = "ykocaman59@gmail.com";
 
-// GÜVENLİ GOOGLE GİRİŞİ
-loginBtn.addEventListener('click', () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).catch((error) => {
-        alert("Giriş hatası: " + error.message);
-    });
-});
-
-// OTURUM DURUMU İZLEME VE KULLANICI KONTROLÜ
-auth.onAuthStateChanged(async (user) => {
-    if (user) {
-        currentUser = user;
-        shareBox.style.display = 'block';
-        
-        let isAdmin = user.email === ADMIN_EMAIL;
-
-        // Kullanıcı veritabanı kontrolü
-        const userRef = db.collection('users').doc(user.uid);
-        const userDoc = await userRef.get();
-        
-        if (!userDoc.exists && !isAdmin) {
-            // İlk kayıt esnasında Ad Soyad ve Kullanıcı Adı alma
-            let customName = prompt("Adınızı ve Soyadınızı girin:", user.displayName || "Üye");
-            if (!customName) customName = "Üye";
-
-            let customUsername = "";
-            let isUnique = false;
-
-            // Kullanıcı adı çakışma kontrolü döngüsü
-            while (!isUnique) {
-                let tempUsername = prompt("Kullanıcı adınızı girin:", "uye_" + Math.floor(Math.random()*1000));
-                if (!tempUsername) {
-                    customUsername = "uye_" + Math.floor(Math.random()*10000);
-                    break;
-                }
-                tempUsername = tempUsername.trim().toLowerCase();
-
-                // Veritabanında bu kullanıcı adı var mı kontrol et
-                const querySnapshot = await db.collection('users').where('username', '==', tempUsername).get();
-                if (querySnapshot.empty && tempUsername !== "admin") {
-                    customUsername = tempUsername;
-                    isUnique = true;
-                } else {
-                    let suggested = tempUsername + Math.floor(Math.random() * 900 + 100);
-                    alert(`Bu kullanıcı adı zaten alınmış! Size önerilen alternatif: @${suggested}`);
-                }
-            }
-
-            let customInsta = prompt("Instagram profil linkiniz (İsteğe bağlı, boş bırakabilirsiniz):", "");
-
-            await userRef.set({
-                name: customName,
-                username: customUsername,
-                email: user.email,
-                photoURL: user.photoURL || "",
-                instagram: customInsta || "",
-                lastUsernameChange: Date.now(),
-                isAdmin: false
-            });
-        } else if (isAdmin) {
-            // Yönetici bilgileri sabitlenir (Eğer veritabanında daha önce Instagram kaydedildiyse silinmez, korunur)
-            let existingInstagram = "";
-            if (userDoc.exists && userDoc.data().instagram) {
-                existingInstagram = userDoc.data().instagram;
-            }
-
-            await userRef.set({
-                name: "yönetici",
-                username: "admin",
-                email: ADMIN_EMAIL,
-                photoURL: user.photoURL || "",
-                instagram: existingInstagram, // Kaydettiğiniz Instagram adresi burada korunur
-                lastUsernameChange: Date.now(),
-                isAdmin: true
-            }, { merge: true });
-        }
-
-        userMenuSection.innerHTML = `
-            <button class="btn-primary" id="openProfileMenuBtn" style="display:flex; align-items:center; gap:8px;">
-                <img src="${user.photoURL || 'https://via.placeholder.com/30'}" style="width:24px; height:24px; border-radius:50%;"> 
-                ${isAdmin ? 'yönetici' : (user.displayName || 'Profil')} ${isAdmin ? '<span class="admin-badge">YÖNETİCİ</span>' : ''}
-            </button>
-        `;
-
-        document.getElementById('openProfileMenuBtn').addEventListener('click', () => {
-            openMainUserMenu(isAdmin);
-        });
-
-    } else {
-        currentUser = null;
-        shareBox.style.display = 'none';
-        userMenuSection.innerHTML = `
-            <button id="loginBtn" class="btn-primary"><i class="fa-brands fa-google"></i> Gmail ile Giriş Yap</button>
-        `;
-        document.getElementById('loginBtn').addEventListener('click', () => {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider);
-        });
-    }
+// Sayfa yüklendiğinde oturum durumunu kontrol et
+document.addEventListener('DOMContentLoaded', () => {
+    checkAuthStatus();
     loadPosts();
 });
 
-// ANA KULLANICI MENÜSÜ (YÖNETİCİ VEYA ÜYE)
-async function openMainUserMenu(isAdmin) {
-    let userData = (await db.collection('users').doc(currentUser.uid).get()).data() || {};
-    
-    modalUserName.value = isAdmin ? "yönetici" : (userData.name || currentUser.displayName || '');
-    modalUserEmail.innerText = currentUser.email; // Gmail adresi gösterilir (değiştirilemez)
+// GİRİŞ İŞLEMİ (Simüle edilmiş veya Google/Admin butonuna bağlı)
+function checkAuthStatus() {
+    const currentUser = JSON.parse(localStorage.getItem('current_user'));
+
+    if (currentUser) {
+        if (shareBox) shareBox.style.display = 'block';
+        let isAdmin = currentUser.email === ADMIN_EMAIL;
+
+        if (userMenuSection) {
+            userMenuSection.innerHTML = `
+                <button class="btn-primary" id="openProfileMenuBtn" style="display:flex; align-items:center; gap:8px;">
+                    <img src="${currentUser.photoURL || 'https://via.placeholder.com/30'}" style="width:24px; height:24px; border-radius:50%;"> 
+                    ${isAdmin ? 'yönetici' : currentUser.name} ${isAdmin ? '<span class="admin-badge">YÖNETİCİ</span>' : ''}
+                </button>
+            `;
+
+            document.getElementById('openProfileMenuBtn').addEventListener('click', () => {
+                openMainUserMenu(isAdmin);
+            });
+        }
+    } else {
+        if (shareBox) shareBox.style.display = 'none';
+        if (userMenuSection) {
+            userMenuSection.innerHTML = `
+                <button id="loginBtn" class="btn-primary"><i class="fa-brands fa-google"></i> Giriş Yap</button>
+            `;
+            // Test için örnek hızlı giriş promptu
+            document.getElementById('loginBtn').addEventListener('click', () => {
+                let email = prompt("Gmail adresinizi giriniz (Yönetici için: ykocaman59@gmail.com):");
+                if (!email) return;
+                
+                let isAdmin = email.trim().toLowerCase() === ADMIN_EMAIL;
+                let userData = {
+                    email: email.trim(),
+                    name: isAdmin ? "yönetici" : "Üye",
+                    username: isAdmin ? "admin" : "uye_" + Math.floor(Math.random()*1000),
+                    photoURL: "https://via.placeholder.com/40",
+                    instagram: isAdmin ? (localStorage.getItem('admin_instagram') || "") : ""
+                };
+
+                localStorage.setItem('current_user', JSON.stringify(userData));
+                checkAuthStatus();
+                loadPosts();
+            });
+        }
+    }
+}
+
+// ANA KULLANICI MENÜSÜ (PROFİL MODALI)
+function openMainUserMenu(isAdmin) {
+    const currentUser = JSON.parse(localStorage.getItem('current_user'));
+    if (!currentUser) return;
+
+    if (isAdmin) {
+        modalUserName.value = "yönetici";
+        modalUserEmail.innerText = ADMIN_EMAIL;
+    } else {
+        modalUserName.value = currentUser.name || '';
+        modalUserEmail.innerText = currentUser.email;
+    }
     modalUserPhoto.src = currentUser.photoURL || 'https://via.placeholder.com/80';
 
-    // Kullanıcı Adı Input Alanı Kontrolü
+    // Kullanıcı Adı Input Alanı
     let usernameInput = document.getElementById('modalUserUsername');
     if (!usernameInput) {
         const divU = document.createElement('div');
@@ -154,9 +100,9 @@ async function openMainUserMenu(isAdmin) {
         modalUserName.parentNode.insertBefore(divU, saveProfileBtn);
         usernameInput = document.getElementById('modalUserUsername');
     }
-    usernameInput.value = isAdmin ? "admin" : (userData.username || '');
+    usernameInput.value = isAdmin ? "admin" : (currentUser.username || '');
 
-    // Instagram input alanı yönetimi
+    // Instagram Input Alanı
     let instaInput = document.getElementById('modalUserInstagram');
     if (!instaInput) {
         const div = document.createElement('div');
@@ -169,227 +115,147 @@ async function openMainUserMenu(isAdmin) {
         instaInput = document.getElementById('modalUserInstagram');
     }
     
-    instaInput.value = userData.instagram || ''; // Veritabanında ne varsa onu getirir, boşsa boş kalır
+    instaInput.value = isAdmin ? (localStorage.getItem('admin_instagram') || "") : (currentUser.instagram || '');
     
+    // Kısıtlamalar
     if (isAdmin) {
-        instaInput.disabled = false; // Yönetici Instagram adresini yazıp kaydedebilsin diye açık bırakıldı
         modalUserName.disabled = true; 
         usernameInput.disabled = true;
+        instaInput.disabled = false; // Yönetici Instagram adresini değiştirebilir
     } else {
-        instaInput.disabled = false;
         modalUserName.disabled = false;
         usernameInput.disabled = false;
+        instaInput.disabled = false;
     }
 
-    profileModal.style.display = 'flex';
+    if (profileModal) profileModal.style.display = 'flex';
 }
 
-// PROFİL GÜNCELLEME (7 GÜN KURALI VE ÇAKIŞMA DENETİMİ İLE)
-saveProfileBtn.onclick = async () => {
-    if (!currentUser) return;
-    let isAdmin = currentUser.email === ADMIN_EMAIL;
+// PROFİLİ KAYDET
+if (saveProfileBtn) {
+    saveProfileBtn.onclick = () => {
+        const currentUser = JSON.parse(localStorage.getItem('current_user'));
+        if (!currentUser) return;
+        
+        let isAdmin = currentUser.email === ADMIN_EMAIL;
+        const newInsta = document.getElementById('modalUserInstagram').value.trim();
 
-    const userRef = db.collection('users').doc(currentUser.uid);
-    const userDoc = await userRef.get();
-    const userData = userDoc.data();
-    const newInsta = document.getElementById('modalUserInstagram').value.trim();
+        if (isAdmin) {
+            localStorage.setItem('admin_instagram', newInsta);
+            alert("Yönetici profili ve Instagram adresiniz başarıyla kaydedildi!");
+        } else {
+            const newName = modalUserName.value.trim();
+            const newUsername = document.getElementById('modalUserUsername').value.trim().toLowerCase();
+            
+            currentUser.name = newName;
+            currentUser.username = newUsername;
+            currentUser.instagram = newInsta;
+            localStorage.setItem('current_user', JSON.stringify(currentUser));
+            alert("Profiliniz başarıyla güncellendi!");
+        }
 
-    if (isAdmin) {
-        // Yönetici adı ve kullanıcı adı değiştirilemez ama Instagram adresi güncellenip kaydedilebilir
-        await userRef.update({
-            instagram: newInsta,
-            name: "yönetici",
-            username: "admin"
-        });
-        alert("Yönetici profili başarıyla güncellendi!");
-        profileModal.style.display = 'none';
+        if (profileModal) profileModal.style.display = 'none';
+        checkAuthStatus();
         loadPosts();
+    };
+}
+
+// MODAL KAPATMA
+if (closeProfileModal) {
+    closeProfileModal.addEventListener('click', () => { profileModal.style.display = 'none'; });
+}
+
+// ÇIKIŞ YAP
+if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('current_user');
+        if (profileModal) profileModal.style.display = 'none';
+        checkAuthStatus();
+        loadPosts();
+    });
+}
+
+// HESAP SİLME
+if (deleteAccountBtn) {
+    deleteAccountBtn.onclick = () => {
+        if (confirm("Hesabınızı silmek istediğinize emin misiniz?")) {
+            localStorage.removeItem('current_user');
+            if (profileModal) profileModal.style.display = 'none';
+            checkAuthStatus();
+            loadPosts();
+            alert("Hesap silindi.");
+        }
+    };
+}
+
+// GÖNDERİ PAYLAŞMA
+if (submitPostBtn) {
+    submitPostBtn.addEventListener('click', () => {
+        const currentUser = JSON.parse(localStorage.getItem('current_user'));
+        if (!currentUser) return alert("Lütfen önce giriş yapın!");
+
+        const content = postContent.value.trim();
+        if (!content) return alert("Lütfen bir şeyler yazın!");
+
+        let isAdmin = currentUser.email === ADMIN_EMAIL;
+        let displayName = isAdmin ? "yönetici" : currentUser.name;
+
+        let posts = JSON.parse(localStorage.getItem('local_posts')) || [];
+        
+        const newPost = {
+            id: Date.now().toString(),
+            uid: currentUser.email,
+            userName: displayName,
+            userPhoto: currentUser.photoURL || "",
+            isAdmin: isAdmin,
+            content: content,
+            date: "Az önce"
+        };
+
+        posts.unshift(newPost); // En üste ekle
+        localStorage.setItem('local_posts', JSON.stringify(posts));
+
+        postContent.value = "";
+        loadPosts();
+    });
+}
+
+// GÖNDERİLERİ LİSTELEME
+function loadPosts() {
+    if (!postsContainer) return;
+    
+    let posts = JSON.parse(localStorage.getItem('local_posts')) || [];
+    postsContainer.innerHTML = "";
+
+    if (posts.length === 0) {
+        postsContainer.innerHTML = "<p style='text-align:center; color:gray; padding:20px;'>Henüz gönderi yok.</p>";
         return;
     }
 
-    const newName = modalUserName.value.trim();
-    const newUsername = document.getElementById('modalUserUsername').value.trim().toLowerCase();
-
-    // 7 Gün Kuralı Kontrolü
-    const currentTime = Date.now();
-    const lastChange = userData.lastUsernameChange || 0;
-    const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
-
-    if (newUsername !== userData.username) {
-        if (currentTime - lastChange < sevenDaysInMs) {
-            const remainingDays = Math.ceil((sevenDaysInMs - (currentTime - lastChange)) / (1000 * 60 * 60 * 24));
-            alert(`Kullanıcı adınızı değiştirmek için ${remainingDays} gün daha beklemelisiniz! (7 günde bir değiştirilebilir)`);
-            return;
+    posts.forEach(post => {
+        let instaIconHtml = "";
+        if (post.isAdmin) {
+            let adminInsta = localStorage.getItem('admin_instagram');
+            if (adminInsta) {
+                instaIconHtml = `<a href="${adminInsta}" target="_blank" style="margin-left:8px; color:#E1306C; font-size:1.1rem;"><i class="fa-brands fa-instagram"></i></a>`;
+            }
         }
 
-        // Başka bir kullanıcı bu kullanıcı adını almış mı?
-        const checkQuery = await db.collection('users').where('username', '==', newUsername).get();
-        if (!checkQuery.empty) {
-            let suggested = newUsername + Math.floor(Math.random() * 900 + 100);
-            alert(`Bu kullanıcı adı başka biri tarafından kullanılıyor! Önerilen alternatif: @${suggested}`);
-            return;
-        }
-    }
-
-    let updateData = {
-        name: newName,
-        instagram: newInsta
-    };
-
-    if (newUsername !== userData.username) {
-        updateData.username = newUsername;
-        updateData.lastUsernameChange = currentTime;
-    }
-
-    await userRef.update(updateData);
-    await currentUser.updateProfile({ displayName: newName });
-    
-    alert("Profiliniz başarıyla güncellendi!");
-    profileModal.style.display = 'none';
-    loadPosts();
-};
-
-// MODAL KAPATMA
-closeProfileModal.addEventListener('click', () => { profileModal.style.display = 'none'; });
-
-// ÇIKIŞ YAP
-logoutBtn.addEventListener('click', () => {
-    auth.signOut().then(() => { profileModal.style.display = 'none'; });
-});
-
-// HESABI SİLME
-deleteAccountBtn.onclick = async () => {
-    let confirmDelete = confirm("Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.");
-    if (!confirmDelete) return;
-
-    try {
-        const batch = db.batch();
-        const postsSnap = await db.collection('posts').where('uid', '==', currentUser.uid).get();
-        postsSnap.forEach(doc => {
-            batch.update(doc.ref, { userName: "Bu kullanıcı mevcut değildir", userPhoto: "", deletedUser: true, instagram: "" });
-        });
-        await batch.commit();
-
-        await db.collection('users').doc(currentUser.uid).delete();
-        await currentUser.delete();
-        alert("Hesabınız başarıyla silindi.");
-        profileModal.style.display = 'none';
-    } catch (error) {
-        alert("Güvenlik nedeniyle tekrar giriş yapıp silmeniz gerekebilir: " + error.message);
-        auth.signOut();
-    }
-};
-
-// GÖNDERİ PAYLAŞMA
-submitPostBtn.addEventListener('click', async () => {
-    const content = postContent.value.trim();
-    if (!content) return alert("Lütfen bir şeyler yazın!");
-
-    let isAdmin = currentUser.email === ADMIN_EMAIL;
-    let userData = (await db.collection('users').doc(currentUser.uid).get()).data() || {};
-
-    let pollData = null;
-    if (isPoll.checked) {
-        pollData = { question: content, yes: [], no: [] };
-    }
-
-    await db.collection('posts').add({
-        uid: currentUser.uid,
-        userName: isAdmin ? "yönetici" : (userData.name || currentUser.displayName || "Sultanbeyli Sakini"),
-        userPhoto: currentUser.photoURL || "",
-        isAdmin: isAdmin,
-        content: content,
-        poll: pollData,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    postContent.value = "";
-    isPoll.checked = false;
-    loadPosts();
-});
-
-// BAŞKA KULLANICI PROFİLİNİ GÖRÜNTÜLEME
-window.viewUserProfile = async function(uid) {
-    if(!uid) return;
-    const userDoc = await db.collection('users').doc(uid).get();
-    if(!userDoc.exists) {
-        return alert("Bu kullanıcı mevcut değildir.");
-    }
-    let data = userDoc.data();
-    alert(`Kullanıcı: ${data.name}\nKullanıcı Adı: @${data.username || 'kullanici'}`);
-};
-
-// AKIŞI YÜKLEME VE İNSTAGRAM İKONU ENTEGRASYONU
-function loadPosts() {
-    db.collection('posts').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
-        postsContainer.innerHTML = "";
-        snapshot.forEach(async (doc) => {
-            const post = doc.data();
-            const postId = doc.id;
-            
-            let isDeleted = post.deletedUser === true;
-            let displayName = isDeleted ? "Bu kullanıcı mevcut değildir" : post.userName;
-            let displayPhoto = isDeleted ? "https://via.placeholder.com/40?text=X" : (post.userPhoto || "https://via.placeholder.com/40");
-
-            let instaIconHtml = "";
-            if (!isDeleted && post.uid) {
-                const uDoc = await db.collection('users').doc(post.uid).get();
-                if (uDoc.exists && uDoc.data().instagram) {
-                    let instaLink = uDoc.data().instagram;
-                    instaIconHtml = `<a href="${instaLink}" target="_blank" style="margin-left:8px; color:#E1306C; font-size:1.1rem;"><i class="fa-brands fa-instagram"></i></a>`;
-                }
-            }
-
-            let pollHtml = "";
-            if (post.poll) {
-                const yesCount = post.poll.yes.length;
-                const noCount = post.poll.no.length;
-                const hasVotedYes = currentUser && post.poll.yes.includes(currentUser.uid);
-                const hasVotedNo = currentUser && post.poll.no.includes(currentUser.uid);
-
-                pollHtml = `
-                    <div class="poll-area">
-                        <p><strong>Anket:</strong> ${post.poll.question}</p>
-                        <div class="poll-buttons">
-                            <button onclick="votePoll('${postId}', 'yes')" class="btn-success" ${hasVotedYes ? 'disabled' : ''}>Evet (${yesCount})</button>
-                            <button onclick="votePoll('${postId}', 'no')" class="btn-danger" ${hasVotedNo ? 'disabled' : ''}>Hayır (${noCount})</button>
-                        </div>
+        postsContainer.innerHTML += `
+            <div class="post-card" style="background:#fff; padding:15px; margin-bottom:15px; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+                <div class="post-header" style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                    <img src="${post.userPhoto}" style="width:40px; height:40px; border-radius:50%;">
+                    <div class="post-user-info">
+                        <h4 style="margin:0; font-size:1rem; display:flex; align-items:center;">
+                            <span>${post.userName}</span> 
+                            ${instaIconHtml} 
+                            ${post.isAdmin ? '<span class="admin-badge" style="background:#000; color:#fff; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px;">YÖNETİCİ</span>' : ''}
+                        </h4>
+                        <span style="font-size:0.75rem; color:gray;">${post.date}</span>
                     </div>
-                `;
-            }
-
-            postsContainer.innerHTML += `
-                <div class="post-card">
-                    <div class="post-header">
-                        <img src="${displayPhoto}" class="post-avatar">
-                        <div class="post-user-info">
-                            <h4><span style="cursor:pointer;" onclick="viewUserProfile('${post.uid}')">${displayName}</span> ${instaIconHtml} ${post.isAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}</h4>
-                            <span>${post.createdAt ? new Date(post.createdAt.toDate()).toLocaleString('tr-TR') : 'Yükleniyor...'}</span>
-                        </div>
-                    </div>
-                    <div class="post-body">${post.content}</div>
-                    ${pollHtml}
                 </div>
-            `;
-        });
+                <div class="post-body" style="font-size:0.95rem; color:#333;">${post.content}</div>
+            </div>
+        `;
     });
 }
-
-// ANKET OY VERME FONKSİYONU
-window.votePoll = async function(postId, choice) {
-    if (!currentUser) return alert("Oy vermek için giriş yapmalısınız!");
-    
-    const postRef = db.collection('posts').doc(postId);
-    const doc = await postRef.get();
-    if (!doc.exists) return;
-
-    let poll = doc.data().poll;
-    
-    poll.yes = poll.yes.filter(id => id !== currentUser.uid);
-    poll.no = poll.no.filter(id => id !== currentUser.uid);
-
-    if (choice === 'yes') poll.yes.push(currentUser.uid);
-    if (choice === 'no') poll.no.push(currentUser.uid);
-
-    await postRef.update({ poll: poll });
-};
