@@ -178,19 +178,29 @@ window.openAdminAppeals = async function() {
 
 // 3. İTİRAZ DETAYINI GÖSTERME VE OKUNDU İŞARETLEME
 window.openAppealDetail = async function(appealId, userId, reasonText) {
+    console.log("İncele butonuna basıldı! Veriler:", appealId, userId, reasonText);
+    
     selectedAppealId = appealId;
     selectedAppealUserId = userId;
 
     const detailContent = document.getElementById('appealDetailContent');
-    if(detailContent) detailContent.innerText = reasonText || "Açıklama belirtilmemiş.";
+    if(detailContent) {
+        detailContent.innerText = reasonText || "Açıklama belirtilmemiş.";
+    } else {
+        console.error("HATA: 'appealDetailContent' ID'li HTML elementi bulunamadı!");
+    }
 
     const detailModal = document.getElementById('appealDetailModal');
-    if(detailModal) detailModal.style.display = 'flex';
+    if(detailModal) {
+        detailModal.style.display = 'flex';
+        console.log("İtiraz detay modalı açıldı.");
+    } else {
+        console.error("HATA: 'appealDetailModal' ID'li HTML elementi bulunamadı!");
+    }
 
-    // Tıklandığı an okundu yap ve sayacı düşür
     try {
         await db.collection('appeals').doc(appealId).update({ read: true });
-        checkAppealsCount(); 
+        if(typeof checkAppealsCount === 'function') checkAppealsCount(); 
     } catch(e) {
         console.log("Okundu işaretlenemedi", e);
     }
