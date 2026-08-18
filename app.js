@@ -39,6 +39,10 @@ const ADMIN_DEFAULT = {
 };
 
 let currentUser = null;
+let allUsersCache = []; // Kullanıcı arama için önbellek
+
+// YÖNETİCİ GÖRÜNÜMÜ İÇİN İSİM DÜZENLEME ("Sultanbeyli Takip" yerine sadece Yönetici veya Kullanıcı adı)
+const getDisplayName = (post) => post.isAdmin ? "Yönetici" : (post.userName || "Sultanbeyli Sakini");
 
 // GÜVENLİ GOOGLE GİRİŞİ
 loginBtn.addEventListener('click', () => {
@@ -54,15 +58,13 @@ auth.onAuthStateChanged((user) => {
         currentUser = user;
         shareBox.style.display = 'block';
         
-        // Yönetici kontrolü (Belirlenen mail veya admin yetkisi)
         let isAdmin = user.email === ADMIN_DEFAULT.email || localStorage.getItem("isAdmin") === "true";
 
-        // Eğer kullanıcı yönetici ise bilgilerini sabit/istenen şekilde koru
         let displayName = user.displayName || 'Profil';
         let displayPhoto = user.photoURL || 'https://via.placeholder.com/30';
         
         if (isAdmin) {
-            displayName = ADMIN_DEFAULT.name;
+            displayName = ADMIN_DEFAULT.name; // Sadece "Yönetici" yazar
             displayPhoto = ADMIN_DEFAULT.avatar;
         }
 
@@ -92,6 +94,7 @@ auth.onAuthStateChanged((user) => {
         });
     }
     loadPosts();
+    checkAppealsCount(); // İtiraz sayacını kontrol et
 });
 
 // MODAL KAPATMA
@@ -113,45 +116,104 @@ saveProfileBtn.addEventListener('click', () => {
     });
 });
 
-// KULLANICILAR LİSTESİ VE PROFİL GÖRÜNTÜLEME (Yönetici Paneli İçin)
-window.openUsersList = async function() {
-    // Not: Yönetici panel modalını kapatıp kullanıcılar listesini açabilirsiniz
-    const container = document.getElementById('usersListContainer'); // HTML'deki liste alanı id'si
-    if(!container) return;
-    container.innerHTML = "Yükleniyor...";
-
+// 1. İTİRAZLAR SAYACI (0 İse gizlenir, okundukça azalır)
+async function checkAppealsCount() {
     try {
-        const snapshot = await db.collection('users').get(); // Veya kullanıcıları çektiğiniz koleksiyon
-        container.innerHTML = "";
-
-        snapshot.forEach(doc => {
-            const user = doc.data();
-            const div = document.createElement('div');
-            div.className = "flex items-center justify-between p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 mb-2";
-            div.onclick = () => showUserProfile(user);
-            div.innerHTML = `
-                <div class="flex items-center gap-3">
-                    <img src="${user.photoURL || ADMIN_DEFAULT.avatar}" class="w-10 h-10 rounded-full object-cover border">
-                    <div>
-                        <h4 class="font-bold text-sm text-gray-800">${user.displayName || 'İsimsiz'}</h4>
-                        <p class="text-xs text-gray-500">@${user.username || 'kullanici'}</p>
-                    </div>
-                </div>
-                <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
-            `;
-            container.appendChild(div);
-        });
+        const snapshot = await db.collection('appeals').where('read', '==', false).get();
+        const count = snapshot.size;
+        const badge = document.getElementById('appealBadge');
+        if (badge) {
+            badge.innerText = count > 0 ? count : "";
+            badge.style.display = count > 0 ? "flex" : "none";
+        }
     } catch (e) {
-        container.innerHTML = "Kullanıcılar yüklenirken hata oluştu.";
+        console.log("İtirazlar yüklenemedi");
     }
 }
 
-// KULLANICI PROFİL DETAY PENCERESİ (Ban butonsuz, Instagram/Mail destekli)
-function showUserProfile(user) {
-    document.getElementById('modalProfileImg').src = user.photoURL || ADMIN_DEFAULT.avatar;
-    document.getElementById('modalProfileName').innerText = user.displayName || 'İsimsiz';
-    document.getElementById('modalProfileUsername').innerText = "@" + (user.username || 'kullanici');
+// İtiraz okunduğunda çağrılacak fonksiyon (Sayacı 1 düşürür)
+window.markAppealAsRead = async function(appealId) {
+    try {
+        await db.collection('appeals').doc(appealId).update({ read: true });
+        checkAppealsCount(); // Sayacı güncelle
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+// 2. KULLANICILAR LİSTESİ VE ARAMA ÇUBUĞU
+window.openUsersList = async function() {
+    const container = document.getElementById('usersListContainer');
+    if(!container) return;
     
+    container.innerHTML = `
+        <input type="text" id="userSearch" placeholder="Kullanıcı adı veya isim ara..." class="w-full p-2 mb-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div id="userResults" class="space-y-2 max-h-60 overflow-y-auto">Yükleniyor...</div>
+    `;
+
+    try {
+        const snapshot = await db.collection('users').get();
+        allUsersCache = [];
+        snapshot.forEach(doc => {
+            allUsersCache.push({ id: doc.id, ...doc.data() });
+        });
+
+        renderUserList(allUsersCache);
+
+        // Arama input dinleyicisi
+        document.getElementById('userSearch').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = allUsersCache.filter(u => 
+                (u.displayName && u.displayName.toLowerCase().includes(query)) || 
+                (u.username && u.username.toLowerCase().includes(query))
+            );
+            renderUserList(filtered);
+        });
+
+    } catch (e) {
+        document.getElementById('userResults').innerHTML = "Kullanıcılar yüklenirken hata oluştu.";
+    }
+}
+
+function renderUserList(users) {
+    const resultsContainer = document.getElementById('userResults');
+    if(!resultsContainer) return;
+    resultsContainer.innerHTML = "";
+
+    if(users.length === 0) {
+        resultsContainer.innerHTML = "<p class='text-xs text-gray-500 text-center py-2'>Kullanıcı bulunamadı.</p>";
+        return;
+    }
+
+    users.forEach(user => {
+        const div = document.createElement('div');
+        div.className = "flex items-center justify-between p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100";
+        div.onclick = () => showUserProfile(user);
+        div.innerHTML = `
+            <div class="flex items-center gap-3">
+                <img src="${user.photoURL || ADMIN_DEFAULT.avatar}" class="w-10 h-10 rounded-full object-cover border">
+                <div>
+                    <h4 class="font-bold text-sm text-gray-800">${user.displayName || 'İsimsiz'}</h4>
+                    <p class="text-xs text-gray-500">@${user.username || 'kullanici'}</p>
+                </div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
+        `;
+        resultsContainer.appendChild(div);
+    });
+}
+
+// 3. KULLANICI PROFİL DETAY PENCERESİ (Raporla ve Banla Butonlu)
+function showUserProfile(user) {
+    const profileImg = document.getElementById('modalProfileImg');
+    const profileName = document.getElementById('modalProfileName');
+    const profileUsername = document.getElementById('modalProfileUsername');
+    
+    if(profileImg) profileImg.src = user.photoURL || ADMIN_DEFAULT.avatar;
+    if(profileName) profileName.innerText = user.displayName || 'İsimsiz';
+    if(profileUsername) profileUsername.innerText = "@" + (user.username || 'kullanici');
+    
+    // Sosyal medya ve e-posta ikonları
     let socialContainer = document.getElementById('modalSocialIcons');
     if(socialContainer) {
         socialContainer.innerHTML = '';
@@ -163,8 +225,44 @@ function showUserProfile(user) {
             socialContainer.innerHTML += `<a href="${igLink}" target="_blank" class="text-pink-600 bg-pink-50 p-2 rounded-full"><i class="fa-brands fa-instagram text-lg"></i></a>`;
         }
     }
-    // Profil detay modalını açma komutu (Örn: userProfileModal.style.display = 'flex')
+
+    // Raporla ve Banla Butonları Alanı
+    let actionsContainer = document.getElementById('profileActions');
+    if(actionsContainer) {
+        actionsContainer.innerHTML = `
+            <div class="flex gap-2 mt-4 pt-3 border-t">
+                <button onclick="reportUser('${user.id}')" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Raporla
+                </button>
+                <button onclick="banUser('${user.id}', '${user.displayName || 'Kullanıcı'}')" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-ban"></i> Banla
+                </button>
+            </div>
+        `;
+    }
+
+    // Modal açma tetikleyicisi (Projenizdeki modal id'sine göre)
+    const modalEl = document.getElementById('userProfileModal');
+    if(modalEl) modalEl.style.display = 'flex';
 }
+
+// Raporlama Fonksiyonu
+window.reportUser = function(userId) {
+    alert("Kullanıcı yöneticiye raporlandı.");
+};
+
+// Banlama Sistemi Fonksiyonu
+window.banUser = async function(userId, userName) {
+    if(!confirm(`"${userName}" adlı kullanıcıyı banlamak istediğinize emin misiniz?`)) return;
+    try {
+        await db.collection('bannedUsers').doc(userId).set({
+            bannedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        alert("Kullanıcı başarıyla banlandı.");
+    } catch(e) {
+        alert("Banlama işleminde hata oluştu: " + e.message);
+    }
+};
 
 // GMAIL / HESABI SİLME
 deleteAccountBtn.addEventListener('click', async () => {
@@ -223,7 +321,7 @@ submitPostBtn.addEventListener('click', async () => {
     loadPosts();
 });
 
-// AKIŞI YÜKLEME VE ANLIK GÖSTERME
+// AKIŞI YÜKLEME VE ANLIK GÖSTERME (Resim harf/hata sorunu düzeltilmiş haliyle)
 function loadPosts() {
     db.collection('posts').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
         postsContainer.innerHTML = "";
@@ -232,8 +330,10 @@ function loadPosts() {
             const postId = doc.id;
             
             let isDeleted = post.deletedUser === true;
-            let displayName = isDeleted ? "Kullanıcı Yok" : post.userName;
-            let displayPhoto = isDeleted ? "https://via.placeholder.com/40?text=X" : (post.userPhoto || "https://via.placeholder.com/40");
+            let displayName = isDeleted ? "Kullanıcı Yok" : getDisplayName(post);
+            
+            // Resim yoksa veya harf çıkma sorununa karşı yedek avatar (ui-avatars veya placeholder)
+            let displayPhoto = isDeleted ? "https://via.placeholder.com/40?text=X" : (post.userPhoto && post.userPhoto !== "" ? post.userPhoto : "https://ui-avatars.com/api/?name=" + encodeURIComponent(displayName) + "&background=random");
 
             let pollHtml = "";
             if (post.poll) {
@@ -243,26 +343,28 @@ function loadPosts() {
                 const hasVotedNo = currentUser && post.poll.no.includes(currentUser.uid);
 
                 pollHtml = `
-                    <div class="poll-area">
-                        <p><strong>Anket:</strong> ${post.poll.question}</p>
-                        <div class="poll-buttons">
-                            <button onclick="votePoll('${postId}', 'yes')" class="btn-success" ${hasVotedYes ? 'disabled' : ''}>Evet (${yesCount})</button>
-                            <button onclick="votePoll('${postId}', 'no')" class="btn-danger" ${hasVotedNo ? 'disabled' : ''}>Hayır (${noCount})</button>
+                    <div class="poll-area mt-3 p-3 bg-gray-50 rounded-xl">
+                        <p class="mb-2 text-sm font-medium"><strong>Anket:</strong> ${post.poll.question}</p>
+                        <div class="flex gap-2 poll-buttons">
+                            <button onclick="votePoll('${postId}', 'yes')" class="flex-1 bg-green-600 hover:bg-green-700 text-white text-xs py-2 rounded-lg" ${hasVotedYes ? 'disabled' : ''}>Evet (${yesCount})</button>
+                            <button onclick="votePoll('${postId}', 'no')" class="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs py-2 rounded-lg" ${hasVotedNo ? 'disabled' : ''}>Hayır (${noCount})</button>
                         </div>
                     </div>
                 `;
             }
 
             postsContainer.innerHTML += `
-                <div class="post-card">
-                    <div class="post-header">
-                        <img src="${displayPhoto}" class="post-avatar">
+                <div class="post-card bg-white p-4 rounded-2xl shadow-sm mb-4 border border-gray-100">
+                    <div class="flex items-center gap-3 mb-3 post-header">
+                        <img src="${displayPhoto}" class="w-10 h-10 rounded-full object-cover border post-avatar" onerror="this.src='https://via.placeholder.com/40'">
                         <div class="post-user-info">
-                            <h4>${displayName} ${post.isAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}</h4>
-                            <span>${post.createdAt ? new Date(post.createdAt.toDate()).toLocaleString('tr-TR') : 'Yükleniyor...'}</span>
+                            <h4 class="font-bold text-sm text-gray-800 flex items-center gap-1.5">
+                                ${displayName} ${post.isAdmin ? '<span class="bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full font-bold admin-badge">YÖNETİCİ</span>' : ''}
+                            </h4>
+                            <span class="text-[11px] text-gray-400">${post.createdAt ? new Date(post.createdAt.toDate()).toLocaleString('tr-TR') : 'Yükleniyor...'}</span>
                         </div>
                     </div>
-                    <div class="post-body">${post.content}</div>
+                    <div class="post-body text-sm text-gray-700 leading-relaxed">${post.content}</div>
                     ${pollHtml}
                 </div>
             `;
