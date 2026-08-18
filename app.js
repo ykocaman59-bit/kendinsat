@@ -29,6 +29,15 @@ const modalUserName = document.getElementById('modalUserName');
 const modalUserEmail = document.getElementById('modalUserEmail');
 const modalUserPhoto = document.getElementById('modalUserPhoto');
 
+// YÖNETİCİ SABİT BİLGİLERİ VE KALICILIK
+const ADMIN_DEFAULT = {
+    name: "Yönetici",
+    username: "admin",
+    email: "ykocaman59@gmail.com",
+    instagram: "https://www.instagram.com/istanbulsende3434?igsh=ZHJxamVkeDN0c3Zl",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100"
+};
+
 let currentUser = null;
 
 // GÜVENLİ GOOGLE GİRİŞİ
@@ -45,20 +54,29 @@ auth.onAuthStateChanged((user) => {
         currentUser = user;
         shareBox.style.display = 'block';
         
-        // Admin kontrolü (Örn: Belirli e-posta veya admin şifre doğrulama akışı)
-        let isAdmin = user.email === "admin@sultanbeyli.com" || localStorage.getItem("isAdmin") === "true";
+        // Yönetici kontrolü (Belirlenen mail veya admin yetkisi)
+        let isAdmin = user.email === ADMIN_DEFAULT.email || localStorage.getItem("isAdmin") === "true";
+
+        // Eğer kullanıcı yönetici ise bilgilerini sabit/istenen şekilde koru
+        let displayName = user.displayName || 'Profil';
+        let displayPhoto = user.photoURL || 'https://via.placeholder.com/30';
+        
+        if (isAdmin) {
+            displayName = ADMIN_DEFAULT.name;
+            displayPhoto = ADMIN_DEFAULT.avatar;
+        }
 
         userMenuSection.innerHTML = `
             <button class="btn-primary" id="openProfileBtn" style="display:flex; align-items:center; gap:8px;">
-                <img src="${user.photoURL || 'https://via.placeholder.com/30'}" style="width:24px; height:24px; border-radius:50%;"> 
-                ${user.displayName || 'Profil'} ${isAdmin ? '<span class="admin-badge">YÖNETİCİ</span>' : ''}
+                <img src="${displayPhoto}" style="width:24px; height:24px; border-radius:50%;"> 
+                ${displayName} ${isAdmin ? '<span class="admin-badge">YÖNETİCİ</span>' : ''}
             </button>
         `;
 
         document.getElementById('openProfileBtn').addEventListener('click', () => {
-            modalUserName.value = user.displayName || '';
+            modalUserName.value = isAdmin ? ADMIN_DEFAULT.name : (user.displayName || '');
             modalUserEmail.innerText = user.email;
-            modalUserPhoto.src = user.photoURL || 'https://via.placeholder.com/80';
+            modalUserPhoto.src = displayPhoto;
             profileModal.style.display = 'flex';
         });
 
@@ -68,7 +86,6 @@ auth.onAuthStateChanged((user) => {
         userMenuSection.innerHTML = `
             <button id="loginBtn" class="btn-primary"><i class="fa-brands fa-google"></i> Gmail ile Giriş Yap</button>
         `;
-        // Yeniden bağla
         document.getElementById('loginBtn').addEventListener('click', () => {
             const provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithPopup(provider);
@@ -96,12 +113,64 @@ saveProfileBtn.addEventListener('click', () => {
     });
 });
 
-// GMAIL / HESABI SİLME (İstediğiniz Kriter: Mesajlar silinmez, kullanıcı 'Kullanıcı Yok' görünür)
+// KULLANICILAR LİSTESİ VE PROFİL GÖRÜNTÜLEME (Yönetici Paneli İçin)
+window.openUsersList = async function() {
+    // Not: Yönetici panel modalını kapatıp kullanıcılar listesini açabilirsiniz
+    const container = document.getElementById('usersListContainer'); // HTML'deki liste alanı id'si
+    if(!container) return;
+    container.innerHTML = "Yükleniyor...";
+
+    try {
+        const snapshot = await db.collection('users').get(); // Veya kullanıcıları çektiğiniz koleksiyon
+        container.innerHTML = "";
+
+        snapshot.forEach(doc => {
+            const user = doc.data();
+            const div = document.createElement('div');
+            div.className = "flex items-center justify-between p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 mb-2";
+            div.onclick = () => showUserProfile(user);
+            div.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <img src="${user.photoURL || ADMIN_DEFAULT.avatar}" class="w-10 h-10 rounded-full object-cover border">
+                    <div>
+                        <h4 class="font-bold text-sm text-gray-800">${user.displayName || 'İsimsiz'}</h4>
+                        <p class="text-xs text-gray-500">@${user.username || 'kullanici'}</p>
+                    </div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
+            `;
+            container.appendChild(div);
+        });
+    } catch (e) {
+        container.innerHTML = "Kullanıcılar yüklenirken hata oluştu.";
+    }
+}
+
+// KULLANICI PROFİL DETAY PENCERESİ (Ban butonsuz, Instagram/Mail destekli)
+function showUserProfile(user) {
+    document.getElementById('modalProfileImg').src = user.photoURL || ADMIN_DEFAULT.avatar;
+    document.getElementById('modalProfileName').innerText = user.displayName || 'İsimsiz';
+    document.getElementById('modalProfileUsername').innerText = "@" + (user.username || 'kullanici');
+    
+    let socialContainer = document.getElementById('modalSocialIcons');
+    if(socialContainer) {
+        socialContainer.innerHTML = '';
+        if(user.email) {
+            socialContainer.innerHTML += `<a href="mailto:${user.email}" class="text-blue-600 bg-blue-50 p-2 rounded-full"><i class="fa-solid fa-envelope"></i></a>`;
+        }
+        if(user.instagram) {
+            let igLink = user.instagram.startsWith('http') ? user.instagram : `https://instagram.com/${user.instagram.replace('@','')}`;
+            socialContainer.innerHTML += `<a href="${igLink}" target="_blank" class="text-pink-600 bg-pink-50 p-2 rounded-full"><i class="fa-brands fa-instagram text-lg"></i></a>`;
+        }
+    }
+    // Profil detay modalını açma komutu (Örn: userProfileModal.style.display = 'flex')
+}
+
+// GMAIL / HESABI SİLME
 deleteAccountBtn.addEventListener('click', async () => {
     if (!confirm("Gmail hesabınızı ve site kaydınızı silmek istediğinize emin misiniz? Paylaştığınız mesajlar kalacak ancak isminiz 'Kullanıcı Yok' olarak güncellenecektir.")) return;
 
     try {
-        // Firestore'daki gönderi ve yorumlarda kullanıcı adını anonimleştir
         const batch = db.batch();
         const postsSnap = await db.collection('posts').where('uid', '==', currentUser.uid).get();
         postsSnap.forEach(doc => {
@@ -109,7 +178,6 @@ deleteAccountBtn.addEventListener('click', async () => {
         });
         await batch.commit();
 
-        // Firebase Auth hesabını sil
         await currentUser.delete();
         alert("Hesabınız başarıyla silindi.");
         profileModal.style.display = 'none';
@@ -124,7 +192,7 @@ submitPostBtn.addEventListener('click', async () => {
     const content = postContent.value.trim();
     if (!content) return alert("Lütfen bir şeyler yazın!");
 
-    let isAdmin = currentUser.email === "admin@sultanbeyli.com" || localStorage.getItem("isAdmin") === "true";
+    let isAdmin = currentUser.email === ADMIN_DEFAULT.email || localStorage.getItem("isAdmin") === "true";
 
     let pollData = null;
     if (isPoll.checked) {
@@ -135,7 +203,6 @@ submitPostBtn.addEventListener('click', async () => {
         };
     }
 
-    // Admin şifre kontrolü için hızlı bir prompt (İstediğiniz admin 14531453 kuralı)
     if(content.includes("#admin14531453")) {
         localStorage.setItem("isAdmin", "true");
         alert("Yönetici yetkisi aktifleşti!");
@@ -143,8 +210,8 @@ submitPostBtn.addEventListener('click', async () => {
 
     await db.collection('posts').add({
         uid: currentUser.uid,
-        userName: currentUser.displayName || "Sultanbeyli Sakini",
-        userPhoto: currentUser.photoURL || "",
+        userName: isAdmin ? ADMIN_DEFAULT.name : (currentUser.displayName || "Sultanbeyli Sakini"),
+        userPhoto: isAdmin ? ADMIN_DEFAULT.avatar : (currentUser.photoURL || ""),
         isAdmin: isAdmin,
         content: content,
         poll: pollData,
@@ -213,11 +280,9 @@ window.votePoll = async function(postId, choice) {
 
     let poll = doc.data().poll;
     
-    // Önceki oyları temizle
     poll.yes = poll.yes.filter(id => id !== currentUser.uid);
     poll.no = poll.no.filter(id => id !== currentUser.uid);
 
-    // Yeni oyu ekle
     if (choice === 'yes') poll.yes.push(currentUser.uid);
     if (choice === 'no') poll.no.push(currentUser.uid);
 
