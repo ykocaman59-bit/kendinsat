@@ -53,13 +53,9 @@ auth.onAuthStateChanged((user) => {
         
         let isAdmin = user.email === ADMIN_DEFAULT.email || localStorage.getItem("isAdmin") === "true";
 
-        let displayName = user.displayName || 'Profil';
-        let displayPhoto = user.photoURL || 'https://via.placeholder.com/30';
-        
-                if (isAdmin) {
-            displayName = "Yönetici"; 
-            displayPhoto = ADMIN_DEFAULT.avatar;
-                }
+        // Yönetici ise doğrudan sabit yönetici bilgilerini kullanıyoruz
+        let displayName = isAdmin ? ADMIN_DEFAULT.name : (user.displayName || 'Profil');
+        let displayPhoto = isAdmin ? ADMIN_DEFAULT.avatar : (user.photoURL || 'https://via.placeholder.com/30');
 
         if(userMenuSection) {
             userMenuSection.innerHTML = `
@@ -155,7 +151,6 @@ window.openAdminAppeals = async function() {
             const data = doc.data();
             const isUnread = data.read === false;
             
-            // Metin içindeki bozulmaları önlemek için temizliyoruz
             const safeReason = (data.reason || data.content || 'Açıklama yok').replace(/'/g, "\\'").replace(/"/g, '&quot;');
             const safeName = (data.userName || 'Kullanıcı').replace(/'/g, "\\'");
             
@@ -204,19 +199,17 @@ window.banaTiklandi = async function(appealId, userId, reasonText) {
     }
 }
 
-
 // 3. İTİRAZ DETAYINI GÖSTERME VE OKUNDU İŞARETLEME
 window.openAppealDetail = async function(appealId, userId, reasonText) {
     selectedAppealId = appealId;
     selectedAppealUserId = userId;
 
-    // Modalı kapatmak yerine doğrudan içerik alanını değiştiriyoruz
     const container = document.getElementById('adminAppealsListContainer');
     if(container) {
         container.innerHTML = `
             <div style="padding: 10px;">
                 <button onclick="openAdminAppeals()" style="background: none; border: none; color: #2563eb; font-weight: bold; cursor: pointer; margin-bottom: 10px; font-size: 0.85rem;">← Geri Dön</button>
-                <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 4px;">Kullanıcının İtiraz Açıklaması:</div>
+                <div style="font-size: 0.80rem; color: #64748b; margin-bottom: 4px;">Kullanıcının İtiraz Açıklaması:</div>
                 <div style="background: #f1f5f9; padding: 12px; border-radius: 8px; font-size: 0.9rem; color: #1e293b; margin-bottom: 15px; border: 1px solid #cbd5e1;">${reasonText || "Açıklama belirtilmemiş."}</div>
                 <div style="display: flex; gap: 10px;">
                     <button onclick="resolveAppeal(true)" style="flex: 1; background: #16a34a; color: white; padding: 10px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer;">Kabul Et (Banı Kaldır)</button>
@@ -234,7 +227,6 @@ window.openAppealDetail = async function(appealId, userId, reasonText) {
     }
 }
 
-
 // 4. KABUL ET VEYA REDDET
 window.resolveAppeal = async function(isApproved) {
     if(!selectedAppealId) {
@@ -244,7 +236,6 @@ window.resolveAppeal = async function(isApproved) {
 
     try {
         if(isApproved) {
-            // Kabul edildiyse banı kaldır
             if(selectedAppealUserId) {
                 await db.collection('bannedUsers').doc(selectedAppealUserId).delete();
             }
@@ -253,10 +244,8 @@ window.resolveAppeal = async function(isApproved) {
             alert("İtiraz reddedildi. Kullanıcının banı devam ediyor.");
         }
 
-        // İtiraz talebini listeden sil
         await db.collection('appeals').doc(selectedAppealId).delete();
 
-        // Modalleri kapat
         const detailModal = document.getElementById('appealDetailModal');
         const appealsModal = document.getElementById('adminAppealsModal');
         if(detailModal) detailModal.style.display = 'none';
@@ -421,7 +410,7 @@ if(submitPostBtn) {
     });
 }
 
-function loadPosts() {
+function loadPosts() { 
     if(!postsContainer) return;
     db.collection('posts').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
         postsContainer.innerHTML = "";
@@ -484,4 +473,4 @@ window.votePoll = async function(postId, choice) {
     if (choice === 'no') poll.no.push(currentUser.uid);
 
     await postRef.update({ poll: poll });
-                                }
+}
