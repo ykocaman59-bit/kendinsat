@@ -255,20 +255,26 @@
     </div>
 
     <!-- YÖNETİCİ ANA MENÜ MODALI -->
-    <div id="adminMenuModal" class="modal" style="display: none;">
-        <div class="modal-content" style="text-align: left;">
-            <span class="close-modal" onclick="document.getElementById('adminMenuModal').style.display='none'">&times;</span>
-            <h3 style="margin-bottom: 15px;"><i class="fa-solid fa-crown" style="color:#d97706;"></i> Yönetici Paneli</h3>
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-                <button class="admin-menu-btn" onclick="openAdminProfileEdit()"><i class="fa-solid fa-user-pen"></i> Profil Düzenle</button>
-                <button class="admin-menu-btn" onclick="openAdminUsersList()"><i class="fa-solid fa-users"></i> Kullanıcılar (Banla)</button>
-                <button class="admin-menu-btn" onclick="openAdminAppeals()"><i class="fa-solid fa-scale-balanced"></i> İtirazlar <span id="appealCountBadge" style="background:var(--danger-color); color:white; padding:2px 6px; border-radius:10px; font-size:0.75rem; margin-left:auto;">0</span></button>
-                <button class="admin-menu-btn" onclick="openAdminBansList()"><i class="fa-solid fa-ban"></i> Kalıcı / Süreli Banlar</button>
-                <button class="admin-menu-btn" onclick="openAdminSuggestions()"><i class="fa-solid fa-lightbulb"></i> Öneriler</button>
-                <button class="admin-menu-btn" onclick="logout()" style="color: var(--danger-color);"><i class="fa-solid fa-right-from-bracket" style="color: var(--danger-color);"></i> Çıkış</button>
-            </div>
+<div id="adminMenuModal" class="modal" style="display: none;">
+    <div class="modal-content" style="text-align: left;">
+        <span class="close-modal" onclick="document.getElementById('adminMenuModal').style.display='none'">&times;</span>
+        <h3 style="margin-bottom: 15px;"><i class="fa-solid fa-crown" style="color:#d97706;"></i> Yönetici Paneli</h3>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <button class="admin-menu-btn" onclick="openAdminProfileEdit()"><i class="fa-solid fa-user-pen"></i> Profil Düzenle</button>
+            
+            <!-- Kullanıcılar Butonu (Arama çubuklu sisteme bağlanır) -->
+            <button class="admin-menu-btn" onclick="openUsersList()"><i class="fa-solid fa-users"></i> Kullanıcılar (Banla)</button>
+            
+            <!-- İtirazlar Butonu (0 olduğunda gizlenen / dinamik çalışan badge) -->
+            <button class="admin-menu-btn" onclick="openAppeals()"><i class="fa-solid fa-scale-balanced"></i> İtirazlar <span id="appealBadge" class="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold ml-auto" style="display: none;">0</span></button>
+            
+            <button class="admin-menu-btn" onclick="openAdminBansList()"><i class="fa-solid fa-ban"></i> Kalıcı / Süreli Banlar</button>
+            <button class="admin-menu-btn" onclick="openAdminSuggestions()"><i class="fa-solid fa-lightbulb"></i> Öneriler</button>
+            <button class="admin-menu-btn" onclick="logout()" style="color: var(--danger-color);"><i class="fa-solid fa-right-from-bracket" style="color: var(--danger-color);"></i> Çıkış</button>
         </div>
     </div>
+</div>
+    
 
     <!-- KULLANICI ANA MENÜ MODALI -->
     <div id="userMenuModal" class="modal" style="display: none;">
