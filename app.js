@@ -155,24 +155,27 @@ window.openAdminAppeals = async function() {
             const data = doc.data();
             const isUnread = data.read === false;
             
+            const safeReason = (data.reason || data.content || 'Açıklama yok').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            const safeName = (data.userName || 'Kullanıcı').replace(/'/g, "\\'");
+            
             const div = document.createElement('div');
-            div.className = `p-3 mb-2 rounded-xl border flex items-center justify-between cursor-pointer ${isUnread ? 'bg-blue-50 border-blue-200' : 'bg-gray-50'}`;
-            // Tıklandığında detay modalını açacak ve verileri aktaracak
-            div.onclick = () => openAppealDetail(doc.id, data.userId, data.reason || data.content);
+            div.className = `p-3 mb-2 rounded-xl border flex items-center justify-between ${isUnread ? 'bg-blue-50 border-blue-200' : 'bg-gray-50'}`;
             
             div.innerHTML = `
                 <div>
-                    <h4 class="font-bold text-sm text-gray-800">${data.userName || 'Kullanıcı'} ${isUnread ? '<span class="text-[10px] bg-blue-600 text-white px-1.5 py-0.5 rounded ml-1">Yeni</span>' : ''}</h4>
-                    <p class="text-xs text-gray-500 truncate max-w-[250px]">${data.reason || data.content || 'Açıklama yok'}</p>
+                    <h4 class="font-bold text-sm text-gray-800">${safeName} ${isUnread ? '<span class="text-[10px] bg-blue-600 text-white px-1.5 py-0.5 rounded ml-1">Yeni</span>' : ''}</h4>
+                    <p class="text-xs text-gray-500 truncate max-w-[200px]">${data.reason || data.content || 'Açıklama yok'}</p>
                 </div>
-                <button class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-medium">İncele</button>
+                <button onclick="openAppealDetail('${doc.id}', '${data.userId || ''}', '${safeReason}')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium cursor-pointer">İncele</button>
             `;
             container.appendChild(div);
         });
     } catch (e) {
         container.innerHTML = "İtirazlar yüklenirken hata oluştu.";
+        console.error(e);
     }
 }
+
 
 // 3. İTİRAZ DETAYINI GÖSTERME VE OKUNDU İŞARETLEME
 window.openAppealDetail = async function(appealId, userId, reasonText) {
