@@ -155,6 +155,7 @@ window.openAdminAppeals = async function() {
             const data = doc.data();
             const isUnread = data.read === false;
             
+            // Metin içindeki bozulmaları önlemek için temizliyoruz
             const safeReason = (data.reason || data.content || 'Açıklama yok').replace(/'/g, "\\'").replace(/"/g, '&quot;');
             const safeName = (data.userName || 'Kullanıcı').replace(/'/g, "\\'");
             
@@ -166,7 +167,7 @@ window.openAdminAppeals = async function() {
                     <h4 class="font-bold text-sm text-gray-800">${safeName} ${isUnread ? '<span class="text-[10px] bg-blue-600 text-white px-1.5 py-0.5 rounded ml-1">Yeni</span>' : ''}</h4>
                     <p class="text-xs text-gray-500 truncate max-w-[200px]">${data.reason || data.content || 'Açıklama yok'}</p>
                 </div>
-                <button onclick="openAppealDetail('${doc.id}', '${data.userId || ''}', '${safeReason}')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium cursor-pointer">İncele</button>
+                <button onclick="banaTiklandi('${doc.id}', '${data.userId || ''}', '${safeReason}')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium cursor-pointer">İncele</button>
             `;
             container.appendChild(div);
         });
@@ -175,6 +176,34 @@ window.openAdminAppeals = async function() {
         console.error(e);
     }
 }
+
+window.banaTiklandi = async function(appealId, userId, reasonText) {
+    selectedAppealId = appealId;
+    selectedAppealUserId = userId;
+
+    const container = document.getElementById('adminAppealsListContainer');
+    if(container) {
+        container.innerHTML = `
+            <div style="padding: 10px;">
+                <button onclick="openAdminAppeals()" style="background: none; border: none; color: #2563eb; font-weight: bold; cursor: pointer; margin-bottom: 10px; font-size: 0.85rem;">← Geri Dön</button>
+                <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 4px;">Kullanıcının İtiraz Açıklaması:</div>
+                <div style="background: #f1f5f9; padding: 12px; border-radius: 8px; font-size: 0.9rem; color: #1e293b; margin-bottom: 15px; border: 1px solid #cbd5e1; white-space: pre-wrap;">${reasonText}</div>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="resolveAppeal(true)" style="flex: 1; background: #16a34a; color: white; padding: 10px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer;">Kabul Et (Banı Kaldır)</button>
+                    <button onclick="resolveAppeal(false)" style="flex: 1; background: #dc2626; color: white; padding: 10px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer;">Reddet</button>
+                </div>
+            </div>
+        `;
+    }
+
+    try {
+        await db.collection('appeals').doc(appealId).update({ read: true });
+        if(typeof checkAppealsCount === 'function') checkAppealsCount(); 
+    } catch(e) {
+        console.log("Okundu işaretlenemedi", e);
+    }
+}
+
 
 // 3. İTİRAZ DETAYINI GÖSTERME VE OKUNDU İŞARETLEME
 window.openAppealDetail = async function(appealId, userId, reasonText) {
