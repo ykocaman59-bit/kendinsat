@@ -178,24 +178,23 @@ window.openAdminAppeals = async function() {
 
 // 3. İTİRAZ DETAYINI GÖSTERME VE OKUNDU İŞARETLEME
 window.openAppealDetail = async function(appealId, userId, reasonText) {
-    console.log("İncele butonuna basıldı! Veriler:", appealId, userId, reasonText);
-    
     selectedAppealId = appealId;
     selectedAppealUserId = userId;
 
-    const detailContent = document.getElementById('appealDetailContent');
-    if(detailContent) {
-        detailContent.innerText = reasonText || "Açıklama belirtilmemiş.";
-    } else {
-        console.error("HATA: 'appealDetailContent' ID'li HTML elementi bulunamadı!");
-    }
-
-    const detailModal = document.getElementById('appealDetailModal');
-    if(detailModal) {
-        detailModal.style.display = 'flex';
-        console.log("İtiraz detay modalı açıldı.");
-    } else {
-        console.error("HATA: 'appealDetailModal' ID'li HTML elementi bulunamadı!");
+    // Gelen Ban İtirazları modalının içindeki listeyi ve başlığı bulup içeriği değiştiriyoruz
+    const container = document.getElementById('adminAppealsListContainer');
+    if(container) {
+        container.innerHTML = `
+            <div class="mb-4">
+                <button onclick="openAdminAppeals()" class="text-xs text-blue-600 font-semibold mb-2 flex items-center gap-1 cursor-pointer">← İtiraz Listesine Geri Dön</button>
+                <div class="text-xs text-gray-500 mb-1">İtiraz Açıklaması:</div>
+                <div class="text-sm text-gray-800 bg-gray-50 p-3 rounded-xl border mb-4">${reasonText || "Açıklama belirtilmemiş."}</div>
+                <div class="flex gap-2">
+                    <button onclick="resolveAppeal(true)" class="flex-1 bg-green-600 hover:bg-green-700 text-white text-xs py-2 rounded-lg font-bold cursor-pointer">Kabul Et (Banı Kaldır)</button>
+                    <button onclick="resolveAppeal(false)" class="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs py-2 rounded-lg font-bold cursor-pointer">Reddet</button>
+                </div>
+            </div>
+        `;
     }
 
     try {
