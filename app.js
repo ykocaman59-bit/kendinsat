@@ -176,7 +176,6 @@ window.openAdminAppeals = async function() {
     }
 }
 
-
 // 3. İTİRAZ DETAYINI GÖSTERME VE OKUNDU İŞARETLEME
 window.openAppealDetail = async function(appealId, userId, reasonText) {
     selectedAppealId = appealId;
