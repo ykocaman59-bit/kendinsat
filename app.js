@@ -181,17 +181,17 @@ window.openAppealDetail = async function(appealId, userId, reasonText) {
     selectedAppealId = appealId;
     selectedAppealUserId = userId;
 
-    // Gelen Ban İtirazları modalının içindeki listeyi ve başlığı bulup içeriği değiştiriyoruz
+    // Modalı kapatmak yerine doğrudan içerik alanını değiştiriyoruz
     const container = document.getElementById('adminAppealsListContainer');
     if(container) {
         container.innerHTML = `
-            <div class="mb-4">
-                <button onclick="openAdminAppeals()" class="text-xs text-blue-600 font-semibold mb-2 flex items-center gap-1 cursor-pointer">← İtiraz Listesine Geri Dön</button>
-                <div class="text-xs text-gray-500 mb-1">İtiraz Açıklaması:</div>
-                <div class="text-sm text-gray-800 bg-gray-50 p-3 rounded-xl border mb-4">${reasonText || "Açıklama belirtilmemiş."}</div>
-                <div class="flex gap-2">
-                    <button onclick="resolveAppeal(true)" class="flex-1 bg-green-600 hover:bg-green-700 text-white text-xs py-2 rounded-lg font-bold cursor-pointer">Kabul Et (Banı Kaldır)</button>
-                    <button onclick="resolveAppeal(false)" class="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs py-2 rounded-lg font-bold cursor-pointer">Reddet</button>
+            <div style="padding: 10px;">
+                <button onclick="openAdminAppeals()" style="background: none; border: none; color: #2563eb; font-weight: bold; cursor: pointer; margin-bottom: 10px; font-size: 0.85rem;">← Geri Dön</button>
+                <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 4px;">Kullanıcının İtiraz Açıklaması:</div>
+                <div style="background: #f1f5f9; padding: 12px; border-radius: 8px; font-size: 0.9rem; color: #1e293b; margin-bottom: 15px; border: 1px solid #cbd5e1;">${reasonText || "Açıklama belirtilmemiş."}</div>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="resolveAppeal(true)" style="flex: 1; background: #16a34a; color: white; padding: 10px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer;">Kabul Et (Banı Kaldır)</button>
+                    <button onclick="resolveAppeal(false)" style="flex: 1; background: #dc2626; color: white; padding: 10px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer;">Reddet</button>
                 </div>
             </div>
         `;
@@ -204,6 +204,7 @@ window.openAppealDetail = async function(appealId, userId, reasonText) {
         console.log("Okundu işaretlenemedi", e);
     }
 }
+
 
 // 4. KABUL ET VEYA REDDET
 window.resolveAppeal = async function(isApproved) {
