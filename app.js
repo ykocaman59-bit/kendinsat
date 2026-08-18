@@ -56,10 +56,10 @@ auth.onAuthStateChanged((user) => {
         let displayName = user.displayName || 'Profil';
         let displayPhoto = user.photoURL || 'https://via.placeholder.com/30';
         
-        if (isAdmin) {
-            displayName = ADMIN_DEFAULT.name; 
+                if (isAdmin) {
+            displayName = "Yönetici"; 
             displayPhoto = ADMIN_DEFAULT.avatar;
-        }
+                }
 
         if(userMenuSection) {
             userMenuSection.innerHTML = `
