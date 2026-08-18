@@ -121,10 +121,11 @@ async function checkAppealsCount() {
     try {
         const snapshot = await db.collection('appeals').where('read', '==', false).get();
         const count = snapshot.size;
-        const badge = document.getElementById('appealBadge');
+        const badge = document.getElementById('appealCountBadge');
         if (badge) {
-            badge.innerText = count > 0 ? count : "";
-            badge.style.display = count > 0 ? "flex" : "none";
+            badge.innerText = count;
+            // Eğer itiraz sayısı 0'dan büyükse göster, 0 ise gizle
+            badge.style.display = count > 0 ? "inline-block" : "none";
         }
     } catch (e) {
         console.log("İtirazlar yüklenemedi");
