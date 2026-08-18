@@ -43,7 +43,7 @@ let allUsersCache = [];
 let selectedAppealId = null;
 let selectedAppealUserId = null;
 
-const getDisplayName = (post) => post.isAdmin ? "Yönetici" : (post.userName || "Sultanbeyli Sakini");
+const getDisplayName = (post) => post.isAdmin ? "Yönetici" : (post.userName || "İstanbul Sakini");
 
 // OTURUM DURUMU İZLEME
 auth.onAuthStateChanged((user) => {
@@ -396,7 +396,7 @@ if(submitPostBtn) {
 
         await db.collection('posts').add({
             uid: currentUser.uid,
-            userName: isAdmin ? ADMIN_DEFAULT.name : (currentUser.displayName || "Sultanbeyli Sakini"),
+            userName: isAdmin ? ADMIN_DEFAULT.name : (currentUser.displayName || "İstanbul Sakini"),
             userPhoto: isAdmin ? ADMIN_DEFAULT.avatar : (currentUser.photoURL || ""),
             isAdmin: isAdmin,
             content: content,
