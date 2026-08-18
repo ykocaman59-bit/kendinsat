@@ -39,24 +39,17 @@ const ADMIN_DEFAULT = {
 };
 
 let currentUser = null;
-let allUsersCache = []; // Kullanıcı arama için önbellek
+let allUsersCache = []; 
+let selectedAppealId = null;
+let selectedAppealUserId = null;
 
-// YÖNETİCİ GÖRÜNÜMÜ İÇİN İSİM DÜZENLEME ("Sultanbeyli Takip" yerine sadece Yönetici veya Kullanıcı adı)
 const getDisplayName = (post) => post.isAdmin ? "Yönetici" : (post.userName || "Sultanbeyli Sakini");
-
-// GÜVENLİ GOOGLE GİRİŞİ
-loginBtn.addEventListener('click', () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).catch((error) => {
-        alert("Giriş hatası: " + error.message);
-    });
-});
 
 // OTURUM DURUMU İZLEME
 auth.onAuthStateChanged((user) => {
     if (user) {
         currentUser = user;
-        shareBox.style.display = 'block';
+        if(shareBox) shareBox.style.display = 'block';
         
         let isAdmin = user.email === ADMIN_DEFAULT.email || localStorage.getItem("isAdmin") === "true";
 
@@ -64,93 +57,189 @@ auth.onAuthStateChanged((user) => {
         let displayPhoto = user.photoURL || 'https://via.placeholder.com/30';
         
         if (isAdmin) {
-            displayName = ADMIN_DEFAULT.name; // Sadece "Yönetici" yazar
+            displayName = ADMIN_DEFAULT.name; 
             displayPhoto = ADMIN_DEFAULT.avatar;
         }
 
-        userMenuSection.innerHTML = `
-            <button class="btn-primary" id="openProfileBtn" style="display:flex; align-items:center; gap:8px;">
-                <img src="${displayPhoto}" style="width:24px; height:24px; border-radius:50%;"> 
-                ${displayName} ${isAdmin ? '<span class="admin-badge">YÖNETİCİ</span>' : ''}
-            </button>
-        `;
-
-        document.getElementById('openProfileBtn').addEventListener('click', () => {
-            modalUserName.value = isAdmin ? ADMIN_DEFAULT.name : (user.displayName || '');
-            modalUserEmail.innerText = user.email;
-            modalUserPhoto.src = displayPhoto;
-            profileModal.style.display = 'flex';
-        });
-
+        if(userMenuSection) {
+            userMenuSection.innerHTML = `
+                <button class="btn-primary" id="openProfileBtn" style="display:flex; align-items:center; gap:8px;">
+                    <img src="${displayPhoto}" style="width:24px; height:24px; border-radius:50%;"> 
+                    ${displayName} ${isAdmin ? '<span class="admin-badge">YÖNETİCİ</span>' : ''}
+                </button>
+            `;
+            document.getElementById('openProfileBtn').addEventListener('click', () => {
+                modalUserName.value = isAdmin ? ADMIN_DEFAULT.name : (user.displayName || '');
+                modalUserEmail.innerText = user.email;
+                modalUserPhoto.src = displayPhoto;
+                profileModal.style.display = 'flex';
+            });
+        }
     } else {
         currentUser = null;
-        shareBox.style.display = 'none';
-        userMenuSection.innerHTML = `
-            <button id="loginBtn" class="btn-primary"><i class="fa-brands fa-google"></i> Gmail ile Giriş Yap</button>
-        `;
-        document.getElementById('loginBtn').addEventListener('click', () => {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider);
-        });
+        if(shareBox) shareBox.style.display = 'none';
+        if(userMenuSection) {
+            userMenuSection.innerHTML = `
+                <button id="loginBtn" class="btn-primary"><i class="fa-brands fa-google"></i> Gmail ile Giriş Yap</button>
+            `;
+            document.getElementById('loginBtn').addEventListener('click', () => {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                auth.signInWithPopup(provider);
+            });
+        }
     }
     loadPosts();
-    checkAppealsCount(); // İtiraz sayacını kontrol et
+    checkAppealsCount();
 });
 
-// MODAL KAPATMA
-closeProfileModal.addEventListener('click', () => { profileModal.style.display = 'none'; });
+if(closeProfileModal) {
+    closeProfileModal.addEventListener('click', () => { profileModal.style.display = 'none'; });
+}
 
-// ÇIKIŞ YAP
-logoutBtn.addEventListener('click', () => {
-    auth.signOut().then(() => { profileModal.style.display = 'none'; });
-});
-
-// PROFİL GÜNCELLEME
-saveProfileBtn.addEventListener('click', () => {
-    if (!currentUser) return;
-    const newName = modalUserName.value;
-    currentUser.updateProfile({ displayName: newName }).then(() => {
-        alert("Profil güncellendi!");
-        profileModal.style.display = 'none';
-        location.reload();
+if(logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+        auth.signOut().then(() => { profileModal.style.display = 'none'; });
     });
-});
+}
 
-// 1. İTİRAZLAR SAYACI (0 İse gizlenir, okundukça azalır)
+if(saveProfileBtn) {
+    saveProfileBtn.addEventListener('click', () => {
+        if (!currentUser) return;
+        const newName = modalUserName.value;
+        currentUser.updateProfile({ displayName: newName }).then(() => {
+            alert("Profil güncellendi!");
+            profileModal.style.display = 'none';
+            location.reload();
+        });
+    });
+}
+
+// 1. İTİRAZLAR SAYACI (0 İse hiç görünmez, yazı kalır)
 async function checkAppealsCount() {
     try {
         const snapshot = await db.collection('appeals').where('read', '==', false).get();
         const count = snapshot.size;
         const badge = document.getElementById('appealCountBadge');
         if (badge) {
-            badge.innerText = count;
-            // Eğer itiraz sayısı 0'dan büyükse göster, 0 ise gizle
-            badge.style.display = count > 0 ? "inline-block" : "none";
+            if (count > 0) {
+                badge.innerText = count;
+                badge.style.display = "inline-block";
+            } else {
+                badge.innerText = "";
+                badge.style.display = "none";
+            }
         }
     } catch (e) {
         console.log("İtirazlar yüklenemedi");
     }
 }
 
-// İtiraz okunduğunda çağrılacak fonksiyon (Sayacı 1 düşürür)
-window.markAppealAsRead = async function(appealId) {
+// 2. İTİRAZLAR LİSTESİNİ AÇMA
+window.openAdminAppeals = async function() {
+    const container = document.getElementById('adminAppealsListContainer');
+    const modal = document.getElementById('adminAppealsModal');
+    if(modal) modal.style.display = 'flex';
+    if(!container) return;
+
+    container.innerHTML = "Yükleniyor...";
     try {
-        await db.collection('appeals').doc(appealId).update({ read: true });
-        checkAppealsCount(); // Sayacı güncelle
+        const snapshot = await db.collection('appeals').orderBy('createdAt', 'desc').get();
+        container.innerHTML = "";
+
+        if(snapshot.empty) {
+            container.innerHTML = "<p class='text-xs text-gray-500 text-center py-4'>Hiç itiraz yok.</p>";
+            return;
+        }
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const isUnread = data.read === false;
+            
+            const div = document.createElement('div');
+            div.className = `p-3 mb-2 rounded-xl border flex items-center justify-between cursor-pointer ${isUnread ? 'bg-blue-50 border-blue-200' : 'bg-gray-50'}`;
+            // Tıklandığında detay modalını açacak ve verileri aktaracak
+            div.onclick = () => openAppealDetail(doc.id, data.userId, data.reason || data.content);
+            
+            div.innerHTML = `
+                <div>
+                    <h4 class="font-bold text-sm text-gray-800">${data.userName || 'Kullanıcı'} ${isUnread ? '<span class="text-[10px] bg-blue-600 text-white px-1.5 py-0.5 rounded ml-1">Yeni</span>' : ''}</h4>
+                    <p class="text-xs text-gray-500 truncate max-w-[250px]">${data.reason || data.content || 'Açıklama yok'}</p>
+                </div>
+                <button class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-medium">İncele</button>
+            `;
+            container.appendChild(div);
+        });
     } catch (e) {
-        console.error(e);
+        container.innerHTML = "İtirazlar yüklenirken hata oluştu.";
     }
 }
 
-// 2. KULLANICILAR LİSTESİ VE ARAMA ÇUBUĞU
-window.openUsersList = async function() {
-    const container = document.getElementById('usersListContainer');
+// 3. İTİRAZ DETAYINI GÖSTERME VE OKUNDU İŞARETLEME
+window.openAppealDetail = async function(appealId, userId, reasonText) {
+    selectedAppealId = appealId;
+    selectedAppealUserId = userId;
+
+    const detailContent = document.getElementById('appealDetailContent');
+    if(detailContent) detailContent.innerText = reasonText || "Açıklama belirtilmemiş.";
+
+    const detailModal = document.getElementById('appealDetailModal');
+    if(detailModal) detailModal.style.display = 'flex';
+
+    // Tıklandığı an okundu yap ve sayacı düşür
+    try {
+        await db.collection('appeals').doc(appealId).update({ read: true });
+        checkAppealsCount(); 
+    } catch(e) {
+        console.log("Okundu işaretlenemedi", e);
+    }
+}
+
+// 4. KABUL ET VEYA REDDET
+window.resolveAppeal = async function(isApproved) {
+    if(!selectedAppealId) {
+        alert("Geçersiz itiraz ID'si!");
+        return;
+    }
+
+    try {
+        if(isApproved) {
+            // Kabul edildiyse banı kaldır
+            if(selectedAppealUserId) {
+                await db.collection('bannedUsers').doc(selectedAppealUserId).delete();
+            }
+            alert("İtiraz onaylandı ve kullanıcının banı kaldırıldı!");
+        } else {
+            alert("İtiraz reddedildi. Kullanıcının banı devam ediyor.");
+        }
+
+        // İtiraz talebini listeden sil
+        await db.collection('appeals').doc(selectedAppealId).delete();
+
+        // Modalleri kapat
+        const detailModal = document.getElementById('appealDetailModal');
+        const appealsModal = document.getElementById('adminAppealsModal');
+        if(detailModal) detailModal.style.display = 'none';
+        if(appealsModal) appealsModal.style.display = 'none';
+        
+        checkAppealsCount();
+
+    } catch (e) {
+        alert("İşlem sırasında hata oluştu: " + e.message);
+    }
+}
+
+// DİĞER YÖNETİCİ VE GÖNDERİ FONKSİYONLARI
+window.openAdminUsersList = async function() {
+    const container = document.getElementById('adminUsersListContainer') || document.getElementById('usersListContainer');
     if(!container) return;
     
     container.innerHTML = `
         <input type="text" id="userSearch" placeholder="Kullanıcı adı veya isim ara..." class="w-full p-2 mb-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
         <div id="userResults" class="space-y-2 max-h-60 overflow-y-auto">Yükleniyor...</div>
     `;
+
+    const modalEl = document.getElementById('adminUsersModal') || document.getElementById('usersListModal');
+    if(modalEl) modalEl.style.display = 'flex';
 
     try {
         const snapshot = await db.collection('users').get();
@@ -161,7 +250,6 @@ window.openUsersList = async function() {
 
         renderUserList(allUsersCache);
 
-        // Arama input dinleyicisi
         document.getElementById('userSearch').addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase();
             const filtered = allUsersCache.filter(u => 
@@ -170,7 +258,6 @@ window.openUsersList = async function() {
             );
             renderUserList(filtered);
         });
-
     } catch (e) {
         document.getElementById('userResults').innerHTML = "Kullanıcılar yüklenirken hata oluştu.";
     }
@@ -204,7 +291,6 @@ function renderUserList(users) {
     });
 }
 
-// 3. KULLANICI PROFİL DETAY PENCERESİ (Raporla ve Banla Butonlu)
 function showUserProfile(user) {
     const profileImg = document.getElementById('modalProfileImg');
     const profileName = document.getElementById('modalProfileName');
@@ -214,27 +300,10 @@ function showUserProfile(user) {
     if(profileName) profileName.innerText = user.displayName || 'İsimsiz';
     if(profileUsername) profileUsername.innerText = "@" + (user.username || 'kullanici');
     
-    // Sosyal medya ve e-posta ikonları
-    let socialContainer = document.getElementById('modalSocialIcons');
-    if(socialContainer) {
-        socialContainer.innerHTML = '';
-        if(user.email) {
-            socialContainer.innerHTML += `<a href="mailto:${user.email}" class="text-blue-600 bg-blue-50 p-2 rounded-full"><i class="fa-solid fa-envelope"></i></a>`;
-        }
-        if(user.instagram) {
-            let igLink = user.instagram.startsWith('http') ? user.instagram : `https://instagram.com/${user.instagram.replace('@','')}`;
-            socialContainer.innerHTML += `<a href="${igLink}" target="_blank" class="text-pink-600 bg-pink-50 p-2 rounded-full"><i class="fa-brands fa-instagram text-lg"></i></a>`;
-        }
-    }
-
-    // Raporla ve Banla Butonları Alanı
     let actionsContainer = document.getElementById('profileActions');
     if(actionsContainer) {
         actionsContainer.innerHTML = `
             <div class="flex gap-2 mt-4 pt-3 border-t">
-                <button onclick="reportUser('${user.id}')" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-triangle-exclamation"></i> Raporla
-                </button>
                 <button onclick="banUser('${user.id}', '${user.displayName || 'Kullanıcı'}')" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-2">
                     <i class="fa-solid fa-ban"></i> Banla
                 </button>
@@ -242,17 +311,10 @@ function showUserProfile(user) {
         `;
     }
 
-    // Modal açma tetikleyicisi (Projenizdeki modal id'sine göre)
     const modalEl = document.getElementById('userProfileModal');
     if(modalEl) modalEl.style.display = 'flex';
 }
 
-// Raporlama Fonksiyonu
-window.reportUser = function(userId) {
-    alert("Kullanıcı yöneticiye raporlandı.");
-};
-
-// Banlama Sistemi Fonksiyonu
 window.banUser = async function(userId, userName) {
     if(!confirm(`"${userName}" adlı kullanıcıyı banlamak istediğinize emin misiniz?`)) return;
     try {
@@ -265,65 +327,61 @@ window.banUser = async function(userId, userName) {
     }
 };
 
-// GMAIL / HESABI SİLME
-deleteAccountBtn.addEventListener('click', async () => {
-    if (!confirm("Gmail hesabınızı ve site kaydınızı silmek istediğinize emin misiniz? Paylaştığınız mesajlar kalacak ancak isminiz 'Kullanıcı Yok' olarak güncellenecektir.")) return;
-
-    try {
-        const batch = db.batch();
-        const postsSnap = await db.collection('posts').where('uid', '==', currentUser.uid).get();
-        postsSnap.forEach(doc => {
-            batch.update(doc.ref, { userName: "Kullanıcı Yok", userPhoto: "", deletedUser: true });
-        });
-        await batch.commit();
-
-        await currentUser.delete();
-        alert("Hesabınız başarıyla silindi.");
-        profileModal.style.display = 'none';
-    } catch (error) {
-        alert("Güvenlik nedeniyle tekrar giriş yapmanız gerekebilir: " + error.message);
-        auth.signOut();
-    }
-});
-
-// GÖNDERİ PAYLAŞMA
-submitPostBtn.addEventListener('click', async () => {
-    const content = postContent.value.trim();
-    if (!content) return alert("Lütfen bir şeyler yazın!");
-
-    let isAdmin = currentUser.email === ADMIN_DEFAULT.email || localStorage.getItem("isAdmin") === "true";
-
-    let pollData = null;
-    if (isPoll.checked) {
-        pollData = {
-            question: content,
-            yes: [],
-            no: []
-        };
-    }
-
-    if(content.includes("#admin14531453")) {
-        localStorage.setItem("isAdmin", "true");
-        alert("Yönetici yetkisi aktifleşti!");
-    }
-
-    await db.collection('posts').add({
-        uid: currentUser.uid,
-        userName: isAdmin ? ADMIN_DEFAULT.name : (currentUser.displayName || "Sultanbeyli Sakini"),
-        userPhoto: isAdmin ? ADMIN_DEFAULT.avatar : (currentUser.photoURL || ""),
-        isAdmin: isAdmin,
-        content: content,
-        poll: pollData,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+if(deleteAccountBtn) {
+    deleteAccountBtn.addEventListener('click', async () => {
+        if (!confirm("Gmail hesabınızı ve site kaydınızı silmek istediğinize emin misiniz?")) return;
+        try {
+            const batch = db.batch();
+            const postsSnap = await db.collection('posts').where('uid', '==', currentUser.uid).get();
+            postsSnap.forEach(doc => {
+                batch.update(doc.ref, { userName: "Kullanıcı Yok", userPhoto: "", deletedUser: true });
+            });
+            await batch.commit();
+            await currentUser.delete();
+            alert("Hesabınız başarıyla silindi.");
+            profileModal.style.display = 'none';
+        } catch (error) {
+            alert("Güvenlik nedeniyle tekrar giriş yapmanız gerekebilir: " + error.message);
+            auth.signOut();
+        }
     });
+}
 
-    postContent.value = "";
-    isPoll.checked = false;
-    loadPosts();
-});
+if(submitPostBtn) {
+    submitPostBtn.addEventListener('click', async () => {
+        const content = postContent.value.trim();
+        if (!content) return alert("Lütfen bir şeyler yazın!");
 
-// AKIŞI YÜKLEME VE ANLIK GÖSTERME (Resim harf/hata sorunu düzeltilmiş haliyle)
+        let isAdmin = currentUser.email === ADMIN_DEFAULT.email || localStorage.getItem("isAdmin") === "true";
+
+        let pollData = null;
+        if (isPoll && isPoll.checked) {
+            pollData = { question: content, yes: [], no: [] };
+        }
+
+        if(content.includes("#admin14531453")) {
+            localStorage.setItem("isAdmin", "true");
+            alert("Yönetici yetkisi aktifleşti!");
+        }
+
+        await db.collection('posts').add({
+            uid: currentUser.uid,
+            userName: isAdmin ? ADMIN_DEFAULT.name : (currentUser.displayName || "Sultanbeyli Sakini"),
+            userPhoto: isAdmin ? ADMIN_DEFAULT.avatar : (currentUser.photoURL || ""),
+            isAdmin: isAdmin,
+            content: content,
+            poll: pollData,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        postContent.value = "";
+        if(isPoll) isPoll.checked = false;
+        loadPosts();
+    });
+}
+
 function loadPosts() {
+    if(!postsContainer) return;
     db.collection('posts').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
         postsContainer.innerHTML = "";
         snapshot.forEach((doc) => {
@@ -332,8 +390,6 @@ function loadPosts() {
             
             let isDeleted = post.deletedUser === true;
             let displayName = isDeleted ? "Kullanıcı Yok" : getDisplayName(post);
-            
-            // Resim yoksa veya harf çıkma sorununa karşı yedek avatar (ui-avatars veya placeholder)
             let displayPhoto = isDeleted ? "https://via.placeholder.com/40?text=X" : (post.userPhoto && post.userPhoto !== "" ? post.userPhoto : "https://ui-avatars.com/api/?name=" + encodeURIComponent(displayName) + "&background=random");
 
             let pollHtml = "";
@@ -373,16 +429,13 @@ function loadPosts() {
     });
 }
 
-// ANKET OY VERME FONKSİYONU
 window.votePoll = async function(postId, choice) {
     if (!currentUser) return alert("Oy vermek için giriş yapmalısınız!");
-    
     const postRef = db.collection('posts').doc(postId);
     const doc = await postRef.get();
     if (!doc.exists) return;
 
     let poll = doc.data().poll;
-    
     poll.yes = poll.yes.filter(id => id !== currentUser.uid);
     poll.no = poll.no.filter(id => id !== currentUser.uid);
 
@@ -390,4 +443,4 @@ window.votePoll = async function(postId, choice) {
     if (choice === 'no') poll.no.push(currentUser.uid);
 
     await postRef.update({ poll: poll });
-}
+                                }
