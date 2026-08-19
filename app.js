@@ -306,6 +306,7 @@ function renderUserList(users) {
     users.forEach(user => {
         const div = document.createElement('div');
         div.className = "flex items-center justify-between p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100";
+        // Listeden bir kullanıcıya tıklandığında doğrudan profil modalını açıyoruz ve id bilgisini de taşıyoruz
         div.onclick = () => showUserProfile(user);
         div.innerHTML = `
             <div class="flex items-center gap-3">
@@ -321,29 +322,79 @@ function renderUserList(users) {
     });
 }
 
+
 function showUserProfile(user) {
-    const profileImg = document.getElementById('modalProfileImg');
-    const profileName = document.getElementById('modalProfileName');
-    const profileUsername = document.getElementById('modalProfileUsername');
+    // 1. Profil modalının içindeki elementleri güncelleyelim
+    const nameEl = document.getElementById("modalFullName");
+    const userEl = document.getElementById("modalUsername");
+    const imgEl = document.getElementById("modalProfileImg");
     
-    if(profileImg) profileImg.src = user.photoURL || ADMIN_DEFAULT.avatar;
-    if(profileName) profileName.innerText = user.displayName || 'İsimsiz';
-    if(profileUsername) profileUsername.innerText = "@" + (user.username || 'kullanici');
-    
-    let actionsContainer = document.getElementById('profileActions');
-    if(actionsContainer) {
-        actionsContainer.innerHTML = `
-            <div class="flex gap-2 mt-4 pt-3 border-t">
-                <button onclick="banUser('${user.id}', '${user.displayName || 'Kullanıcı'}')" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-ban"></i> Banla
-                </button>
-            </div>
-        `;
+    if(nameEl) nameEl.innerText = user.displayName || 'İsimsiz';
+    if(userEl) userEl.innerText = "@" + (user.username || 'kullanici');
+    if(imgEl) imgEl.src = user.photoURL || ADMIN_DEFAULT.avatar;
+
+    // E-posta ve Instagram buton kontrolleri
+    const emailBtn = document.getElementById("modalEmailBtn");
+    if (emailBtn) {
+        if (user.email) {
+            emailBtn.href = `mailto:${user.email}`;
+            emailBtn.style.display = "inline-block";
+        } else {
+            emailBtn.style.display = "none";
+        }
     }
 
-    const modalEl = document.getElementById('userProfileModal');
-    if(modalEl) modalEl.style.display = 'flex';
+    const instagramBtn = document.getElementById("modalInstagramBtn");
+    if (instagramBtn) {
+        if (user.instagram && user.instagram.trim() !== "") {
+            let igLink = user.instagram;
+            if (!igLink.startsWith("http")) {
+                igLink = `https://instagram.com/${igLink.replace('@', '')}`;
+            }
+            instagramBtn.href = igLink;
+            instagramBtn.style.display = "inline-block";
+        } else {
+            instagramBtn.style.display = "none";
+        }
+    }
+
+    // 2. MODALIN EN ALTINA BANLA BUTONUNU EKLEME
+    let modalContentBox = document.querySelector("#profileModal .modal-content") || document.getElementById("profileModal");
+    
+    if(modalContentBox) {
+        // Üst üste binmemesi için önceki eklenen ban alanını temizleyelim
+        let existingAdminArea = document.getElementById("modalAdminActionArea");
+        if(existingAdminArea) existingAdminArea.remove();
+
+        // Giriş yapan kişi yönetici mi kontrolü
+        let isAdmin = currentUser && (currentUser.email === ADMIN_DEFAULT.email || localStorage.getItem("isAdmin") === "true");
+
+        if(isAdmin) {
+            const adminActionDiv = document.createElement('div');
+            adminActionDiv.id = "modalAdminActionArea";
+            adminActionDiv.className = "mt-6 pt-4 border-t border-gray-200 text-center";
+            
+            // Güvenli isim aktarımı için tırnak işaretlerini escape ediyoruz
+            const safeUserName = (user.displayName || 'Kullanıcı').replace(/'/g, "\\'");
+            const userId = user.id || user.uid;
+
+            adminActionDiv.innerHTML = `
+                <button onclick="banUser('${userId}', '${safeUserName}')" 
+                    class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 px-4 rounded-xl text-sm flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer">
+                    <i class="fa-solid fa-ban"></i> Bu Kullanıcıyı Banla
+                </button>
+            `;
+            
+            const innerBox = modalContentBox.querySelector("div") || modalContentBox;
+            innerBox.appendChild(adminActionDiv);
+        }
+    }
+
+    // 3. Modali ekranda açalım
+    const profileModalEl = document.getElementById("profileModal");
+    if(profileModalEl) profileModalEl.style.display = "flex";
 }
+
 
 window.banUser = async function(userId, userName) {
     if(!confirm(`"${userName}" adlı kullanıcıyı banlamak istediğinize emin misiniz?`)) return;
