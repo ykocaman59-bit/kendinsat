@@ -441,6 +441,37 @@
             </div>
         </div>
     </div>
+    
+    <!-- Profil Modal Yapısı -->
+<div id="profileModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeProfileModal()">&times;</span>
+        
+        <!-- Profil Fotoğrafı -->
+        <img id="modalProfileImg" src="" alt="Profil" class="profile-pic">
+        
+        <!-- Ad Soyad ve Kullanıcı Adı -->
+        <h3 id="modalFullName">Ad Soyad</h3>
+        <p id="modalUsername">@kullaniciadi</p>
+        
+        <!-- İletişim / Sosyal İkonlar -->
+        <div class="profile-actions">
+            <!-- Gmail Butonu -->
+            <a id="modalEmailBtn" href="#" title="E-posta Gönder" style="display: none;">
+                <i class="fas fa-envelope">✉️</i>
+            </a>
+            
+            <!-- Instagram Butonu -->
+            <a id="modalInstagramBtn" href="#" target="_blank" title="Instagram'a Git" style="display: none;">
+                <i class="fas fa-instagram">📷</i>
+            </a>
+        </div>
+
+        <!-- Rapor Et / Banla -->
+        <button class="report-ban-btn">⚠️ Rapor Et / Banla</button>
+    </div>
+</div>
+    
 
     <script>
         let posts = JSON.parse(localStorage.getItem('sb_posts')) || [
