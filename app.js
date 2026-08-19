@@ -445,7 +445,13 @@ function loadPosts() {
                     <div class="flex items-center gap-3 mb-3 post-header">
                         <img src="${displayPhoto}" class="w-10 h-10 rounded-full object-cover border post-avatar" onerror="this.src='https://via.placeholder.com/40'">
                         <div class="post-user-info">
-                            <h4 class="font-bold text-sm text-gray-800 flex items-center gap-1.5">
+                            <h4 class="font-bold text-sm text-gray-800 flex items-center gap-1.5" style="cursor: pointer;" onclick="openProfileModal({
+                                fullName: '${displayName}',
+                                username: '${post.uid || ''}',
+                                email: '${post.email || ''}',
+                                instagram: '${post.instagram || ''}',
+                                profilePic: '${displayPhoto}'
+                            })">
                                 ${displayName} ${post.isAdmin ? '<span class="bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full font-bold admin-badge">YÖNETİCİ</span>' : ''}
                             </h4>
                             <span class="text-[11px] text-gray-400">${post.createdAt ? new Date(post.createdAt.toDate()).toLocaleString('tr-TR') : 'Yükleniyor...'}</span>
@@ -473,4 +479,47 @@ window.votePoll = async function(postId, choice) {
     if (choice === 'no') poll.no.push(currentUser.uid);
 
     await postRef.update({ poll: poll });
+}
+
+// ==========================================
+// KULLANICI PROFİL MODAL FONKSİYONLARI (EKLENDİ)
+// ==========================================
+function openProfileModal(userData) {
+    document.getElementById("modalFullName").innerText = userData.fullName || "İsimsiz";
+    document.getElementById("modalUsername").innerText = "@" + (userData.username || "kullanici");
+    
+    const profileImg = document.getElementById("modalProfileImg");
+    if(profileImg) profileImg.src = userData.profilePic || "default-avatar.png";
+
+    const emailBtn = document.getElementById("modalEmailBtn");
+    if (emailBtn) {
+        if (userData.email) {
+            emailBtn.href = `mailto:${userData.email}`;
+            emailBtn.style.display = "inline-block";
+        } else {
+            emailBtn.style.display = "none";
+        }
+    }
+
+    const instagramBtn = document.getElementById("modalInstagramBtn");
+    if (instagramBtn) {
+        if (userData.instagram && userData.instagram.trim() !== "") {
+            let igLink = userData.instagram;
+            if (!igLink.startsWith("http")) {
+                igLink = `https://instagram.com/${igLink.replace('@', '')}`;
+            }
+            instagramBtn.href = igLink;
+            instagramBtn.style.display = "inline-block";
+        } else {
+            instagramBtn.style.display = "none";
+        }
+    }
+
+    const profileModalEl = document.getElementById("profileModal");
+    if(profileModalEl) profileModalEl.style.display = "block";
+}
+
+function closeProfileModal() {
+    const profileModalEl = document.getElementById("profileModal");
+    if(profileModalEl) profileModalEl.style.display = "none";
 }
