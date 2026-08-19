@@ -65,9 +65,9 @@ auth.onAuthStateChanged((user) => {
                 </button>
             `;
             document.getElementById('openProfileBtn').addEventListener('click', () => {
-                modalUserName.value = isAdmin ? ADMIN_DEFAULT.name : (user.displayName || '');
-                modalUserEmail.innerText = user.email;
-                modalUserPhoto.src = displayPhoto;
+                if(modalUserName) modalUserName.value = isAdmin ? ADMIN_DEFAULT.name : (user.displayName || '');
+                if(modalUserEmail) modalUserEmail.innerText = user.email;
+                if(modalUserPhoto) modalUserPhoto.src = displayPhoto;
                 profileModal.style.display = 'flex';
             });
         }
@@ -306,7 +306,6 @@ function renderUserList(users) {
     users.forEach(user => {
         const div = document.createElement('div');
         div.className = "flex items-center justify-between p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100";
-        // Listeden bir kullanıcıya tıklandığında doğrudan profil modalını açıyoruz ve id bilgisini de taşıyoruz
         div.onclick = () => showUserProfile(user);
         div.innerHTML = `
             <div class="flex items-center gap-3">
@@ -322,22 +321,22 @@ function renderUserList(users) {
     });
 }
 
-
-function showUserProfile(user) {
-    // 1. Profil modalının içindeki elementleri güncelleyelim
+// ==========================================
+// GÜNCELLENMİŞ PROFİL MODAL VE BANLA FONKSİYONU
+// ==========================================
+function openProfileModal(userData) {
     const nameEl = document.getElementById("modalFullName");
     const userEl = document.getElementById("modalUsername");
-    const imgEl = document.getElementById("modalProfileImg");
+    const profileImg = document.getElementById("modalProfileImg");
     
-    if(nameEl) nameEl.innerText = user.displayName || 'İsimsiz';
-    if(userEl) userEl.innerText = "@" + (user.username || 'kullanici');
-    if(imgEl) imgEl.src = user.photoURL || ADMIN_DEFAULT.avatar;
+    if(nameEl) nameEl.innerText = userData.fullName || "İsimsiz";
+    if(userEl) userEl.innerText = "@" + (userData.username || "kullanici");
+    if(profileImg) profileImg.src = userData.profilePic || ADMIN_DEFAULT.avatar;
 
-    // E-posta ve Instagram buton kontrolleri
     const emailBtn = document.getElementById("modalEmailBtn");
     if (emailBtn) {
-        if (user.email) {
-            emailBtn.href = `mailto:${user.email}`;
+        if (userData.email) {
+            emailBtn.href = `mailto:${userData.email}`;
             emailBtn.style.display = "inline-block";
         } else {
             emailBtn.style.display = "none";
@@ -346,8 +345,8 @@ function showUserProfile(user) {
 
     const instagramBtn = document.getElementById("modalInstagramBtn");
     if (instagramBtn) {
-        if (user.instagram && user.instagram.trim() !== "") {
-            let igLink = user.instagram;
+        if (userData.instagram && userData.instagram.trim() !== "") {
+            let igLink = userData.instagram;
             if (!igLink.startsWith("http")) {
                 igLink = `https://instagram.com/${igLink.replace('@', '')}`;
             }
@@ -358,43 +357,50 @@ function showUserProfile(user) {
         }
     }
 
-    // 2. MODALIN EN ALTINA BANLA BUTONUNU EKLEME
+    // MODALIN EN ALTINA BANLA BUTONU EKLEME (YÖNETİCİ İÇİN)
     let modalContentBox = document.querySelector("#profileModal .modal-content") || document.getElementById("profileModal");
-    
     if(modalContentBox) {
-        // Üst üste binmemesi için önceki eklenen ban alanını temizleyelim
         let existingAdminArea = document.getElementById("modalAdminActionArea");
         if(existingAdminArea) existingAdminArea.remove();
 
-        // Giriş yapan kişi yönetici mi kontrolü
         let isAdmin = currentUser && (currentUser.email === ADMIN_DEFAULT.email || localStorage.getItem("isAdmin") === "true");
 
-        if(isAdmin) {
+        if(isAdmin && userData.uid) {
             const adminActionDiv = document.createElement('div');
             adminActionDiv.id = "modalAdminActionArea";
             adminActionDiv.className = "mt-6 pt-4 border-t border-gray-200 text-center";
             
-            // Güvenli isim aktarımı için tırnak işaretlerini escape ediyoruz
-            const safeUserName = (user.displayName || 'Kullanıcı').replace(/'/g, "\\'");
-            const userId = user.id || user.uid;
-
+            const safeUserName = (userData.fullName || 'Kullanıcı').replace(/'/g, "\\'");
             adminActionDiv.innerHTML = `
-                <button onclick="banUser('${userId}', '${safeUserName}')" 
+                <button onclick="banUser('${userData.uid}', '${safeUserName}')" 
                     class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 px-4 rounded-xl text-sm flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer">
                     <i class="fa-solid fa-ban"></i> Bu Kullanıcıyı Banla
                 </button>
             `;
-            
             const innerBox = modalContentBox.querySelector("div") || modalContentBox;
             innerBox.appendChild(adminActionDiv);
         }
     }
 
-    // 3. Modali ekranda açalım
     const profileModalEl = document.getElementById("profileModal");
     if(profileModalEl) profileModalEl.style.display = "flex";
 }
 
+function showUserProfile(user) {
+    openProfileModal({
+        fullName: user.displayName || 'İsimsiz',
+        username: user.username || 'kullanici',
+        email: user.email || '',
+        instagram: user.instagram || '',
+        profilePic: user.photoURL || ADMIN_DEFAULT.avatar,
+        uid: user.id || user.uid
+    });
+}
+
+function closeProfileModal() {
+    const profileModalEl = document.getElementById("profileModal");
+    if(profileModalEl) profileModalEl.style.display = "none";
+}
 
 window.banUser = async function(userId, userName) {
     if(!confirm(`"${userName}" adlı kullanıcıyı banlamak istediğinize emin misiniz?`)) return;
@@ -491,7 +497,7 @@ function loadPosts() {
                 `;
             }
 
-                        postsContainer.innerHTML += `
+            postsContainer.innerHTML += `
                 <div class="post-card bg-white p-4 rounded-2xl shadow-sm mb-4 border border-gray-100">
                     <div class="flex items-center gap-3 mb-3 post-header">
                         <img src="${displayPhoto}" class="w-10 h-10 rounded-full object-cover border post-avatar" onerror="this.src='https://via.placeholder.com/40'">
@@ -501,7 +507,8 @@ function loadPosts() {
                                 username: '${post.uid || 'kullanici'}',
                                 email: '${post.email || ''}',
                                 instagram: '${post.instagram || ''}',
-                                profilePic: '${displayPhoto}'
+                                profilePic: '${displayPhoto}',
+                                uid: '${post.uid || ''}'
                             })">
                                 ${displayName} ${post.isAdmin ? '<span class="bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full font-bold admin-badge">YÖNETİCİ</span>' : ''}
                             </h4>
@@ -512,7 +519,6 @@ function loadPosts() {
                     ${pollHtml}
                 </div>
             `;
-            
         });
     });
 }
@@ -531,47 +537,4 @@ window.votePoll = async function(postId, choice) {
     if (choice === 'no') poll.no.push(currentUser.uid);
 
     await postRef.update({ poll: poll });
-}
-
-// ==========================================
-// KULLANICI PROFİL MODAL FONKSİYONLARI (EKLENDİ)
-// ==========================================
-function openProfileModal(userData) {
-    document.getElementById("modalFullName").innerText = userData.fullName || "İsimsiz";
-    document.getElementById("modalUsername").innerText = "@" + (userData.username || "kullanici");
-    
-    const profileImg = document.getElementById("modalProfileImg");
-    if(profileImg) profileImg.src = userData.profilePic || "default-avatar.png";
-
-    const emailBtn = document.getElementById("modalEmailBtn");
-    if (emailBtn) {
-        if (userData.email) {
-            emailBtn.href = `mailto:${userData.email}`;
-            emailBtn.style.display = "inline-block";
-        } else {
-            emailBtn.style.display = "none";
-        }
-    }
-
-    const instagramBtn = document.getElementById("modalInstagramBtn");
-    if (instagramBtn) {
-        if (userData.instagram && userData.instagram.trim() !== "") {
-            let igLink = userData.instagram;
-            if (!igLink.startsWith("http")) {
-                igLink = `https://instagram.com/${igLink.replace('@', '')}`;
-            }
-            instagramBtn.href = igLink;
-            instagramBtn.style.display = "inline-block";
-        } else {
-            instagramBtn.style.display = "none";
-        }
-    }
-
-    const profileModalEl = document.getElementById("profileModal");
-    if(profileModalEl) profileModalEl.style.display = "block";
-}
-
-function closeProfileModal() {
-    const profileModalEl = document.getElementById("profileModal");
-    if(profileModalEl) profileModalEl.style.display = "none";
 }
