@@ -440,14 +440,14 @@ function loadPosts() {
                 `;
             }
 
-            postsContainer.innerHTML += `
+                        postsContainer.innerHTML += `
                 <div class="post-card bg-white p-4 rounded-2xl shadow-sm mb-4 border border-gray-100">
                     <div class="flex items-center gap-3 mb-3 post-header">
                         <img src="${displayPhoto}" class="w-10 h-10 rounded-full object-cover border post-avatar" onerror="this.src='https://via.placeholder.com/40'">
                         <div class="post-user-info">
-                            <h4 class="font-bold text-sm text-gray-800 flex items-center gap-1.5" style="cursor: pointer;" onclick="openProfileModal({
-                                fullName: '${displayName}',
-                                username: '${post.uid || ''}',
+                            <h4 class="font-bold text-sm text-gray-800 flex items-center gap-1.5" style="cursor: pointer; color: #2563eb;" onclick="openProfileModal({
+                                fullName: '${displayName.replace(/'/g, "\\'")}',
+                                username: '${post.uid || 'kullanici'}',
                                 email: '${post.email || ''}',
                                 instagram: '${post.instagram || ''}',
                                 profilePic: '${displayPhoto}'
@@ -461,6 +461,7 @@ function loadPosts() {
                     ${pollHtml}
                 </div>
             `;
+            
         });
     });
 }
