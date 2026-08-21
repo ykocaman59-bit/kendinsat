@@ -53,7 +53,6 @@ auth.onAuthStateChanged((user) => {
         
         let isAdmin = user.email === ADMIN_DEFAULT.email || localStorage.getItem("isAdmin") === "true";
 
-        // Yönetici ise doğrudan sabit yönetici bilgilerini kullanıyoruz
         let displayName = isAdmin ? ADMIN_DEFAULT.name : (user.displayName || 'Profil');
         let displayPhoto = isAdmin ? ADMIN_DEFAULT.avatar : (user.photoURL || 'https://via.placeholder.com/30');
 
@@ -110,7 +109,7 @@ if(saveProfileBtn) {
     });
 }
 
-// 1. İTİRAZLAR SAYACI (0 İse hiç görünmez, yazı kalır)
+// 1. İTİRAZLAR SAYACI
 async function checkAppealsCount() {
     try {
         const snapshot = await db.collection('appeals').where('read', '==', false).get();
@@ -199,35 +198,6 @@ window.banaTiklandi = async function(appealId, userId, reasonText) {
     }
 }
 
-// 3. İTİRAZ DETAYINI GÖSTERME VE OKUNDU İŞARETLEME
-window.openAppealDetail = async function(appealId, userId, reasonText) {
-    selectedAppealId = appealId;
-    selectedAppealUserId = userId;
-
-    const container = document.getElementById('adminAppealsListContainer');
-    if(container) {
-        container.innerHTML = `
-            <div style="padding: 10px;">
-                <button onclick="openAdminAppeals()" style="background: none; border: none; color: #2563eb; font-weight: bold; cursor: pointer; margin-bottom: 10px; font-size: 0.85rem;">← Geri Dön</button>
-                <div style="font-size: 0.80rem; color: #64748b; margin-bottom: 4px;">Kullanıcının İtiraz Açıklaması:</div>
-                <div style="background: #f1f5f9; padding: 12px; border-radius: 8px; font-size: 0.9rem; color: #1e293b; margin-bottom: 15px; border: 1px solid #cbd5e1;">${reasonText || "Açıklama belirtilmemiş."}</div>
-                <div style="display: flex; gap: 10px;">
-                    <button onclick="resolveAppeal(true)" style="flex: 1; background: #16a34a; color: white; padding: 10px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer;">Kabul Et (Banı Kaldır)</button>
-                    <button onclick="resolveAppeal(false)" style="flex: 1; background: #dc2626; color: white; padding: 10px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer;">Reddet</button>
-                </div>
-            </div>
-        `;
-    }
-
-    try {
-        await db.collection('appeals').doc(appealId).update({ read: true });
-        if(typeof checkAppealsCount === 'function') checkAppealsCount(); 
-    } catch(e) {
-        console.log("Okundu işaretlenemedi", e);
-    }
-}
-
-// 4. KABUL ET VEYA REDDET
 window.resolveAppeal = async function(isApproved) {
     if(!selectedAppealId) {
         alert("Geçersiz itiraz ID'si!");
@@ -246,83 +216,17 @@ window.resolveAppeal = async function(isApproved) {
 
         await db.collection('appeals').doc(selectedAppealId).delete();
 
-        const detailModal = document.getElementById('appealDetailModal');
         const appealsModal = document.getElementById('adminAppealsModal');
-        if(detailModal) detailModal.style.display = 'none';
         if(appealsModal) appealsModal.style.display = 'none';
         
         checkAppealsCount();
-
     } catch (e) {
         alert("İşlem sırasında hata oluştu: " + e.message);
     }
 }
 
-// DİĞER YÖNETİCİ VE GÖNDERİ FONKSİYONLARI
-window.openAdminUsersList = async function() {
-    const container = document.getElementById('adminUsersListContainer') || document.getElementById('usersListContainer');
-    if(!container) return;
-    
-    container.innerHTML = `
-        <input type="text" id="userSearch" placeholder="Kullanıcı adı veya isim ara..." class="w-full p-2 mb-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <div id="userResults" class="space-y-2 max-h-60 overflow-y-auto">Yükleniyor...</div>
-    `;
-
-    const modalEl = document.getElementById('adminUsersModal') || document.getElementById('usersListModal');
-    if(modalEl) modalEl.style.display = 'flex';
-
-    try {
-        const snapshot = await db.collection('users').get();
-        allUsersCache = [];
-        snapshot.forEach(doc => {
-            allUsersCache.push({ id: doc.id, ...doc.data() });
-        });
-
-        renderUserList(allUsersCache);
-
-        document.getElementById('userSearch').addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
-            const filtered = allUsersCache.filter(u => 
-                (u.displayName && u.displayName.toLowerCase().includes(query)) || 
-                (u.username && u.username.toLowerCase().includes(query))
-            );
-            renderUserList(filtered);
-        });
-    } catch (e) {
-        document.getElementById('userResults').innerHTML = "Kullanıcılar yüklenirken hata oluştu.";
-    }
-}
-
-function renderUserList(users) {
-    const resultsContainer = document.getElementById('userResults');
-    if(!resultsContainer) return;
-    resultsContainer.innerHTML = "";
-
-    if(users.length === 0) {
-        resultsContainer.innerHTML = "<p class='text-xs text-gray-500 text-center py-2'>Kullanıcı bulunamadı.</p>";
-        return;
-    }
-
-    users.forEach(user => {
-        const div = document.createElement('div');
-        div.className = "flex items-center justify-between p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100";
-        div.onclick = () => showUserProfile(user);
-        div.innerHTML = `
-            <div class="flex items-center gap-3">
-                <img src="${user.photoURL || ADMIN_DEFAULT.avatar}" class="w-10 h-10 rounded-full object-cover border">
-                <div>
-                    <h4 class="font-bold text-sm text-gray-800">${user.displayName || 'İsimsiz'}</h4>
-                    <p class="text-xs text-gray-500">@${user.username || 'kullanici'}</p>
-                </div>
-            </div>
-            <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
-        `;
-        resultsContainer.appendChild(div);
-    });
-}
-
 // ==========================================
-// GÜNCELLENMİŞ PROFİL MODAL VE BANLA FONKSİYONU
+// PROFİL MODALI VE GMAIL/INSTAGRAM/BAN AYARLARI
 // ==========================================
 function openProfileModal(userData) {
     const nameEl = document.getElementById("modalFullName");
@@ -333,16 +237,18 @@ function openProfileModal(userData) {
     if(userEl) userEl.innerText = "@" + (userData.username || "kullanici");
     if(profileImg) profileImg.src = userData.profilePic || ADMIN_DEFAULT.avatar;
 
+    // 1. Gmail Butonu / Logosu Ayarı
     const emailBtn = document.getElementById("modalEmailBtn");
     if (emailBtn) {
-        if (userData.email) {
+        if (userData.email && userData.email.trim() !== "") {
             emailBtn.href = `mailto:${userData.email}`;
-            emailBtn.style.display = "inline-block";
+            emailBtn.style.display = "inline-flex";
         } else {
             emailBtn.style.display = "none";
         }
     }
 
+    // 2. Instagram Butonu / Logosu Ayarı
     const instagramBtn = document.getElementById("modalInstagramBtn");
     if (instagramBtn) {
         if (userData.instagram && userData.instagram.trim() !== "") {
@@ -351,13 +257,13 @@ function openProfileModal(userData) {
                 igLink = `https://instagram.com/${igLink.replace('@', '')}`;
             }
             instagramBtn.href = igLink;
-            instagramBtn.style.display = "inline-block";
+            instagramBtn.style.display = "inline-flex";
         } else {
             instagramBtn.style.display = "none";
         }
     }
 
-    // MODALIN EN ALTINA BANLA BUTONU EKLEME (YÖNETİCİ İÇİN)
+    // 3. Rapor Et / Banla Butonu (Sadece Yönetici Görecek)
     let modalContentBox = document.querySelector("#profileModal .modal-content") || document.getElementById("profileModal");
     if(modalContentBox) {
         let existingAdminArea = document.getElementById("modalAdminActionArea");
@@ -374,7 +280,7 @@ function openProfileModal(userData) {
             adminActionDiv.innerHTML = `
                 <button onclick="banUser('${userData.uid}', '${safeUserName}')" 
                     class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 px-4 rounded-xl text-sm flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer">
-                    <i class="fa-solid fa-ban"></i> Bu Kullanıcıyı Banla
+                    <i class="fa-solid fa-ban"></i> Rapor Et / Banla
                 </button>
             `;
             const innerBox = modalContentBox.querySelector("div") || modalContentBox;
@@ -455,6 +361,8 @@ if(submitPostBtn) {
             uid: currentUser.uid,
             userName: isAdmin ? ADMIN_DEFAULT.name : (currentUser.displayName || "İstanbul Sakini"),
             userPhoto: isAdmin ? ADMIN_DEFAULT.avatar : (currentUser.photoURL || ""),
+            email: currentUser.email || "", // Profilde mail ikonunun çalışabilmesi için eklendi
+            instagram: currentUser.instagram || "", // Varsa Instagram verisi
             isAdmin: isAdmin,
             content: content,
             poll: pollData,
