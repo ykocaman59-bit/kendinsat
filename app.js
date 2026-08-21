@@ -226,10 +226,9 @@ window.resolveAppeal = async function(isApproved) {
 }
 
 // ==========================================
-// PROFİL MODALI VE GMAIL/INSTAGRAM/BAN AYARLARI (DÜZELTİLDİ)
+// PROFİL MODALI VE GMAIL/INSTAGRAM/BAN AYARLARI (GLOBAL YAPILDI)
 // ==========================================
-function openProfileModal(userData) {
-    // Senin HTML'indeki ID'ler ile birebir eşleştirildi:
+window.openProfileModal = function(userData) {
     const nameEl = document.getElementById("modalFullName");
     const userEl = document.getElementById("modalUsername");
     const profileImg = document.getElementById("modalProfileImg");
@@ -293,7 +292,7 @@ function openProfileModal(userData) {
     if(profileModalEl) profileModalEl.style.display = "flex";
 }
 
-function showUserProfile(user) {
+window.showUserProfile = function(user) {
     openProfileModal({
         fullName: user.displayName || 'İsimsiz',
         username: user.username || 'kullanici',
@@ -304,7 +303,7 @@ function showUserProfile(user) {
     });
 }
 
-function closeProfileModal() {
+window.closeProfileModal = function() {
     const profileModalEl = document.getElementById("profileModal");
     if(profileModalEl) profileModalEl.style.display = "none";
 }
@@ -406,25 +405,15 @@ function loadPosts() {
                 `;
             }
 
-            // DÜZELTİLDİ: Tırnak çakışmaları giderildi, isme tıklandığında openProfileModal sorunsuz çalışacak
-            const safeDisplayName = displayName.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-            const safeUid = post.uid || 'kullanici';
-            const safeEmail = post.email || '';
-            const safeInstagram = post.instagram || '';
+            // Benzersiz ID oluşturuluyor (Tırnak çakışmalarını tamamen bitiren kesin yöntem)
+            const uniqueId = "user-name-" + Math.random().toString(36).substr(2, 9);
 
             postsContainer.innerHTML += `
                 <div class="post-card bg-white p-4 rounded-2xl shadow-sm mb-4 border border-gray-100">
                     <div class="flex items-center gap-3 mb-3 post-header">
                         <img src="${displayPhoto}" class="w-10 h-10 rounded-full object-cover border post-avatar" onerror="this.src='https://via.placeholder.com/40'">
                         <div class="post-user-info">
-                            <h4 class="font-bold text-sm text-gray-800 flex items-center gap-1.5" style="cursor: pointer; color: #2563eb;" onclick='openProfileModal({
-                                fullName: "${safeDisplayName}",
-                                username: "${safeUid}",
-                                email: "${safeEmail}",
-                                instagram: "${safeInstagram}",
-                                profilePic: "${displayPhoto}",
-                                uid: "${safeUid}"
-                            })'>
+                            <h4 id="${uniqueId}" class="font-bold text-sm text-gray-800 flex items-center gap-1.5" style="cursor: pointer; color: #2563eb;">
                                 ${displayName} ${post.isAdmin ? '<span class="bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full font-bold admin-badge">YÖNETİCİ</span>' : ''}
                             </h4>
                             <span class="text-[11px] text-gray-400">${post.createdAt ? new Date(post.createdAt.toDate()).toLocaleString('tr-TR') : 'Yükleniyor...'}</span>
@@ -434,6 +423,23 @@ function loadPosts() {
                     ${pollHtml}
                 </div>
             `;
+
+            // İsme tıklama olayı güvenli bir şekilde ekleniyor
+            setTimeout(() => {
+                const nameEl = document.getElementById(uniqueId);
+                if(nameEl) {
+                    nameEl.addEventListener('click', () => {
+                        openProfileModal({
+                            fullName: displayName,
+                            username: post.uid || 'kullanici',
+                            email: post.email || '',
+                            instagram: post.instagram || '',
+                            profilePic: displayPhoto,
+                            uid: post.uid || ''
+                        });
+                    });
+                }
+            }, 50);
         });
     });
 }
