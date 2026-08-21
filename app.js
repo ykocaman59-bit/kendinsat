@@ -226,9 +226,10 @@ window.resolveAppeal = async function(isApproved) {
 }
 
 // ==========================================
-// PROFİL MODALI VE GMAIL/INSTAGRAM/BAN AYARLARI
+// PROFİL MODALI VE GMAIL/INSTAGRAM/BAN AYARLARI (DÜZELTİLDİ)
 // ==========================================
 function openProfileModal(userData) {
+    // Senin HTML'indeki ID'ler ile birebir eşleştirildi:
     const nameEl = document.getElementById("modalFullName");
     const userEl = document.getElementById("modalUsername");
     const profileImg = document.getElementById("modalProfileImg");
@@ -361,8 +362,8 @@ if(submitPostBtn) {
             uid: currentUser.uid,
             userName: isAdmin ? ADMIN_DEFAULT.name : (currentUser.displayName || "İstanbul Sakini"),
             userPhoto: isAdmin ? ADMIN_DEFAULT.avatar : (currentUser.photoURL || ""),
-            email: currentUser.email || "", // Profilde mail ikonunun çalışabilmesi için eklendi
-            instagram: currentUser.instagram || "", // Varsa Instagram verisi
+            email: currentUser.email || "", 
+            instagram: currentUser.instagram || "", 
             isAdmin: isAdmin,
             content: content,
             poll: pollData,
@@ -405,19 +406,25 @@ function loadPosts() {
                 `;
             }
 
+            // DÜZELTİLDİ: Tırnak çakışmaları giderildi, isme tıklandığında openProfileModal sorunsuz çalışacak
+            const safeDisplayName = displayName.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            const safeUid = post.uid || 'kullanici';
+            const safeEmail = post.email || '';
+            const safeInstagram = post.instagram || '';
+
             postsContainer.innerHTML += `
                 <div class="post-card bg-white p-4 rounded-2xl shadow-sm mb-4 border border-gray-100">
                     <div class="flex items-center gap-3 mb-3 post-header">
                         <img src="${displayPhoto}" class="w-10 h-10 rounded-full object-cover border post-avatar" onerror="this.src='https://via.placeholder.com/40'">
                         <div class="post-user-info">
-                            <h4 class="font-bold text-sm text-gray-800 flex items-center gap-1.5" style="cursor: pointer; color: #2563eb;" onclick="openProfileModal({
-                                fullName: '${displayName.replace(/'/g, "\\'")}',
-                                username: '${post.uid || 'kullanici'}',
-                                email: '${post.email || ''}',
-                                instagram: '${post.instagram || ''}',
-                                profilePic: '${displayPhoto}',
-                                uid: '${post.uid || ''}'
-                            })">
+                            <h4 class="font-bold text-sm text-gray-800 flex items-center gap-1.5" style="cursor: pointer; color: #2563eb;" onclick='openProfileModal({
+                                fullName: "${safeDisplayName}",
+                                username: "${safeUid}",
+                                email: "${safeEmail}",
+                                instagram: "${safeInstagram}",
+                                profilePic: "${displayPhoto}",
+                                uid: "${safeUid}"
+                            })'>
                                 ${displayName} ${post.isAdmin ? '<span class="bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full font-bold admin-badge">YÖNETİCİ</span>' : ''}
                             </h4>
                             <span class="text-[11px] text-gray-400">${post.createdAt ? new Date(post.createdAt.toDate()).toLocaleString('tr-TR') : 'Yükleniyor...'}</span>
