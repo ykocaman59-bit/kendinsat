@@ -568,17 +568,81 @@
         }
 
         function renderNavbar() {
-            let navArea = document.getElementById('navAuthArea');
-            let adminCard = document.getElementById('adminShareCard');
+    const navArea = document.getElementById('navAuthArea');
+    const adminCard = document.getElementById('adminShareCard');
 
-            if (currentUser) {
-                adminCard.style.display = currentUser.isAdmin ? 'block' : 'none';
-                let avatarHtml = currentUser.avatar ? `<img src="${currentUser.avatar}" style="width:28px; height:28px; border-radius:50%; object-fit:cover;">` : `<i class="fa-solid fa-user"></i>`;
-                navArea.innerHTML = `<button onclick="openMenuModal()" class="btn-primary" style="display:flex; align-items:center; gap:8px;">${avatarHtml} ${currentUser.name}</button>`;
-            } else {
-                adminCard.style.display = 'none';
-                navArea.innerHTML = `<button onclick="openLoginModal()" class="btn-google"><i class="fa-brands fa-google" style="color: #ea4335;"></i> Gmail ile Giriş</button>`;
-            }
+    // Gerekli HTML elemanları yoksa uygulamanın geri kalanını durdurma
+    if (!navArea) {
+        console.error("navAuthArea bulunamadı.");
+        return;
+    }
+
+    if (currentUser) {
+
+        // Yönetici paylaşım panelini sadece admin görsün
+        if (adminCard) {
+            adminCard.style.display = currentUser.isAdmin ? 'block' : 'none';
+        }
+
+        // Profil fotoğrafı varsa göster
+        const avatarHtml = currentUser.avatar
+            ? `<img 
+                src="${currentUser.avatar}" 
+                alt="Profil"
+                style="
+                    width:28px;
+                    height:28px;
+                    border-radius:50%;
+                    object-fit:cover;
+                "
+              >`
+            : `<i class="fa-solid fa-user"></i>`;
+
+        // Kullanıcı menüsü
+        navArea.innerHTML = `
+            <button
+                onclick="openMenuModal()"
+                class="btn-primary"
+                style="
+                    display:flex;
+                    align-items:center;
+                    gap:8px;
+                    max-width:220px;
+                "
+                title="${currentUser.name || 'Kullanıcı'}"
+            >
+                ${avatarHtml}
+                <span style="
+                    overflow:hidden;
+                    text-overflow:ellipsis;
+                    white-space:nowrap;
+                ">
+                    ${currentUser.name || 'Kullanıcı'}
+                </span>
+            </button>
+        `;
+
+    } else {
+
+        // Giriş yapılmamışsa admin panelini gizle
+        if (adminCard) {
+            adminCard.style.display = 'none';
+        }
+
+        // Gmail giriş butonu
+        navArea.innerHTML = `
+            <button
+                onclick="openLoginModal()"
+                class="btn-google"
+            >
+                <i
+                    class="fa-brands fa-google"
+                    style="color:#ea4335;"
+                ></i>
+                Gmail ile Giriş
+            </button>
+        `;
+    }
         }
 
         function openMenuModal() {
